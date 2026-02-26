@@ -412,6 +412,8 @@
         <button class="chip" data-speed="2">2x</button>
         <button class="chip" data-speed="4">4x</button>
         <button class="chip" id="autoBuyBtn">自动购买: 关</button>
+        <button class="chip" id="exportSaveBtn">导出存档</button>
+        <button class="chip" id="importSaveBtn">导入存档</button>
         <button class="chip" id="prestigeBtn">软重置</button>
         <button class="chip" id="resetSaveBtn">重置存档</button>
       </div>
@@ -534,6 +536,8 @@
     const modeButtons = [...document.querySelectorAll("[data-mode]")];
     const speedButtons = [...document.querySelectorAll("[data-speed]")];
     const autoBuyBtn = document.getElementById("autoBuyBtn");
+    const exportSaveBtn = document.getElementById("exportSaveBtn");
+    const importSaveBtn = document.getElementById("importSaveBtn");
     const prestigeBtn = document.getElementById("prestigeBtn");
     const resetSaveBtn = document.getElementById("resetSaveBtn");
     const offlineNoticeEl = document.getElementById("offlineNotice");
@@ -633,6 +637,36 @@
         savedAt: Date.now()
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+    };
+
+
+    const exportSave = async () => {
+      const raw = localStorage.getItem(SAVE_KEY) || "";
+      if (!raw) {
+        window.alert("当前没有可导出的存档。");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(raw);
+        pushLog("已导出存档到剪贴板");
+      } catch {
+        window.prompt("复制以下存档文本", raw);
+      }
+    };
+
+    const importSave = () => {
+      const raw = window.prompt("粘贴存档文本以导入（会覆盖当前进度）");
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== "object") throw new Error("invalid payload");
+        localStorage.setItem(SAVE_KEY, raw);
+        pushLog("已导入存档，正在刷新状态");
+        loadGame();
+        render();
+      } catch {
+        window.alert("存档格式无效，导入失败。");
+      }
     };
 
     const loadGame = () => {
@@ -1080,6 +1114,17 @@
       const id = target.dataset.skillBuy;
       if (!id) return;
       buySkill(id);
+    });
+
+
+    exportSaveBtn.addEventListener("click", () => {
+      exportSave();
+      render();
+    });
+
+    importSaveBtn.addEventListener("click", () => {
+      importSave();
+      saveGame();
     });
 
     document.querySelector(".controls").addEventListener("click", (event) => {
