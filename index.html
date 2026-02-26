@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>自动化工厂 - 放置游戏原型</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #22d3ee;
+      --ok: #34d399;
+      --warn: #f59e0b;
+      --disabled: #4b5563;
+      --border: #374151;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(1200px 800px at 20% -20%, #1d4ed8 0%, var(--bg) 45%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .game {
+      width: min(920px, 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)) , var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .title { margin: 0; font-size: 1.5rem; }
+    .subtitle { margin: 6px 0 0; color: var(--muted); font-size: 0.95rem; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(140px, 1fr));
+      gap: 12px;
+      width: min(360px, 100%);
+    }
+
+    .stat-card {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .stat-card .label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .value {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .content {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .manual {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      background: #0ea5e9;
+      color: #082f49;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.08s ease, filter 0.2s ease;
+    }
+
+    .btn:hover:enabled { filter: brightness(1.07); }
+    .btn:active:enabled { transform: translateY(1px); }
+
+    .buildings {
+      display: grid;
+      gap: 10px;
+    }
+
+    .building {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .building .name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .building .meta {
+      color: var(--muted);
+      font-size: 0.88rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .buy-btn {
+      min-width: 190px;
+      text-align: center;
+      background: var(--ok);
+      color: #052e22;
+    }
+
+    .buy-btn:disabled {
+      cursor: not-allowed;
+      background: var(--disabled);
+      color: #d1d5db;
+      opacity: 0.8;
+    }
+
+    .hint {
+      margin-top: 4px;
+      color: var(--warn);
+      font-size: 0.82rem;
+      min-height: 1.2em;
+    }
+
+    @media (max-width: 760px) {
+      .header {
+        grid-template-columns: 1fr;
+      }
+      .stats {
+        width: 100%;
+      }
+      .building {
+        grid-template-columns: 1fr;
+      }
+      .buy-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game">
+    <section class="header">
+      <div>
+        <h1 class="title">⚙️ 自动化工厂</h1>
+        <p class="subtitle">点击和自动化并行，持续扩张你的齿轮产线。</p>
+      </div>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="label">齿轮总数</div>
+          <div class="value" id="gears">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">GPS（每秒产出）</div>
+          <div class="value" id="gps">0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content">
+      <div class="manual">
+        <div>
+          <strong>手动生产</strong>
+          <div class="subtitle" style="margin-top:4px">每次点击 +1 齿轮</div>
+        </div>
+        <button id="manualBtn" class="btn">+1 齿轮</button>
+      </div>
+
+      <div class="buildings" id="buildingList"></div>
+    </section>
+  </main>
+
+  <script>
+    const PRICE_GROWTH = 1.15;
+
+    const buildings = [
+      { id: "intern", name: "实习生", basePrice: 15, dps: 1, owned: 0 },
+      { id: "conveyor", name: "传送带", basePrice: 100, dps: 8, owned: 0 },
+      { id: "assembler", name: "组装机", basePrice: 1100, dps: 47, owned: 0 }
+    ];
+
+    const state = {
+      gears: 0,
+      lastTimestamp: performance.now()
+    };
+
+    const gearsEl = document.getElementById("gears");
+    const gpsEl = document.getElementById("gps");
+    const manualBtn = document.getElementById("manualBtn");
+    const buildingList = document.getElementById("buildingList");
+
+    const format = (num) => {
+      if (num >= 1_000_000) return num.toLocaleString("zh-CN", { maximumFractionDigits: 1 });
+      if (num >= 1000) return num.toLocaleString("zh-CN", { maximumFractionDigits: 2 });
+      return num.toLocaleString("zh-CN", { maximumFractionDigits: 2 });
+    };
+
+    const getCurrentPrice = (building) => Math.floor(building.basePrice * Math.pow(PRICE_GROWTH, building.owned));
+
+    const getTotalGPS = () => buildings.reduce((sum, b) => sum + b.dps * b.owned, 0);
+
+    const createBuildingRow = (building) => {
+      const row = document.createElement("div");
+      row.className = "building";
+      row.dataset.id = building.id;
+
+      row.innerHTML = `
+        <div>
+          <div class="name">${building.name}</div>
+          <div class="meta">
+            <span>产出：${building.dps} / 秒</span>
+            <span>拥有：<strong data-owned="${building.id}">0</strong></span>
+          </div>
+          <div class="hint" data-hint="${building.id}"></div>
+        </div>
+        <button class="btn buy-btn" data-buy="${building.id}">购买（0 齿轮）</button>
+      `;
+
+      buildingList.appendChild(row);
+    };
+
+    const render = () => {
+      gearsEl.textContent = format(state.gears);
+      const gps = getTotalGPS();
+      gpsEl.textContent = format(gps);
+
+      for (const building of buildings) {
+        const price = getCurrentPrice(building);
+        const ownedEl = document.querySelector(`[data-owned="${building.id}"]`);
+        const buyBtn = document.querySelector(`[data-buy="${building.id}"]`);
+        const hintEl = document.querySelector(`[data-hint="${building.id}"]`);
+
+        ownedEl.textContent = building.owned;
+        buyBtn.textContent = `购买（${format(price)} 齿轮）`;
+
+        const affordable = state.gears >= price;
+        buyBtn.disabled = !affordable;
+        hintEl.textContent = affordable ? "" : `还差 ${format(price - state.gears)} 齿轮`;
+      }
+    };
+
+    const buyBuilding = (id) => {
+      const building = buildings.find((b) => b.id === id);
+      if (!building) return;
+
+      const price = getCurrentPrice(building);
+      if (state.gears < price) return;
+
+      state.gears -= price;
+      building.owned += 1;
+      render();
+    };
+
+    manualBtn.addEventListener("click", () => {
+      state.gears += 1;
+      render();
+    });
+
+    buildingList.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+      const id = target.dataset.buy;
+      if (!id) return;
+      buyBuilding(id);
+    });
+
+    for (const building of buildings) createBuildingRow(building);
+
+    const tick = (now) => {
+      const deltaSeconds = Math.min((now - state.lastTimestamp) / 1000, 0.25);
+      state.lastTimestamp = now;
+
+      const gps = getTotalGPS();
+      state.gears += gps * deltaSeconds;
+
+      render();
+      requestAnimationFrame(tick);
+    };
+
+    render();
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
