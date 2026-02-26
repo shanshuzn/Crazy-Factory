@@ -57,6 +57,7 @@ import {
 } from "../core/constants.js";
 import { createInitialState } from "../core/state.js";
 import { createFeedbackBus } from "../fx/feedbackBus.js";
+import { attachGameFeelHandlers } from "../fx/gameFeelSystem.js";
 import { migrateSaveData as migrateSavePayload } from "../core/saveMigrations.js";
 import { getCurrentPrice as calcCurrentPrice, getPrestigeGain as calcPrestigeGain } from "../systems/economySystem.js";
 import { createOrderFromTemplate, getOrderProgress as calcOrderProgress, pickWeightedOrderTemplate as pickWeightedTemplate } from "../systems/taskSystem.js";
@@ -562,6 +563,22 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
         state.activeFloatingGains = Math.max(0, state.activeFloatingGains - 1);
       }, duration);
     };
+
+    // 阶段3：反馈事件化接线，后续可整体迁移到独立 FX 组合器。
+    const emitFeedback = (eventName, payload = {}) => feedbackBus.emit(eventName, payload);
+    attachGameFeelHandlers({
+      feedbackBus,
+      manualBtn,
+      gamePanelEl,
+      orderPanelEl: document.getElementById("orderPanel"),
+      format,
+      triggerButtonPop,
+      spawnFloatingGain,
+      triggerPanelPulse,
+      triggerEventHighlight,
+      triggerScreenShake,
+      playSfx: (kind) => audioSystem.playSfx(kind)
+    });
     const getOrderProgress = (order = state.activeOrder) => calcOrderProgress(order, {
       totalClicks: state.totalClicks,
       lifetimeGears: state.lifetimeGears,
@@ -603,40 +620,6 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       if (!state.activeOrder) createOrder();
     };
     const migrateSaveData = (rawData) => migrateSavePayload(rawData, SAVE_VERSION);
-
-    // 阶段3：反馈事件化。逻辑层发事件，表现层统一订阅，后续可替换成独立 fx 模块实现。
-    const emitFeedback = (eventName, payload = {}) => feedbackBus.emit(eventName, payload);
-
-    feedbackBus.on("onManualClick", ({ gain }) => {
-      triggerButtonPop(manualBtn);
-      spawnFloatingGain(manualBtn, `+${format(gain)}`, "gear");
-      audioSystem.playSfx("click");
-    });
-
-    feedbackBus.on("onBigReward", ({ text, kind = "gear", priority = "normal", anchorEl = gamePanelEl }) => {
-      spawnFloatingGain(anchorEl, text, kind, priority);
-      triggerPanelPulse(gamePanelEl);
-      audioSystem.playSfx("reward");
-    });
-
-    feedbackBus.on("onTaskComplete", ({ title }) => {
-      triggerEventHighlight("task", `任务完成：${title}`);
-      triggerScreenShake(gamePanelEl, "task");
-      audioSystem.playSfx("order");
-    });
-
-    feedbackBus.on("onOrderComplete", ({ title }) => {
-      triggerEventHighlight("order", `订单达成：${title}`);
-      triggerPanelPulse(document.getElementById("orderPanel"));
-      triggerScreenShake(gamePanelEl, "order");
-      audioSystem.playSfx("order");
-    });
-
-    feedbackBus.on("onPrestige", ({ gain }) => {
-      triggerEventHighlight("prestige", `Prestige +${gain} RP`, "本轮效率重塑完成");
-      triggerScreenShake(gamePanelEl, "prestige");
-      audioSystem.playSfx("prestige");
-    });
 
     const resetCollectionProgress = () => {
       for (const b of buildings) b.owned = 0;

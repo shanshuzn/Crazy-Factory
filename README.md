@@ -82,7 +82,8 @@ price = floor(basePrice * 1.15 ^ owned)
 │   │   ├── state.js
 │   │   └── saveMigrations.js
 │   ├── fx/
-│   │   └── feedbackBus.js
+│   │   ├── feedbackBus.js
+│   │   └── gameFeelSystem.js
 │   ├── systems/
 │   │   ├── economySystem.js
 │   │   ├── taskSystem.js

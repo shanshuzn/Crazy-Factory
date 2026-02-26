@@ -73,6 +73,7 @@ src/
 ### 反馈架构
 - 使用 `feedbackBus` 统一事件：
 - ✅ 已在 bootstrap 中落地 `onManualClick/onBigReward/onTaskComplete/onOrderComplete/onPrestige` 事件分发与订阅。
+- ✅ 已新增 `src/fx/gameFeelSystem.js`，将阶段3反馈订阅从 bootstrap 拆出为独立 FX 组合器。
   - `onManualClick`
   - `onBigReward`
   - `onOrderComplete`
