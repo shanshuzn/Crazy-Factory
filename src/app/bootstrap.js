@@ -59,6 +59,7 @@ import { createInitialState } from "../core/state.js";
 import { createFeedbackBus } from "../fx/feedbackBus.js";
 import { getCurrentPrice as calcCurrentPrice, getPrestigeGain as calcPrestigeGain } from "../systems/economySystem.js";
 import { createOrderFromTemplate, getOrderProgress as calcOrderProgress, pickWeightedOrderTemplate as pickWeightedTemplate } from "../systems/taskSystem.js";
+import { createAudioSystem } from "../systems/audioSystem.js";
 
 export function boot() {
 const PRESTIGE_BRANCHES = [
@@ -131,6 +132,10 @@ const PRESTIGE_BRANCHES = [
       defaultFinanceAssets: DEFAULT_FINANCE_ASSETS
     });
     const feedbackBus = createFeedbackBus();
+    const audioSystem = createAudioSystem({
+      getState: () => state,
+      volume: AUDIO_VOLUME
+    });
 
     const gearsEl = document.getElementById("gears");
     const gpsEl = document.getElementById("gps");
@@ -552,51 +557,6 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
         item.remove();
         state.activeFloatingGains = Math.max(0, state.activeFloatingGains - 1);
       }, duration);
-    };
-
-    let audioContext = null;
-
-    const getAudioContext = () => {
-      if (audioContext) return audioContext;
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return null;
-      audioContext = new Ctx();
-      return audioContext;
-    };
-
-    // 统一音效入口：后续可替换为 sample 播放，当前用合成音保证零资源依赖。
-    const playSfx = (kind) => {
-      if (!state.audioEnabled) return;
-      const ctx = getAudioContext();
-      if (!ctx) return;
-      if (ctx.state === "suspended") ctx.resume();
-
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const now = ctx.currentTime;
-      const profile = {
-        click: { f0: 680, f1: 520, t: 0.06 },
-        reward: { f0: 900, f1: 1200, t: 0.1 },
-        order: { f0: 480, f1: 720, t: 0.12 },
-        prestige: { f0: 320, f1: 860, t: 0.18 }
-      }[kind] || { f0: 600, f1: 700, t: 0.08 };
-
-      const audioSafeMode = state.lowPerfMode || state.lowPerfAudioSafe;
-      const safeF0 = audioSafeMode ? Math.min(profile.f0, 700) : profile.f0;
-      const safeF1 = audioSafeMode ? Math.min(profile.f1, 780) : profile.f1;
-      const safeT = audioSafeMode ? Math.min(profile.t, 0.07) : profile.t;
-
-      osc.type = audioSafeMode ? "sine" : "triangle";
-      osc.frequency.setValueAtTime(safeF0, now);
-      osc.frequency.exponentialRampToValueAtTime(safeF1, now + safeT);
-
-      gain.gain.setValueAtTime(AUDIO_VOLUME, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + safeT);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + safeT);
     };
     const getOrderProgress = (order = state.activeOrder) => calcOrderProgress(order, {
       totalClicks: state.totalClicks,
@@ -1174,7 +1134,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
         pushLog(state.lastRewardText);
         spawnFloatingGain(gamePanelEl, `+${format(reward.value)} 齿轮`, "gear", priority);
         triggerPanelPulse(gamePanelEl);
-        playSfx("reward");
+        audioSystem.playSfx("reward");
       }
       if (reward.type === "rp") {
         state.researchPoints += reward.value;
@@ -1182,7 +1142,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
         pushLog(state.lastRewardText);
         spawnFloatingGain(gamePanelEl, `+${reward.value} RP`, "rp", priority);
         triggerPanelPulse(gamePanelEl);
-        playSfx("reward");
+        audioSystem.playSfx("reward");
       }
     };
 
@@ -1209,7 +1169,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
         grantReward(quest.reward, `任务奖励（${quest.title}）`, "high");
         triggerEventHighlight("task", `任务完成：${quest.title}`);
         triggerScreenShake(gamePanelEl, "task");
-        playSfx("order");
+        audioSystem.playSfx("order");
         state.questIndex += 1;
         saveGame();
       }
@@ -1655,13 +1615,13 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
 
       if (state.comboStreak === 10 || state.comboStreak === 25) {
         triggerPanelPulse(gamePanelEl);
-        playSfx("order");
+        audioSystem.playSfx("order");
         pushLog(`连击加速：${state.comboStreak} 连击`);
       }
 
       triggerButtonPop(manualBtn);
       spawnFloatingGain(manualBtn, `+${format(gain)}`, "gear");
-      playSfx("click");
+      audioSystem.playSfx("click");
       saveGame();
       render();
     });
@@ -1746,7 +1706,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
 
       if (target.id === "audioBtn") {
         state.audioEnabled = !state.audioEnabled;
-        if (state.audioEnabled) playSfx("click");
+        if (state.audioEnabled) audioSystem.playSfx("click");
         pushLog(`音效已${state.audioEnabled ? "开启" : "关闭"}`);
         saveGame();
         render();
@@ -1861,7 +1821,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       triggerTypedPanelPulse("order", document.getElementById("overdrivePanel"));
       spawnFloatingGain(overdriveBtn, `GPS x${OVERDRIVE_GPS_MULT}`, "reward");
       pushLog(`[Overdrive] 启动成功：${OVERDRIVE_DURATION_MS / 1000}s 内总 GPS x${OVERDRIVE_GPS_MULT}`);
-      playSfx("order");
+      audioSystem.playSfx("order");
       saveGame();
       render();
     });
@@ -1875,7 +1835,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       triggerEventHighlight("order", `订单达成：${order.title}`);
       triggerPanelPulse(document.getElementById("orderPanel"));
       triggerScreenShake(gamePanelEl, "order");
-      playSfx("order");
+      audioSystem.playSfx("order");
       state.activeOrder = null;
       ensureOrder();
       saveGame();
@@ -1891,7 +1851,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       spawnFloatingGain(rerollOrderBtn, `-${ORDER_REROLL_COST} 齿轮`, "gear");
       triggerPanelPulse(document.getElementById("orderPanel"));
       triggerScreenShake(gamePanelEl, "order");
-      playSfx("order");
+      audioSystem.playSfx("order");
       render();
     });
     const setFinanceStrategy = (strategyKey) => {
@@ -2014,7 +1974,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       state.financeHedgeUntil = nowMs + FINANCE_HEDGE_DURATION_MS;
       pushLog(`[Finance/对冲] 支付 ${format(hedgeCost)} 资金，12s 降波动`);
       triggerTypedPanelPulse("order", document.getElementById("financePanel"));
-      playSfx("order");
+      audioSystem.playSfx("order");
       saveGame();
       render();
     });
@@ -2030,7 +1990,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       spawnFloatingGain(financeInvestBtn, `-${format(invest)} 齿轮`, "gear");
       state.financeLastInvestAt = Date.now();
       pushLog(`[Finance/投入] ${format(invest)} 齿轮`);
-      playSfx("click");
+      audioSystem.playSfx("click");
       saveGame();
       render();
     });
@@ -2046,7 +2006,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       spawnFloatingGain(financeWithdrawBtn, `+${format(withdraw)} 齿轮`, "gear");
       state.financeLastWithdrawAt = Date.now();
       pushLog(`[Finance/提取] ${format(withdraw)} 齿轮`);
-      playSfx("reward");
+      audioSystem.playSfx("reward");
       saveGame();
       render();
     });
@@ -2061,7 +2021,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       triggerEventHighlight("order", `风控升级 Lv.${state.financeTier}`);
       triggerTypedPanelPulse("order", document.getElementById("financePanel"));
       pushLog(`[Finance/升级] 风控 Lv.${state.financeTier}`);
-      playSfx("order");
+      audioSystem.playSfx("order");
       saveGame();
       render();
     });
@@ -2082,7 +2042,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       state.financeLineage += Math.max(1, Math.floor(getFinanceCreditLevel() / 2));
       triggerEventHighlight("prestige", `Prestige +${gain} RP`, "本轮效率重塑完成");
       pushLog(`执行 Prestige，获得 RP +${gain}（保留金融元进度 +${retainedMeta}，金融谱系 +${Math.max(1, Math.floor(getFinanceCreditLevel() / 2))}）`);
-      playSfx("prestige");
+      audioSystem.playSfx("prestige");
       triggerScreenShake(gamePanelEl, "prestige");
       feedbackBus.emit("prestige", { gain });
       resetRunState();
