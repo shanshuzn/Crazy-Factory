@@ -13,8 +13,9 @@ description: "Use when iterating on the Crazy-Factory repo with modular refactor
 2. 用 `scripts/bootstrap_iteration.py` 生成本轮 TODO。
 3. 选择一个垂直切片（系统 / UI / FX / 文档闭环），只做一件事。
 4. 更新路线图文档；必要时用脚本追加 `ROLLING_UPDATE_LOG.md`。
-5. 运行校验命令（优先执行 `npm run check`）。
-6. 提交 commit，并创建 PR。
+5. 运行文档产物校验：`verify_iteration_artifacts.py`。
+6. 运行校验命令（优先执行 `npm run check`）。
+7. 提交 commit，并创建 PR。
 
 ## Iteration Rules
 
@@ -52,6 +53,7 @@ node scripts/kpi_dashboard_checks.js
 - `scripts/run_iteration_checks.sh`
 - `scripts/bootstrap_iteration.py`
 - `scripts/add_iteration_log.py`
+- `scripts/verify_iteration_artifacts.py`
 - 参考命令：`references/command-snippets.md`、`references/slice-playbook.md`
 
 ## Output Contract
@@ -59,6 +61,7 @@ node scripts/kpi_dashboard_checks.js
 - 变更说明必须包含：
   - 本次切片目标
   - 修改文件
-  - 校验命令结果
+  - 校验命令结果（含文档产物校验）
   - 路线图更新位置
+  - 对应 Iteration ID 的文档证据
 - 若是可感知 UI 变化，补截图流程（按仓库现有截图脚本）。

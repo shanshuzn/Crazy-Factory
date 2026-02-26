@@ -47,6 +47,15 @@
 - 校验：`npm run check` + skill validate/package。
 - 回滚点：回退到手工写 TODO。
 
+
+
+## 2026-02-26 / Iteration H
+- 目标：补齐迭代产物校验链。
+- 改动：新增 `verify_iteration_artifacts.py`；更新 skill 文档、命令片段与 checklist。
+- 校验：`bootstrap_iteration.py`、`verify_iteration_artifacts.py`、`npm run check`、skill validate/package。
+- 回滚点：移除文档产物校验，回退到仅代码检查流程。
+- Vibe：文档契约可自动核对，迭代收口更稳。
+
 ## 模板（后续复用）
 ```md
 ## YYYY-MM-DD / Iteration X

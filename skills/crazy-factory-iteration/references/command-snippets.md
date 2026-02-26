@@ -23,6 +23,12 @@ python3 skills/crazy-factory-iteration/scripts/add_iteration_log.py \
   --rollback "回到 bootstrap 内联订阅"
 ```
 
+
+## 校验迭代产物
+```bash
+python3 skills/crazy-factory-iteration/scripts/verify_iteration_artifacts.py --id H
+```
+
 ## 校验技能本身
 ```bash
 python3 /opt/codex/skills/.system/skill-creator/scripts/quick_validate.py skills/crazy-factory-iteration
