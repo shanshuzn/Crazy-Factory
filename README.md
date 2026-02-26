@@ -73,6 +73,28 @@ price = floor(basePrice * 1.15 ^ owned)
 ```txt
 .
 ├── index.html
+├── package.json
+├── src/
+│   ├── main.js
+│   ├── app/
+│   │   └── bootstrap.js
+│   ├── core/
+│   │   ├── constants.js
+│   │   ├── state.js
+│   │   └── saveMigrations.js
+│   ├── fx/
+│   │   ├── feedbackBus.js
+│   │   └── gameFeelSystem.js
+│   ├── systems/
+│   │   ├── economySystem.js
+│   │   ├── taskSystem.js
+│   │   └── audioSystem.js
+│   └── ui/
+│       ├── renderTopbar.js
+│       ├── renderPanels.js
+│       └── bindControls.js
+├── styles/
+│   └── main.css
 ├── README.md
 ├── docs/
 │   └── roadmaps/
@@ -86,9 +108,21 @@ price = floor(basePrice * 1.15 ^ owned)
     ├── serve_static.js
     ├── capture_screenshot.py
     ├── economy_checks.js
+    ├── module_checks.mjs
     ├── finance_checks.js
     ├── kpi_dashboard_checks.js
     └── sim_common.js
+```
+
+
+## 工程命令（npm scripts）
+
+```bash
+npm run serve
+npm run check
+npm run sim:baseline
+npm run sim:stability
+npm run sim:balance
 ```
 
 ## 截图与调试（容器/CI）
@@ -115,10 +149,15 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 
 - 产品年度路线：`docs/roadmaps/ROADMAP.md`
 - 执行节奏路线：`docs/roadmaps/WORKPLAN.md`
+- 多文件化路线：`docs/roadmaps/MULTI_FILE_ARCH_ROADMAP.md`
 - 金融专项路线：`docs/roadmaps/FINANCE_ROADMAP.md`
 - 滚动更新监控路线：`docs/roadmaps/ROLLING_UPDATE_MONITORING_ROADMAP.md`
 - 滚动更新执行手册：`docs/roadmaps/ROLLING_UPDATE_RUNBOOK.md`
 - 种子轮融资路线：`docs/roadmaps/SEED_ROUND_ROADMAP.md`
+- 反馈事件清单：`docs/roadmaps/FEEDBACK_EVENT_CATALOG.md`
+- 模块依赖图：`docs/roadmaps/MODULE_DEPENDENCY_MAP.md`
+- 状态流转图：`docs/roadmaps/STATE_FLOW_MAP.md`
+- 滚动更新日志：`docs/roadmaps/ROLLING_UPDATE_LOG.md`
 
 ## 贡献方向
 

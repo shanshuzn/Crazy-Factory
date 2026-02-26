@@ -1,0 +1,13 @@
+{
+  "name": "crazy-factory",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "node scripts/serve_static.js",
+    "check": "node scripts/module_checks.mjs && node scripts/economy_checks.js && node scripts/kpi_dashboard_checks.js",
+    "sim:baseline": "node scripts/baseline_15m.js",
+    "sim:stability": "node scripts/stability_30m.js",
+    "sim:balance": "node scripts/balance_runs_20m.js",
+    "screenshot": "python3 scripts/capture_screenshot.py"
+  }
+}
