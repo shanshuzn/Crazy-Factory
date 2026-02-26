@@ -1,0 +1,103 @@
+# 多文件化路线图（MVP → 可维护架构）
+
+## 目标
+- 将当前单页逻辑逐步拆分为“状态层 / 系统层 / UI层 / 反馈层”，降低耦合并提升可迭代性。
+- 保持现有可玩性不回退，确保每个阶段都可运行、可验证、可回滚。
+- 为后续数值平衡、Vibe 反馈迭代与自动化校验预留稳定接口。
+
+## 阶段 0（已完成）
+- `index.html` 内联 CSS/JS 已拆分：
+  - `styles/main.css`
+  - `src/main.js`
+- 交付标准：页面行为与原版一致，核心校验脚本通过。
+
+## 阶段 1：建立目录边界（1 个迭代）
+
+### 目录规划
+```txt
+src/
+  core/
+    state.js            # 单一状态容器与快照
+    constants.js        # 所有可调参数（价格、tick、反馈阈值）
+  systems/
+    economySystem.js    # 价格、购买、离线收益、Prestige
+    taskSystem.js       # 成就、任务、订单逻辑
+    audioSystem.js      # 事件音效调度与低性能保护
+  ui/
+    renderTopbar.js     # 资源区渲染
+    renderPanels.js     # 经济/目标栏目渲染
+    bindControls.js     # 按钮与交互绑定
+  fx/
+    feedbackBus.js      # 反馈事件总线（解耦逻辑与表现）
+    screenPulse.js      # 脉冲/震屏
+    floatingText.js     # 浮字与并发分级
+  app/
+    bootstrap.js        # 初始化、主循环装配
+```
+
+### 交付项
+- 将 `src/main.js` 切分为上述文件并通过 `src/app/bootstrap.js` 统一启动。
+- 将“可调手感参数”全部收拢到 `src/core/constants.js`，避免散落常量导致调参成本升高。
+- 引入 `feedbackBus` 事件通道：经济系统只发事件，不直接操作 DOM 动画。
+
+### 验收标准
+- `node --check` 覆盖所有新增 JS 文件通过。
+- `node scripts/economy_checks.js` 通过。
+- `node scripts/kpi_dashboard_checks.js` 通过。
+
+## 阶段 2：系统解耦与防回归（1~2 个迭代）
+
+### 重点任务
+- 将“纯计算”与“副作用”分离：
+  - 纯函数：价格计算、奖励结算、订单生成。
+  - 副作用：DOM 更新、音频播放、localStorage。
+- 为 `core` 与 `systems` 添加最小单测（Node 可跑，无浏览器依赖）。
+- 存档兼容策略：新增 `SAVE_VERSION` 迁移映射表，避免后续字段调整导致坏档。
+
+### 验收标准
+- 新增 `scripts/*_checks.js` 的模块级回归脚本可独立运行。
+- 老存档导入成功率维持 100%。
+
+## 阶段 3：Vibe 反馈工程化（1 个迭代）
+
+### 反馈架构
+- 使用 `feedbackBus` 统一事件：
+  - `onManualClick`
+  - `onBigReward`
+  - `onOrderComplete`
+  - `onPrestige`
+- 每个反馈模块只订阅事件，不反向依赖经济逻辑。
+
+### 性能约束（必须遵守）
+- 动画只改 `transform/opacity`，避免频繁触发布局。
+- 浮字节点池化，避免每帧创建/销毁 DOM 造成 GC 抖动。
+- 高频音效节流（低性能模式下提高冷却阈值）。
+
+### 验收标准
+- 30 分钟稳定性脚本通过。
+- 低性能模式下无明显卡顿峰值。
+
+## 阶段 4：工程化收口（1 个迭代）
+- 增加 `npm scripts` 统一命令入口（check/test/sim/screenshot）。
+- 文档补齐：
+  - 模块依赖图
+  - 状态流转图
+  - 反馈事件清单
+- 在 `docs/roadmaps` 维护“滚动更新日志”，确保每轮拆分可追踪。
+
+## 里程碑清单
+- M1：目录边界建立 + 主循环可运行。
+- M2：核心系统纯函数化 + 存档迁移稳定。
+- M3：反馈系统事件化 + 性能基线达标。
+- M4：工程命令统一 + 文档闭环。
+
+## 风险与控制
+- 风险：一次性大拆分导致行为偏差。
+  - 控制：按系统逐块迁移，每块迁移后立即跑 `economy_checks`。
+- 风险：反馈特效过度导致性能下降。
+  - 控制：默认开启并发上限与降级策略，先保帧率再加特效。
+
+## 执行口径
+- 每次只做一个垂直切片（例如“订单系统 + 订单UI + 订单反馈”）。
+- 每次提交必须附带可执行校验命令。
+- 任一阶段出现回归，优先修复稳定性，不叠加新功能。

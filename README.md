@@ -119,6 +119,7 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 
 - 产品年度路线：`docs/roadmaps/ROADMAP.md`
 - 执行节奏路线：`docs/roadmaps/WORKPLAN.md`
+- 多文件化路线：`docs/roadmaps/MULTI_FILE_ARCH_ROADMAP.md`
 - 金融专项路线：`docs/roadmaps/FINANCE_ROADMAP.md`
 - 滚动更新监控路线：`docs/roadmaps/ROLLING_UPDATE_MONITORING_ROADMAP.md`
 - 滚动更新执行手册：`docs/roadmaps/ROLLING_UPDATE_RUNBOOK.md`
