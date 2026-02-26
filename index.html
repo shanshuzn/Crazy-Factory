@@ -843,6 +843,19 @@
         <button id="claimOfflineBtn" class="btn">领取</button>
       </div>
 
+      <div class="progress-wrap" id="overdrivePanel">
+        <div class="progress-title">玩法扩展：产线超载（Overdrive）</div>
+        <div class="progress-track"><div id="overdriveFill" class="progress-fill"></div></div>
+        <div class="progress-meta compact-grid">
+          <span id="overdriveHint" class="metric-pill">累计齿轮达到 500 后解锁</span>
+          <span id="overdriveStatus" class="metric-pill">状态：未解锁</span>
+          <span id="overdriveCount" class="metric-pill">本轮触发：0 次</span>
+        </div>
+        <div class="order-actions">
+          <button class="order-btn secondary" id="overdriveBtn" disabled>启动超载（消耗 180 齿轮）</button>
+        </div>
+      </div>
+
       <div class="progress-wrap" id="debugPanel" style="display:none">
         <div class="progress-title">开发调试面板</div>
         <div class="progress-meta">
@@ -1033,6 +1046,11 @@
     const FINANCE_META_APR_PER_POINT = 0.004;
     const CHAIN_BONUS_PER_STAGE = 0.08;
     const CHAIN_MAX_STAGES = 10;
+    const OVERDRIVE_UNLOCK_LIFETIME_GEARS = 500;
+    const OVERDRIVE_COST_GEARS = 180;
+    const OVERDRIVE_DURATION_MS = 12_000;
+    const OVERDRIVE_COOLDOWN_MS = 30_000;
+    const OVERDRIVE_GPS_MULT = 2;
 
     // 手感参数：集中在这里，便于快速调“多汁感”。
     const FX_FLOAT_DURATION_MS = 850;
@@ -1160,7 +1178,10 @@
       financeAssets: { bond: 0.34, equity: 0.33, derivative: 0.33 },
       financeLineage: 0,
       financeAutoPilot: false,
-      financeAutoAccumulator: 0
+      financeAutoAccumulator: 0,
+      overdriveUntil: 0,
+      overdriveCooldownUntil: 0,
+      overdriveActivations: 0
     };
 
     const gearsEl = document.getElementById("gears");
@@ -1182,6 +1203,11 @@
     const offlineNoticeEl = document.getElementById("offlineNotice");
     const offlineTextEl = document.getElementById("offlineText");
     const claimOfflineBtn = document.getElementById("claimOfflineBtn");
+    const overdriveFillEl = document.getElementById("overdriveFill");
+    const overdriveHintEl = document.getElementById("overdriveHint");
+    const overdriveStatusEl = document.getElementById("overdriveStatus");
+    const overdriveCountEl = document.getElementById("overdriveCount");
+    const overdriveBtn = document.getElementById("overdriveBtn");
     const debugPanelEl = document.getElementById("debugPanel");
     const debugSnapshotInfoEl = document.getElementById("debugSnapshotInfo");
     const debugAddGearsBtn = document.getElementById("debugAddGearsBtn");
@@ -1303,6 +1329,8 @@
     const getPrestigeGpsMultiplier = () => 1 + getPrestigeBranchLevel("legacy_line") * 0.10;
     const getSkillGpsMultiplier = () => 1 + getSkillLevel("line_optimizer") * 0.2;
     const getSkillManualMultiplier = () => 1 + getSkillLevel("manual_mastery") * 0.25;
+    const isOverdriveActive = (nowMs = Date.now()) => nowMs < state.overdriveUntil;
+    const getOverdriveMultiplier = (nowMs = Date.now()) => isOverdriveActive(nowMs) ? OVERDRIVE_GPS_MULT : 1;
     const getIndustryChainMultiplier = () => {
       const internOwned = buildings.find((b) => b.id === "intern")?.owned || 0;
       const conveyorOwned = buildings.find((b) => b.id === "conveyor")?.owned || 0;
@@ -1315,7 +1343,7 @@
       return Math.max(1, synergy - imbalance * 0.06);
     };
 
-    const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier() * getSkillGpsMultiplier() * getIndustryChainMultiplier() * getPrestigeGpsMultiplier() * state.debugGpsMult;
+    const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier() * getSkillGpsMultiplier() * getIndustryChainMultiplier() * getPrestigeGpsMultiplier() * getOverdriveMultiplier() * state.debugGpsMult;
     const getComboMultiplier = () => 1 + Math.min(COMBO_MAX_STREAK, state.comboStreak) * COMBO_BONUS_PER_STACK;
     const getManualGain = () => state.manualPower * getSkillManualMultiplier() * getComboMultiplier() * getPrestigeManualMultiplier() * state.debugManualMult;
 
@@ -1756,6 +1784,10 @@
         if (typeof data.debugPanelOpen !== "boolean") data.debugPanelOpen = false;
       }
 
+      if (!Number.isFinite(Number(data.overdriveUntil))) data.overdriveUntil = 0;
+      if (!Number.isFinite(Number(data.overdriveCooldownUntil))) data.overdriveCooldownUntil = 0;
+      if (!Number.isFinite(Number(data.overdriveActivations))) data.overdriveActivations = 0;
+
       if (!Number.isFinite(Number(data.saveVersion))) {
         data.saveVersion = SAVE_VERSION;
       }
@@ -1803,6 +1835,9 @@
         debugPanelOpen: state.debugPanelOpen,
         debugManualMult: state.debugManualMult,
         debugGpsMult: state.debugGpsMult,
+        overdriveUntil: state.overdriveUntil,
+        overdriveCooldownUntil: state.overdriveCooldownUntil,
+        overdriveActivations: state.overdriveActivations,
         saveVersion: SAVE_VERSION,
         savedAt: Date.now()
       };
@@ -1904,6 +1939,9 @@
         state.debugPanelOpen = Boolean(data.debugPanelOpen);
         state.debugManualMult = Math.max(0.2, Math.min(5, Number(data.debugManualMult) || 1));
         state.debugGpsMult = Math.max(0.2, Math.min(5, Number(data.debugGpsMult) || 1));
+        state.overdriveUntil = Math.max(0, Number(data.overdriveUntil) || 0);
+        state.overdriveCooldownUntil = Math.max(0, Number(data.overdriveCooldownUntil) || 0);
+        state.overdriveActivations = Math.max(0, Math.floor(Number(data.overdriveActivations) || 0));
         if (data.categoryCollapse && typeof data.categoryCollapse === "object") {
           state.categoryCollapse.economy = Boolean(data.categoryCollapse.economy);
           state.categoryCollapse.goals = Boolean(data.categoryCollapse.goals);
@@ -1977,6 +2015,7 @@
         if ((Number(data.saveVersion) || 1) !== SAVE_VERSION) {
           saveGame();
         }
+
       } catch (error) {
         console.warn("存档读取失败，已忽略：", error);
         const backupRaw = localStorage.getItem(SAVE_BACKUP_KEY);
@@ -2409,9 +2448,6 @@
       } else {
         ensureOrder();
 
-        if ((Number(data.saveVersion) || 1) !== SAVE_VERSION) {
-          saveGame();
-        }
         const order = state.activeOrder;
         const progress = order ? Math.min(getOrderProgress(order), order.target) : 0;
         const pct = order ? Math.min(100, (progress / order.target) * 100) : 0;
@@ -2531,6 +2567,36 @@
         });
         financeAdviceEl.textContent = advice.text;
         financeAdviceEl.className = `subtitle finance-advice ${advice.tone}`;
+      }
+
+      const nowMs = Date.now();
+      const overdriveUnlocked = state.lifetimeGears >= OVERDRIVE_UNLOCK_LIFETIME_GEARS;
+      const overdriveActive = isOverdriveActive(nowMs);
+      const overdriveCooling = nowMs < state.overdriveCooldownUntil;
+      overdriveFillEl.style.width = `${Math.min(100, (state.lifetimeGears / OVERDRIVE_UNLOCK_LIFETIME_GEARS) * 100)}%`;
+      overdriveCountEl.textContent = `本轮触发：${state.overdriveActivations} 次`;
+      if (!overdriveUnlocked) {
+        overdriveHintEl.textContent = `累计齿轮达到 ${OVERDRIVE_UNLOCK_LIFETIME_GEARS} 后解锁`;
+        overdriveStatusEl.textContent = "状态：未解锁";
+        overdriveBtn.disabled = true;
+        overdriveBtn.textContent = `启动超载（消耗 ${OVERDRIVE_COST_GEARS} 齿轮）`;
+      } else if (overdriveActive) {
+        const left = Math.max(0, Math.ceil((state.overdriveUntil - nowMs) / 1000));
+        overdriveHintEl.textContent = `超载生效中：总 GPS x${OVERDRIVE_GPS_MULT}`;
+        overdriveStatusEl.textContent = `状态：运行中（剩余 ${left}s）`;
+        overdriveBtn.disabled = true;
+        overdriveBtn.textContent = "超载运行中...";
+      } else if (overdriveCooling) {
+        const left = Math.max(0, Math.ceil((state.overdriveCooldownUntil - nowMs) / 1000));
+        overdriveHintEl.textContent = "超载结束后进入冷却，可用来规划爆发窗口";
+        overdriveStatusEl.textContent = `状态：冷却中（剩余 ${left}s）`;
+        overdriveBtn.disabled = true;
+        overdriveBtn.textContent = "冷却中...";
+      } else {
+        overdriveHintEl.textContent = `点击启动后 ${OVERDRIVE_DURATION_MS / 1000}s 内总 GPS x${OVERDRIVE_GPS_MULT}`;
+        overdriveStatusEl.textContent = `状态：待机（可启动）`;
+        overdriveBtn.disabled = state.gears < OVERDRIVE_COST_GEARS;
+        overdriveBtn.textContent = `启动超载（消耗 ${OVERDRIVE_COST_GEARS} 齿轮）`;
       }
 
       renderMode();
@@ -2817,6 +2883,24 @@
       render();
     });
 
+    overdriveBtn.addEventListener("click", () => {
+      const nowMs = Date.now();
+      if (state.lifetimeGears < OVERDRIVE_UNLOCK_LIFETIME_GEARS) return;
+      if (state.gears < OVERDRIVE_COST_GEARS) return;
+      if (isOverdriveActive(nowMs) || nowMs < state.overdriveCooldownUntil) return;
+      state.gears -= OVERDRIVE_COST_GEARS;
+      state.overdriveUntil = nowMs + OVERDRIVE_DURATION_MS;
+      state.overdriveCooldownUntil = nowMs + OVERDRIVE_COOLDOWN_MS;
+      state.overdriveActivations += 1;
+      triggerButtonPop(overdriveBtn);
+      triggerTypedPanelPulse("order", document.getElementById("overdrivePanel"));
+      spawnFloatingGain(overdriveBtn, `GPS x${OVERDRIVE_GPS_MULT}`, "reward");
+      pushLog(`[Overdrive] 启动成功：${OVERDRIVE_DURATION_MS / 1000}s 内总 GPS x${OVERDRIVE_GPS_MULT}`);
+      playSfx("order");
+      saveGame();
+      render();
+    });
+
     claimOrderBtn.addEventListener("click", () => {
       const order = state.activeOrder;
       if (!order) return;
@@ -3064,6 +3148,9 @@
       state.financeLineage = 0;
       state.financeAutoPilot = false;
       state.financeAutoAccumulator = 0;
+      state.overdriveUntil = 0;
+      state.overdriveCooldownUntil = 0;
+      state.overdriveActivations = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const s of skills) s.level = 0;
@@ -3114,6 +3201,9 @@
       state.debugPanelOpen = false;
       state.debugManualMult = 1;
       state.debugGpsMult = 1;
+      state.overdriveUntil = 0;
+      state.overdriveCooldownUntil = 0;
+      state.overdriveActivations = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const s of skills) s.level = 0;
