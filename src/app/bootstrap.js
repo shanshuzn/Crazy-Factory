@@ -58,6 +58,7 @@ import {
 import { createInitialState } from "../core/state.js";
 import { createFeedbackBus } from "../fx/feedbackBus.js";
 import { attachGameFeelHandlers } from "../fx/gameFeelSystem.js";
+import { FEEDBACK_EVENTS } from "../fx/events.js";
 import { migrateSaveData as migrateSavePayload } from "../core/saveMigrations.js";
 import { getCurrentPrice as calcCurrentPrice, getPrestigeGain as calcPrestigeGain } from "../systems/economySystem.js";
 import { createOrderFromTemplate, getOrderProgress as calcOrderProgress, pickWeightedOrderTemplate as pickWeightedTemplate } from "../systems/taskSystem.js";
@@ -1107,13 +1108,13 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
         state.lifetimeGears += reward.value;
         state.lastRewardText = `${label}：+${format(reward.value)} 齿轮`;
         pushLog(state.lastRewardText);
-        emitFeedback("onBigReward", { text: `+${format(reward.value)} 齿轮`, kind: "gear", priority, anchorEl: gamePanelEl });
+        emitFeedback(FEEDBACK_EVENTS.BIG_REWARD, { text: `+${format(reward.value)} 齿轮`, kind: "gear", priority, anchorEl: gamePanelEl });
       }
       if (reward.type === "rp") {
         state.researchPoints += reward.value;
         state.lastRewardText = `${label}：+${reward.value} RP`;
         pushLog(state.lastRewardText);
-        emitFeedback("onBigReward", { text: `+${reward.value} RP`, kind: "rp", priority, anchorEl: gamePanelEl });
+        emitFeedback(FEEDBACK_EVENTS.BIG_REWARD, { text: `+${reward.value} RP`, kind: "rp", priority, anchorEl: gamePanelEl });
       }
     };
 
@@ -1138,7 +1139,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
 
       if (current >= quest.target) {
         grantReward(quest.reward, `任务奖励（${quest.title}）`, "high");
-        emitFeedback("onTaskComplete", { title: quest.title });
+        emitFeedback(FEEDBACK_EVENTS.TASK_COMPLETE, { title: quest.title });
         state.questIndex += 1;
         saveGame();
       }
@@ -1591,7 +1592,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
         pushLog(`连击加速：${state.comboStreak} 连击`);
       }
 
-      emitFeedback("onManualClick", { gain });
+      emitFeedback(FEEDBACK_EVENTS.MANUAL_CLICK, { gain });
       saveGame();
       render();
     });
@@ -1781,7 +1782,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       const progress = getOrderProgress(order);
       if (progress < order.target) return;
       grantReward(order.reward, `订单完成（${order.title}）`, "high");
-      emitFeedback("onOrderComplete", { title: order.title });
+      emitFeedback(FEEDBACK_EVENTS.ORDER_COMPLETE, { title: order.title });
       state.activeOrder = null;
       ensureOrder();
       saveGame();
@@ -1986,7 +1987,7 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       state.financeMetaPoints += retainedMeta;
       state.financeCreditBase = Math.max(0, Math.floor(getFinanceCreditLevel() * 0.5));
       state.financeLineage += Math.max(1, Math.floor(getFinanceCreditLevel() / 2));
-      emitFeedback("onPrestige", { gain });
+      emitFeedback(FEEDBACK_EVENTS.PRESTIGE, { gain });
       pushLog(`执行 Prestige，获得 RP +${gain}（保留金融元进度 +${retainedMeta}，金融谱系 +${Math.max(1, Math.floor(getFinanceCreditLevel() / 2))}）`);
       resetRunState();
       saveGame();

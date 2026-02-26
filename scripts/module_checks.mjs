@@ -6,6 +6,7 @@ import { createInitialState } from '../src/core/state.js';
 import { createFeedbackBus } from '../src/fx/feedbackBus.js';
 import { migrateSaveData } from '../src/core/saveMigrations.js';
 import { attachGameFeelHandlers } from '../src/fx/gameFeelSystem.js';
+import { FEEDBACK_EVENTS } from '../src/fx/events.js';
 
 function runEconomyChecks() {
   const curve = { midStart: 40, lateStart: 100, midFactor: 0.82, lateFactor: 0.68 };
@@ -106,11 +107,11 @@ function runGameFeelChecks() {
     playSfx: mk('sfx')
   });
 
-  feedbackBus.emit('onManualClick', { gain: 12 });
-  feedbackBus.emit('onBigReward', { text: '+1 RP', kind: 'rp', priority: 'high', anchorEl: gamePanelEl });
-  feedbackBus.emit('onTaskComplete', { title: '任务A' });
-  feedbackBus.emit('onOrderComplete', { title: '订单B' });
-  feedbackBus.emit('onPrestige', { gain: 3 });
+  feedbackBus.emit(FEEDBACK_EVENTS.MANUAL_CLICK, { gain: 12 });
+  feedbackBus.emit(FEEDBACK_EVENTS.BIG_REWARD, { text: '+1 RP', kind: 'rp', priority: 'high', anchorEl: gamePanelEl });
+  feedbackBus.emit(FEEDBACK_EVENTS.TASK_COMPLETE, { title: '任务A' });
+  feedbackBus.emit(FEEDBACK_EVENTS.ORDER_COMPLETE, { title: '订单B' });
+  feedbackBus.emit(FEEDBACK_EVENTS.PRESTIGE, { gain: 3 });
 
   assert.ok(calls.some((c) => c[0] === 'btnPop'));
   assert.ok(calls.some((c) => c[0] === 'float' && String(c[2]).includes('12')));

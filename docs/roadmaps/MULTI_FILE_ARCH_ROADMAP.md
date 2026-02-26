@@ -98,7 +98,7 @@ src/
 - 文档补齐：
   - 模块依赖图
   - 状态流转图
-  - 反馈事件清单
+  - 反馈事件清单（`docs/roadmaps/FEEDBACK_EVENT_CATALOG.md`）
 - 在 `docs/roadmaps` 维护“滚动更新日志”，确保每轮拆分可追踪。
 
 ## 里程碑清单
