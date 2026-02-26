@@ -57,6 +57,19 @@ http://127.0.0.1:4173
 └── README.md
 ```
 
+
+## 截图与调试（容器环境）
+
+在部分容器/CI 环境中，Chromium 可能出现 `SIGSEGV` 导致截图失败。仓库提供了截图脚本：
+
+```bash
+python3 scripts/capture_screenshot.py
+```
+
+脚本会按 `Firefox -> WebKit -> Chromium` 顺序回退，优先规避 Chromium 崩溃问题。
+
+> 说明：若本地 Python 环境未安装 Playwright，请先安装依赖后再运行脚本。
+
 ## 后续计划
 
 详细路线请参考 `ROADMAP.md`，重点方向包括：
