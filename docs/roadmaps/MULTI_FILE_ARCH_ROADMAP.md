@@ -65,6 +65,7 @@ src/
 ### 验收标准
 - 新增 `scripts/*_checks.js` 的模块级回归脚本可独立运行。
 - `node scripts/module_checks.mjs` 通过。
+- ✅ `scripts/module_checks.mjs` 已覆盖 `src/fx/gameFeelSystem.js` 反馈订阅回归。
 - `scripts/module_checks.mjs` 已覆盖存档迁移映射回归（v1→v4）。
 - 老存档导入成功率维持 100%。
 

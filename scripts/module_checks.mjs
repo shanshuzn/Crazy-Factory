@@ -4,6 +4,7 @@ import { createOrderFromTemplate, getOrderProgress, pickWeightedOrderTemplate } 
 import { createInitialState } from '../src/core/state.js';
 import { createFeedbackBus } from '../src/fx/feedbackBus.js';
 import { migrateSaveData } from '../src/core/saveMigrations.js';
+import { attachGameFeelHandlers } from '../src/fx/gameFeelSystem.js';
 
 function runEconomyChecks() {
   const curve = { midStart: 40, lateStart: 100, midFactor: 0.82, lateFactor: 0.68 };
@@ -68,6 +69,43 @@ function runMigrationChecks() {
   assert.equal(typeof v3.financeAssets, 'object');
 }
 
+
+function runGameFeelChecks() {
+  const feedbackBus = createFeedbackBus();
+  const calls = [];
+
+  const mk = (name) => (...args) => calls.push([name, ...args]);
+  const manualBtn = { id: 'manual' };
+  const gamePanelEl = { id: 'game' };
+  const orderPanelEl = { id: 'order' };
+
+  attachGameFeelHandlers({
+    feedbackBus,
+    manualBtn,
+    gamePanelEl,
+    orderPanelEl,
+    format: (n) => String(n),
+    triggerButtonPop: mk('btnPop'),
+    spawnFloatingGain: mk('float'),
+    triggerPanelPulse: mk('panelPulse'),
+    triggerEventHighlight: mk('highlight'),
+    triggerScreenShake: mk('shake'),
+    playSfx: mk('sfx')
+  });
+
+  feedbackBus.emit('onManualClick', { gain: 12 });
+  feedbackBus.emit('onBigReward', { text: '+1 RP', kind: 'rp', priority: 'high', anchorEl: gamePanelEl });
+  feedbackBus.emit('onTaskComplete', { title: '任务A' });
+  feedbackBus.emit('onOrderComplete', { title: '订单B' });
+  feedbackBus.emit('onPrestige', { gain: 3 });
+
+  assert.ok(calls.some((c) => c[0] === 'btnPop'));
+  assert.ok(calls.some((c) => c[0] === 'float' && String(c[2]).includes('12')));
+  assert.ok(calls.some((c) => c[0] === 'highlight' && String(c[2]).includes('任务完成')));
+  assert.ok(calls.some((c) => c[0] === 'highlight' && String(c[2]).includes('订单达成')));
+  assert.ok(calls.some((c) => c[0] === 'highlight' && String(c[2]).includes('Prestige +3')));
+}
+
 function runCoreChecks() {
   const state = createInitialState({
     audioEnabledDefault: true,
@@ -89,6 +127,7 @@ function runCoreChecks() {
 runEconomyChecks();
 runTaskChecks();
 runMigrationChecks();
+runGameFeelChecks();
 runCoreChecks();
 
 console.log('module checks passed');
