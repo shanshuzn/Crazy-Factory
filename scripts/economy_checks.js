@@ -32,7 +32,10 @@ const ORDER_TEMPLATES = [
   { key: 'intern', minTier: 3, weight: 2 },
   { key: 'rush_clicks', minTier: 2, weight: 2 },
   { key: 'hybrid_line', minTier: 3, weight: 2 },
-  { key: 'all_in_prestige', minTier: 4, weight: 1 }
+  { key: 'all_in_prestige', minTier: 4, weight: 1 },
+  { key: 'finance_funding', minTier: 2, weight: 2 },
+  { key: 'finance_hedge', minTier: 2, weight: 2 },
+  { key: 'finance_settlement', minTier: 3, weight: 1 }
 ];
 
 const getUnlockedTemplates = (tier) => ORDER_TEMPLATES.filter((t) => t.minTier <= tier);
@@ -236,7 +239,9 @@ assert(sanitizeImportPayload('bad') === null, 'sanitize should reject non-object
 // order template unlock
 assert(getUnlockedTemplates(1).length === 3, 'tier1 should unlock 3 templates');
 assert(getUnlockedTemplates(2).some((t) => t.key === 'rush_clicks'), 'tier2 should unlock rush clicks template');
+assert(getUnlockedTemplates(2).some((t) => t.key === 'finance_funding'), 'tier2 should unlock finance funding template');
 assert(getUnlockedTemplates(3).some((t) => t.key === 'hybrid_line'), 'tier3 should unlock hybrid line template');
+assert(getUnlockedTemplates(3).some((t) => t.key === 'finance_settlement'), 'tier3 should unlock finance settlement template');
 assert(getUnlockedTemplates(4).some((t) => t.key === 'all_in_prestige'), 'tier4 should unlock high-risk prestige template');
-assert(getUnlockedTemplates(4).length === 8, 'tier4 should unlock all templates');
+assert(getUnlockedTemplates(4).length === 11, 'tier4 should unlock all templates');
 console.log('economy checks passed');

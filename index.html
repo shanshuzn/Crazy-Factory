@@ -832,12 +832,20 @@
           <span id="financeYield">年化：0%</span>
           <span id="financeCapital">资金池：0</span>
           <span id="financeBreakdown">构成：基础 0% / 波动 0% / 风控 0%</span>
+          <span id="financeMarket">市场：平稳</span>
+          <span id="financeStrategy">策略：平衡</span>
         </div>
         <div class="subtitle finance-advice info" id="financeAdvice">建议：解锁后会在这里显示下一步操作</div>
+        <div class="order-actions" id="financeStrategyActions">
+          <button class="order-btn secondary" id="financeStrategyConservativeBtn" disabled>策略：稳健</button>
+          <button class="order-btn secondary" id="financeStrategyBalancedBtn" disabled>策略：平衡</button>
+          <button class="order-btn secondary" id="financeStrategyAggressiveBtn" disabled>策略：激进</button>
+        </div>
         <div class="order-actions">
           <button class="order-btn" id="financeInvestBtn" disabled>投入 10% 齿轮</button>
           <button class="order-btn secondary" id="financeWithdrawBtn" disabled>提取 25% 资金</button>
           <button class="order-btn secondary" id="financeUpgradeBtn" disabled>风控升级（1 RP）</button>
+          <button class="order-btn secondary" id="financeHedgeBtn" disabled>对冲（6%资金，12s）</button>
         </div>
       </div>
 
@@ -906,6 +914,10 @@
     const FINANCE_MAX_SHARE_OF_MAINLINE = 0.3;
     const FINANCE_MIN_CAP_GPS = 2;
     const FINANCE_COOLDOWN_MS = 1800;
+    const FINANCE_HEDGE_DURATION_MS = 12000;
+    const FINANCE_HEDGE_COST_RATIO = 0.06;
+    const FINANCE_HEDGE_APR_MULT = 0.7;
+    const FINANCE_HEDGE_VOL_MULT = 0.35;
     const CHAIN_BONUS_PER_STAGE = 0.08;
     const CHAIN_MAX_STAGES = 10;
 
@@ -935,7 +947,10 @@
       // Week3 扩展模板：限时、组合、高风险高收益。通过 target/reward 系数复用已有流程，避免增加状态复杂度。
       { key: "rush_clicks", type: "clicks", minTier: 2, weight: 2, title: "限时单：质检冲刺", desc: "短平快点击冲刺，适合补短线收益", targetScale: 0.75, rewardScale: 0.9 },
       { key: "hybrid_line", type: "building", buildingId: "conveyor", minTier: 3, weight: 2, title: "组合单：物流联动", desc: "同步扩建传送与基础人力，强调中期联动", targetScale: 1.25, rewardScale: 1.45 },
-      { key: "all_in_prestige", type: "lifetime", minTier: 4, weight: 1, title: "高风险单：全压出货", desc: "重载长单，完成后直接给 RP，适合冲 Prestige 前夕", targetScale: 1.85, rewardType: "rp", rewardScale: 1.8 }
+      { key: "all_in_prestige", type: "lifetime", minTier: 4, weight: 1, title: "高风险单：全压出货", desc: "重载长单，完成后直接给 RP，适合冲 Prestige 前夕", targetScale: 1.85, rewardType: "rp", rewardScale: 1.8 },
+      { key: "finance_funding", type: "lifetime", minTier: 2, weight: 2, financeTag: "融资单", preferredMarket: "overheat", title: "融资单：杠杆扩产", desc: "借势市场升温，完成后回补齿轮", targetScale: 1.15, rewardScale: 1.35 },
+      { key: "finance_hedge", type: "clicks", minTier: 2, weight: 2, financeTag: "套保单", preferredMarket: "panic", title: "套保单：紧急风控", desc: "在恐慌窗口快速执行人工风控", targetScale: 0.9, rewardType: "rp", rewardScale: 1.2 },
+      { key: "finance_settlement", type: "building", buildingId: "assembler", minTier: 3, weight: 1, financeTag: "结算单", preferredMarket: "pullback", title: "结算单：利润落袋", desc: "回调期完成高价值结算", targetScale: 1.2, rewardScale: 1.5 }
     ];
 
     const upgrades = [
@@ -1012,7 +1027,9 @@
       financeCapital: 0,
       financeTier: 0,
       financeLastInvestAt: 0,
-      financeLastWithdrawAt: 0
+      financeLastWithdrawAt: 0,
+      financeStrategy: "balanced",
+      financeHedgeUntil: 0
     };
 
     const gearsEl = document.getElementById("gears");
@@ -1065,10 +1082,16 @@
     const financeYieldEl = document.getElementById("financeYield");
     const financeCapitalEl = document.getElementById("financeCapital");
     const financeBreakdownEl = document.getElementById("financeBreakdown");
+    const financeMarketEl = document.getElementById("financeMarket");
+    const financeStrategyEl = document.getElementById("financeStrategy");
     const financeAdviceEl = document.getElementById("financeAdvice");
+    const financeStrategyConservativeBtn = document.getElementById("financeStrategyConservativeBtn");
+    const financeStrategyBalancedBtn = document.getElementById("financeStrategyBalancedBtn");
+    const financeStrategyAggressiveBtn = document.getElementById("financeStrategyAggressiveBtn");
     const financeInvestBtn = document.getElementById("financeInvestBtn");
     const financeWithdrawBtn = document.getElementById("financeWithdrawBtn");
     const financeUpgradeBtn = document.getElementById("financeUpgradeBtn");
+    const financeHedgeBtn = document.getElementById("financeHedgeBtn");
     const fxLayerEl = document.getElementById("fxLayer");
     const highlightLayerEl = document.getElementById("highlightLayer");
     const gamePanelEl = document.querySelector(".game");
@@ -1137,34 +1160,75 @@
       return base + lateBonus;
     };
 
-    // 金融系统：用资金池产息作为中期策略分支，强度可通过 APR 与风控等级快速调参。
-    const getFinanceAprComponents = () => {
+    const FINANCE_MARKET_STATES = {
+      stable: { label: "平稳", aprDelta: 0, cycleScale: 0.8, orderWeight: 1 },
+      overheat: { label: "过热", aprDelta: 0.018, cycleScale: 1.15, orderWeight: 1.2 },
+      pullback: { label: "回调", aprDelta: -0.012, cycleScale: 0.95, orderWeight: 1.05 },
+      panic: { label: "恐慌", aprDelta: -0.022, cycleScale: 0.7, orderWeight: 1.25 }
+    };
+    const FINANCE_STRATEGIES = {
+      conservative: { label: "稳健", aprMult: 0.9, mainlineMult: 1.08, orderRewardMult: 1.02 },
+      balanced: { label: "平衡", aprMult: 1, mainlineMult: 1, orderRewardMult: 1 },
+      aggressive: { label: "激进", aprMult: 1.22, mainlineMult: 0.92, orderRewardMult: 1.12 }
+    };
+    const FINANCE_MARKET_TIMELINE = ["stable", "overheat", "pullback", "panic"];
+
+    const getCurrentMarketKey = () => {
+      const idx = Math.floor(state.totalClicks / 75) % FINANCE_MARKET_TIMELINE.length;
+      return FINANCE_MARKET_TIMELINE[idx];
+    };
+    const getCurrentMarketState = () => FINANCE_MARKET_STATES[getCurrentMarketKey()];
+    const getCurrentStrategyProfile = () => FINANCE_STRATEGIES[state.financeStrategy] || FINANCE_STRATEGIES.balanced;
+    const isHedgeActive = (nowMs = Date.now()) => state.financeHedgeUntil > nowMs;
+
+    // 金融系统：把市场状态、策略切换、对冲动作并入收益构成，形成“低风险+高风险”共存。
+    const getFinanceAprComponents = (nowMs = Date.now()) => {
+      const strategy = getCurrentStrategyProfile();
+      const market = getCurrentMarketState();
+      const hedgeOn = isHedgeActive(nowMs);
       const base = FINANCE_BASE_APR;
-      const cycle = FINANCE_CYCLE_AMPLITUDE * Math.sin(state.totalClicks / 45);
+      const cycle = FINANCE_CYCLE_AMPLITUDE * Math.sin(state.totalClicks / 45) * market.cycleScale * (hedgeOn ? FINANCE_HEDGE_VOL_MULT : 1);
       const riskControl = state.financeTier * FINANCE_TIER_APR_BONUS;
-      return { base, cycle, riskControl };
+      const marketShift = market.aprDelta;
+      const strategyShift = base * (strategy.aprMult - 1);
+      const hedgeShift = hedgeOn ? (base * FINANCE_HEDGE_APR_MULT - base) : 0;
+      return { base, cycle, riskControl, marketShift, strategyShift, hedgeShift };
     };
-    const getFinanceApr = () => {
-      const c = getFinanceAprComponents();
-      return Math.max(0.01, c.base + c.cycle + c.riskControl);
+    const getFinanceApr = (nowMs = Date.now()) => {
+      const c = getFinanceAprComponents(nowMs);
+      return Math.max(0.01, c.base + c.cycle + c.riskControl + c.marketShift + c.strategyShift + c.hedgeShift);
     };
-    // 金融收益做“主线占比封顶”：保证可感知增益，但不会碾压建筑主循环。
-    const getFinanceIncomePerSecond = (baseGps = getTotalGPS()) => {
-      const raw = state.financeCapital * getFinanceApr();
+    // 金融收益做“主线占比封顶”：避免单一路线碾压，同时策略会影响主线权重。
+    const getFinanceIncomePerSecond = (baseGps = getTotalGPS(), nowMs = Date.now()) => {
+      const raw = state.financeCapital * getFinanceApr(nowMs);
       const cap = Math.max(FINANCE_MIN_CAP_GPS, baseGps * FINANCE_MAX_SHARE_OF_MAINLINE);
       return Math.min(raw, cap);
     };
 
-    // 金融建议器：把下一步动作显式化，减少玩家在多个按钮间试错。
-    const getFinanceAdvice = ({ unlocked, mainlineGps, financeIncome, investCooling, withdrawCooling }) => {
+    const getMainlineGpsWithFinanceStrategy = (gps = getTotalGPS()) => {
+      const strategy = getCurrentStrategyProfile();
+      return gps * strategy.mainlineMult;
+    };
+
+    // 金融建议器：明确提供低风险（对冲/提取）与高风险（激进/投入）动作窗口。
+    const getFinanceAdvice = ({ unlocked, mainlineGps, financeIncome, investCooling, withdrawCooling, hedgeCost }) => {
       if (!unlocked) return { tone: "info", text: `建议：先把累计齿轮推到 ${FINANCE_UNLOCK_LIFETIME_GEARS} 解锁金融。` };
 
       const upgradeCost = 1 + state.financeTier;
       const cap = Math.max(FINANCE_MIN_CAP_GPS, mainlineGps * FINANCE_MAX_SHARE_OF_MAINLINE);
       const capRatio = cap > 0 ? financeIncome / cap : 0;
+      const marketKey = getCurrentMarketKey();
+
+      if (marketKey === "panic" && state.financeCapital >= hedgeCost && !isHedgeActive()) {
+        return { tone: "warn", text: "建议：恐慌期先做对冲（低风险动作），压低波动再观察提取窗口。" };
+      }
 
       if (state.financeTier < 8 && state.researchPoints >= upgradeCost) {
         return { tone: "good", text: `建议：可升级风控（消耗 ${upgradeCost} RP），直接抬升长期年化。` };
+      }
+
+      if (state.financeStrategy !== "aggressive" && getCurrentMarketKey() === "overheat") {
+        return { tone: "good", text: "建议：过热期可切换激进策略（高风险动作）争取短线收益。" };
       }
 
       if (!investCooling && state.gears >= 100 && capRatio < 0.75) {
@@ -1179,7 +1243,7 @@
         return { tone: "info", text: "建议：处于冷却窗口，先购买建筑/推进订单再回金融操作。" };
       }
 
-      return { tone: "info", text: "建议：维持当前配置，观察波动窗口后再决定投入或提取。" };
+      return { tone: "info", text: "建议：维持当前配置，观察市场切换后再决定投入或提取。" };
     };
 
     const getAffordableCount = (building, budget, mode) => {
@@ -1363,25 +1427,31 @@
       return 0;
     };
 
-    const pickWeightedOrderTemplate = (tier) => {
+    const pickWeightedOrderTemplate = (tier, marketKey = "stable") => {
       const unlocked = ORDER_TEMPLATES.filter((template) => template.minTier <= tier);
-      const totalWeight = unlocked.reduce((sum, item) => sum + item.weight, 0);
+      const weighted = unlocked.map((template) => ({
+        ...template,
+        dynWeight: template.weight * (template.preferredMarket === marketKey ? 1.8 : 1)
+      }));
+      const totalWeight = weighted.reduce((sum, item) => sum + item.dynWeight, 0);
       let roll = Math.random() * totalWeight;
-      for (const template of unlocked) {
-        roll -= template.weight;
+      for (const template of weighted) {
+        roll -= template.dynWeight;
         if (roll <= 0) return template;
       }
-      return unlocked[unlocked.length - 1] || ORDER_TEMPLATES[0];
+      return weighted[weighted.length - 1] || ORDER_TEMPLATES[0];
     };
 
     const createOrder = () => {
       const tier = Math.max(1, Math.floor(state.lifetimeGears / ORDER_TIER_STEP) + 1);
       const rewardGear = 150 * tier;
       const rewardRP = 1 + Math.floor(tier / 3);
-      const template = pickWeightedOrderTemplate(tier);
+      const marketKey = getCurrentMarketKey();
+      const template = pickWeightedOrderTemplate(tier, marketKey);
+      const strategy = getCurrentStrategyProfile();
       const timestamp = Date.now();
       const targetScale = Math.max(0.6, Number(template.targetScale) || 1);
-      const rewardScale = Math.max(0.5, Number(template.rewardScale) || 1);
+      const rewardScale = Math.max(0.5, (Number(template.rewardScale) || 1) * strategy.orderRewardMult * (getCurrentMarketState().orderWeight || 1));
 
       if (template.type === "clicks") {
         state.activeOrder = {
@@ -1391,7 +1461,8 @@
           desc: template.desc,
           target: Math.max(10, Math.floor((25 + tier * 5) * targetScale)),
           startValue: state.totalClicks,
-          reward: { type: template.rewardType || "gear", value: Math.max(1, Math.floor(rewardGear * rewardScale)) }
+          reward: { type: template.rewardType || "gear", value: Math.max(1, Math.floor(rewardGear * rewardScale)) },
+          financeTag: template.financeTag || null
         };
       }
 
@@ -1406,7 +1477,8 @@
           reward: {
             type: template.rewardType || "gear",
             value: Math.max(1, Math.floor((template.rewardType === "rp" ? rewardRP : rewardGear * 2) * rewardScale))
-          }
+          },
+          financeTag: template.financeTag || null
         };
       }
 
@@ -1487,6 +1559,8 @@
         financeTier: state.financeTier,
         financeLastInvestAt: state.financeLastInvestAt,
         financeLastWithdrawAt: state.financeLastWithdrawAt,
+        financeStrategy: state.financeStrategy,
+        financeHedgeUntil: state.financeHedgeUntil,
         saveVersion: SAVE_VERSION,
         savedAt: Date.now()
       };
@@ -1563,6 +1637,8 @@
         state.financeTier = Math.max(0, Math.min(8, Math.floor(Number(data.financeTier) || 0)));
         state.financeLastInvestAt = Math.max(0, Number(data.financeLastInvestAt) || 0);
         state.financeLastWithdrawAt = Math.max(0, Number(data.financeLastWithdrawAt) || 0);
+        state.financeStrategy = ["conservative", "balanced", "aggressive"].includes(data.financeStrategy) ? data.financeStrategy : "balanced";
+        state.financeHedgeUntil = Math.max(0, Number(data.financeHedgeUntil) || 0);
         if (data.categoryCollapse && typeof data.categoryCollapse === "object") {
           state.categoryCollapse.economy = Boolean(data.categoryCollapse.economy);
           state.categoryCollapse.goals = Boolean(data.categoryCollapse.goals);
@@ -2020,7 +2096,8 @@
         const pct = order ? Math.min(100, (progress / order.target) * 100) : 0;
         orderTitleEl.textContent = order?.title || "生产订单";
         orderFillEl.style.width = `${pct}%`;
-        orderHintEl.textContent = order ? `${order.desc}（${format(progress)} / ${format(order.target)}）` : "暂无订单";
+        const financeTagText = order?.financeTag ? `【${order.financeTag}】` : "";
+        orderHintEl.textContent = order ? `${financeTagText}${order.desc}（${format(progress)} / ${format(order.target)}）` : "暂无订单";
         orderPctEl.textContent = `${pct.toFixed(0)}%`;
         orderRewardEl.textContent = order
           ? `奖励：${order.reward.type === "gear" ? `+${format(order.reward.value)} 齿轮` : `+${order.reward.value} RP`}`
@@ -2038,13 +2115,21 @@
         financeYieldEl.textContent = "年化：0%";
         financeCapitalEl.textContent = "资金池：0";
         financeBreakdownEl.textContent = "构成：基础 0% / 波动 0% / 风控 0%";
+        financeMarketEl.textContent = "市场：平稳";
+        financeStrategyEl.textContent = "策略：平衡";
+        financeStrategyConservativeBtn.disabled = true;
+        financeStrategyBalancedBtn.disabled = true;
+        financeStrategyAggressiveBtn.disabled = true;
         financeInvestBtn.disabled = true;
         financeWithdrawBtn.disabled = true;
         financeUpgradeBtn.disabled = true;
+        financeHedgeBtn.disabled = true;
         const advice = getFinanceAdvice({ unlocked: false, mainlineGps: 0, financeIncome: 0, investCooling: false, withdrawCooling: false });
         financeAdviceEl.textContent = advice.text;
         financeAdviceEl.className = `subtitle finance-advice ${advice.tone}`;
       } else {
+        const market = getCurrentMarketState();
+        const strategy = getCurrentStrategyProfile();
         const apr = getFinanceApr();
         const comp = getFinanceAprComponents();
         const nowMs = Date.now();
@@ -2059,18 +2144,27 @@
         financeYieldEl.textContent = `年化：${(apr * 100).toFixed(1)}%`;
         financeCapitalEl.textContent = `资金池：${format(state.financeCapital)}`;
         financeBreakdownEl.textContent = `构成：基础 ${(comp.base * 100).toFixed(1)}% / 波动 ${(comp.cycle * 100).toFixed(1)}% / 风控 ${(comp.riskControl * 100).toFixed(1)}%`;
+        financeMarketEl.textContent = `市场：${market.label}`;
+        financeStrategyEl.textContent = `策略：${strategy.label}`;
+        financeStrategyConservativeBtn.disabled = false;
+        financeStrategyBalancedBtn.disabled = false;
+        financeStrategyAggressiveBtn.disabled = false;
         financeInvestBtn.disabled = state.gears < 100 || investCooling;
         financeWithdrawBtn.disabled = state.financeCapital < 1 || withdrawCooling;
         financeUpgradeBtn.disabled = state.researchPoints < (1 + state.financeTier) || state.financeTier >= 8;
         financeInvestBtn.textContent = investCooling ? "投入冷却中..." : "投入 10% 齿轮";
         financeWithdrawBtn.textContent = withdrawCooling ? "提取冷却中..." : "提取 25% 资金";
         financeUpgradeBtn.textContent = state.financeTier >= 8 ? "风控已满级" : `风控升级（${1 + state.financeTier} RP）`;
+        const hedgeCost = Math.max(1, Math.floor(state.financeCapital * FINANCE_HEDGE_COST_RATIO));
+        financeHedgeBtn.disabled = isHedgeActive() || state.financeCapital < hedgeCost;
+        financeHedgeBtn.textContent = isHedgeActive() ? "对冲生效中..." : `对冲（${format(hedgeCost)} 资金，12s）`;
         const advice = getFinanceAdvice({
           unlocked: true,
           mainlineGps,
           financeIncome: effectiveFinance,
           investCooling,
-          withdrawCooling
+          withdrawCooling,
+          hedgeCost: Math.max(1, Math.floor(state.financeCapital * FINANCE_HEDGE_COST_RATIO))
         });
         financeAdviceEl.textContent = advice.text;
         financeAdviceEl.className = `subtitle finance-advice ${advice.tone}`;
@@ -2323,6 +2417,35 @@
       playSfx("order");
       render();
     });
+    const setFinanceStrategy = (strategyKey) => {
+      if (!["conservative", "balanced", "aggressive"].includes(strategyKey)) return;
+      if (state.lifetimeGears < FINANCE_UNLOCK_LIFETIME_GEARS) return;
+      state.financeStrategy = strategyKey;
+      pushLog(`[Finance/策略] 切换为${FINANCE_STRATEGIES[strategyKey].label}`);
+      triggerTypedPanelPulse("order", document.getElementById("financePanel"));
+      saveGame();
+      render();
+    };
+
+    financeStrategyConservativeBtn.addEventListener("click", () => setFinanceStrategy("conservative"));
+    financeStrategyBalancedBtn.addEventListener("click", () => setFinanceStrategy("balanced"));
+    financeStrategyAggressiveBtn.addEventListener("click", () => setFinanceStrategy("aggressive"));
+
+    financeHedgeBtn.addEventListener("click", () => {
+      if (state.lifetimeGears < FINANCE_UNLOCK_LIFETIME_GEARS) return;
+      const nowMs = Date.now();
+      if (isHedgeActive(nowMs)) return;
+      const hedgeCost = Math.max(1, Math.floor(state.financeCapital * FINANCE_HEDGE_COST_RATIO));
+      if (state.financeCapital < hedgeCost) return;
+      state.financeCapital -= hedgeCost;
+      state.financeHedgeUntil = nowMs + FINANCE_HEDGE_DURATION_MS;
+      pushLog(`[Finance/对冲] 支付 ${format(hedgeCost)} 资金，12s 降波动`);
+      triggerTypedPanelPulse("order", document.getElementById("financePanel"));
+      playSfx("order");
+      saveGame();
+      render();
+    });
+
     financeInvestBtn.addEventListener("click", () => {
       if (state.lifetimeGears < FINANCE_UNLOCK_LIFETIME_GEARS) return;
       const invest = Math.floor(state.gears * 0.1);
@@ -2403,6 +2526,8 @@
       state.financeTier = 0;
       state.financeLastInvestAt = 0;
       state.financeLastWithdrawAt = 0;
+      state.financeStrategy = "balanced";
+      state.financeHedgeUntil = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const s of skills) s.level = 0;
@@ -2438,6 +2563,8 @@
       state.financeTier = 0;
       state.financeLastInvestAt = 0;
       state.financeLastWithdrawAt = 0;
+      state.financeStrategy = "balanced";
+      state.financeHedgeUntil = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const s of skills) s.level = 0;
@@ -2462,8 +2589,9 @@
 
       const gps = getTotalGPS();
       while (state.accumulator >= FIXED_STEP) {
-        const gain = gps * FIXED_STEP * state.gameSpeed;
-        const financeGain = getFinanceIncomePerSecond(gps) * FIXED_STEP * state.gameSpeed;
+        const strategyAdjustedGps = getMainlineGpsWithFinanceStrategy(gps);
+        const gain = strategyAdjustedGps * FIXED_STEP * state.gameSpeed;
+        const financeGain = getFinanceIncomePerSecond(strategyAdjustedGps) * FIXED_STEP * state.gameSpeed;
         state.gears += gain + financeGain;
         state.lifetimeGears += gain + financeGain;
         state.accumulator -= FIXED_STEP;
