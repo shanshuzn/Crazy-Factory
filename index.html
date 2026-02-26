@@ -395,6 +395,21 @@
       100% { box-shadow: 0 0 0 rgba(34, 211, 238, 0); }
     }
 
+
+
+    .screen-shake {
+      animation: screenShake 0.35s cubic-bezier(.36,.07,.19,.97);
+    }
+
+    @keyframes screenShake {
+      0% { transform: translate3d(0, 0, 0); }
+      20% { transform: translate3d(-3px, 2px, 0); }
+      40% { transform: translate3d(3px, -2px, 0); }
+      60% { transform: translate3d(-2px, 1px, 0); }
+      80% { transform: translate3d(2px, -1px, 0); }
+      100% { transform: translate3d(0, 0, 0); }
+    }
+
     .achievement {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -590,6 +605,7 @@
     const COMBO_DECAY_SECONDS = 2.5;
     const COMBO_MAX_STREAK = 40;
     const COMBO_BONUS_PER_STACK = 0.02;
+    const FX_SHAKE_DURATION_MS = 360;
 
     const ORDER_TEMPLATES = [
       { key: "clicks", type: "clicks", minTier: 1, weight: 3, title: "订单：人工质检", desc: "手动点击完成一次人工抽检" },
@@ -794,6 +810,14 @@
       void el.offsetWidth;
       el.classList.add("panel-pulse");
       window.setTimeout(() => el.classList.remove("panel-pulse"), FX_PANEL_PULSE_MS);
+    };
+
+    const triggerScreenShake = (el = gamePanelEl) => {
+      if (!el) return;
+      el.classList.remove("screen-shake");
+      void el.offsetWidth;
+      el.classList.add("screen-shake");
+      window.setTimeout(() => el.classList.remove("screen-shake"), FX_SHAKE_DURATION_MS);
     };
 
     const spawnFloatingGain = (anchorEl, text, kind = "gear") => {
@@ -1237,6 +1261,8 @@
 
       if (current >= quest.target) {
         grantReward(quest.reward, `任务奖励（${quest.title}）`);
+        triggerScreenShake();
+        playSfx("order");
         state.questIndex += 1;
         saveGame();
       }
@@ -1580,6 +1606,7 @@
       if (progress < order.target) return;
       grantReward(order.reward, `订单完成（${order.title}）`);
       triggerPanelPulse(document.getElementById("orderPanel"));
+      triggerScreenShake();
       playSfx("order");
       state.activeOrder = null;
       ensureOrder();
@@ -1595,6 +1622,7 @@
       pushLog("已刷新生产订单");
       spawnFloatingGain(rerollOrderBtn, `-${ORDER_REROLL_COST} 齿轮`, "gear");
       triggerPanelPulse(document.getElementById("orderPanel"));
+      triggerScreenShake();
       playSfx("order");
       render();
     });
@@ -1611,6 +1639,7 @@
       state.researchPoints += gain;
       pushLog(`执行 Prestige，获得 RP +${gain}`);
       playSfx("prestige");
+      triggerScreenShake();
       state.gears = 0;
       state.purchaseMode = "1";
       state.pendingOfflineGears = 0;
