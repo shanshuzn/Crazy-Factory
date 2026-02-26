@@ -105,6 +105,7 @@ price = floor(basePrice * 1.15 ^ owned)
     ├── serve_static.js
     ├── capture_screenshot.py
     ├── economy_checks.js
+    ├── module_checks.mjs
     ├── finance_checks.js
     ├── kpi_dashboard_checks.js
     └── sim_common.js
