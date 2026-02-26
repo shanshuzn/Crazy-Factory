@@ -57,6 +57,13 @@ const shouldSpawnFloatingGain = (activeCount, priority = "normal") => {
   return priority === "high" ? activeCount < hardCap : activeCount < normalCap;
 };
 
+const getSafeAudioProfile = (profile, audioSafeMode) => ({
+  f0: audioSafeMode ? Math.min(profile.f0, 700) : profile.f0,
+  f1: audioSafeMode ? Math.min(profile.f1, 780) : profile.f1,
+  t: audioSafeMode ? Math.min(profile.t, 0.07) : profile.t,
+  osc: audioSafeMode ? "sine" : "triangle"
+});
+
 const getOfflineReward = (gps, savedAtMs, nowMs) => {
   const offlineSeconds = Math.max(0, Math.min((nowMs - savedAtMs) / 1000, OFFLINE_CAP_SECONDS));
   return gps * offlineSeconds;
@@ -98,6 +105,9 @@ assert(shouldSpawnFloatingGain(0) === true, 'floating gain should spawn when que
 assert(shouldSpawnFloatingGain(FX_MAX_FLOATING_GAINS) === false, 'normal floating gain should stop at cap');
 assert(shouldSpawnFloatingGain(FX_MAX_FLOATING_GAINS, 'high') === true, 'high priority gain should use reserved slots');
 assert(shouldSpawnFloatingGain(FX_MAX_FLOATING_GAINS + FX_PRIORITY_SLOTS, 'high') === false, 'high priority gain should respect hard cap');
+const safeAudio = getSafeAudioProfile({ f0: 900, f1: 1200, t: 0.1 }, true);
+assert(safeAudio.f1 <= 780, 'low-perf audio safe mode should clamp high frequency');
+assert(safeAudio.osc === 'sine', 'low-perf audio safe mode should use sine oscillator');
 
 // prestige
 assert(getPrestigeGain(0) === 0, 'prestige gain at zero should be 0');

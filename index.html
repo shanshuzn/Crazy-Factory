@@ -368,11 +368,23 @@
 
     .floating-gain.gear { color: #34d399; }
     .floating-gain.rp { color: #a78bfa; }
+    .floating-gain.priority-high {
+      color: #fef08a;
+      text-shadow: 0 0 10px rgba(250, 204, 21, 0.7), 0 4px 16px rgba(0, 0, 0, 0.45);
+      -webkit-text-stroke: 0.35px #f59e0b;
+      animation: floatUpHot 0.68s ease-out forwards;
+    }
 
     @keyframes floatUp {
       0% { opacity: 0; transform: translate(-50%, 0) scale(0.8); }
       15% { opacity: 1; }
       100% { opacity: 0; transform: translate(-50%, -42px) scale(1.08); }
+    }
+
+    @keyframes floatUpHot {
+      0% { opacity: 0; transform: translate(-50%, 0) scale(0.92); }
+      20% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -56px) scale(1.18); }
     }
 
     .btn-pop {
@@ -389,10 +401,32 @@
       animation: panelPulse 0.28s ease-out;
     }
 
+    .panel-pulse-task { animation: panelPulseTask 0.28s ease-out; }
+    .panel-pulse-order { animation: panelPulseOrder 0.28s ease-out; }
+    .panel-pulse-prestige { animation: panelPulsePrestige 0.3s ease-out; }
+
     @keyframes panelPulse {
       0% { box-shadow: 0 0 0 rgba(34, 211, 238, 0); }
       45% { box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.45); }
       100% { box-shadow: 0 0 0 rgba(34, 211, 238, 0); }
+    }
+
+    @keyframes panelPulseTask {
+      0% { box-shadow: 0 0 0 rgba(34, 211, 238, 0); }
+      45% { box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.52); }
+      100% { box-shadow: 0 0 0 rgba(34, 211, 238, 0); }
+    }
+
+    @keyframes panelPulseOrder {
+      0% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+      45% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.5); }
+      100% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    @keyframes panelPulsePrestige {
+      0% { box-shadow: 0 0 0 rgba(167, 139, 250, 0); }
+      45% { box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.55); }
+      100% { box-shadow: 0 0 0 rgba(167, 139, 250, 0); }
     }
 
 
@@ -507,6 +541,7 @@
         <button class="chip" id="autoBuyBtn">自动购买: 关</button>
         <button class="chip" id="audioBtn">音效: 开</button>
         <button class="chip" id="lowPerfBtn">低性能模式: 关</button>
+        <button class="chip" id="lowPerfAudioBtn">低性能音效保护: 关</button>
         <button class="chip" id="exportSaveBtn">导出存档</button>
         <button class="chip" id="importSaveBtn">导入存档</button>
         <button class="chip" id="prestigeBtn">软重置</button>
@@ -677,7 +712,8 @@
       comboTimer: 0,
       activeFloatingGains: 0,
       lastShakeAt: 0,
-      lowPerfMode: false
+      lowPerfMode: false,
+      lowPerfAudioSafe: false
     };
 
     const gearsEl = document.getElementById("gears");
@@ -690,6 +726,7 @@
     const autoBuyBtn = document.getElementById("autoBuyBtn");
     const audioBtn = document.getElementById("audioBtn");
     const lowPerfBtn = document.getElementById("lowPerfBtn");
+    const lowPerfAudioBtn = document.getElementById("lowPerfAudioBtn");
     const exportSaveBtn = document.getElementById("exportSaveBtn");
     const importSaveBtn = document.getElementById("importSaveBtn");
     const prestigeBtn = document.getElementById("prestigeBtn");
@@ -821,16 +858,30 @@
       window.setTimeout(() => el.classList.remove("panel-pulse"), FX_PANEL_PULSE_MS);
     };
 
-    const triggerScreenShake = (el = gamePanelEl) => {
+    const triggerTypedPanelPulse = (type, el = gamePanelEl) => {
+      if (!el) return;
+      const map = {
+        task: "panel-pulse-task",
+        order: "panel-pulse-order",
+        prestige: "panel-pulse-prestige"
+      };
+      const className = map[type] || "panel-pulse";
+      el.classList.remove("panel-pulse-task", "panel-pulse-order", "panel-pulse-prestige", "panel-pulse");
+      void el.offsetWidth;
+      el.classList.add(className);
+      window.setTimeout(() => el.classList.remove(className), FX_PANEL_PULSE_MS + 40);
+    };
+
+    const triggerScreenShake = (el = gamePanelEl, fallbackType = "task") => {
       if (!el) return;
       if (state.lowPerfMode) {
-        triggerPanelPulse(el);
+        triggerTypedPanelPulse(fallbackType, el);
         return;
       }
       const now = performance.now();
       // 限制高频震屏；冷却期内自动降级为边框脉冲，保证反馈连续但不过载。
       if (now - state.lastShakeAt < FX_SHAKE_COOLDOWN_MS) {
-        triggerPanelPulse(el);
+        triggerTypedPanelPulse(fallbackType, el);
         return;
       }
       state.lastShakeAt = now;
@@ -852,7 +903,7 @@
 
       const rect = anchorEl.getBoundingClientRect();
       const item = document.createElement("div");
-      item.className = `floating-gain ${kind}`;
+      item.className = `floating-gain ${kind}${priority === "high" ? " priority-high" : ""}`;
       item.textContent = text;
       item.style.left = `${rect.left + rect.width / 2}px`;
       item.style.top = `${rect.top - 6}px`;
@@ -891,17 +942,22 @@
         prestige: { f0: 320, f1: 860, t: 0.18 }
       }[kind] || { f0: 600, f1: 700, t: 0.08 };
 
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(profile.f0, now);
-      osc.frequency.exponentialRampToValueAtTime(profile.f1, now + profile.t);
+      const audioSafeMode = state.lowPerfMode || state.lowPerfAudioSafe;
+      const safeF0 = audioSafeMode ? Math.min(profile.f0, 700) : profile.f0;
+      const safeF1 = audioSafeMode ? Math.min(profile.f1, 780) : profile.f1;
+      const safeT = audioSafeMode ? Math.min(profile.t, 0.07) : profile.t;
+
+      osc.type = audioSafeMode ? "sine" : "triangle";
+      osc.frequency.setValueAtTime(safeF0, now);
+      osc.frequency.exponentialRampToValueAtTime(safeF1, now + safeT);
 
       gain.gain.setValueAtTime(AUDIO_VOLUME, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + profile.t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + safeT);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now);
-      osc.stop(now + profile.t);
+      osc.stop(now + safeT);
     };
 
     const getOrderProgress = (order = state.activeOrder) => {
@@ -1024,6 +1080,7 @@
         activeOrder: state.activeOrder,
         audioEnabled: state.audioEnabled,
         lowPerfMode: state.lowPerfMode,
+        lowPerfAudioSafe: state.lowPerfAudioSafe,
         saveVersion: SAVE_VERSION,
         savedAt: Date.now()
       };
@@ -1077,12 +1134,9 @@
         state.autoBuy = Boolean(data.autoBuy);
         state.audioEnabled = data.audioEnabled !== false;
         state.lowPerfMode = Boolean(data.lowPerfMode);
+        state.lowPerfAudioSafe = Boolean(data.lowPerfAudioSafe);
         state.comboStreak = 0;
         state.comboTimer = 0;
-      state.activeFloatingGains = 0;
-      state.lastShakeAt = 0;
-      state.activeFloatingGains = 0;
-      state.lastShakeAt = 0;
         state.activeFloatingGains = 0;
         state.lastShakeAt = 0;
         state.questIndex = Math.max(0, Math.min(Number(data.questIndex) || 0, questChain.length));
@@ -1301,7 +1355,7 @@
 
       if (current >= quest.target) {
         grantReward(quest.reward, `任务奖励（${quest.title}）`, "high");
-        triggerScreenShake();
+        triggerScreenShake(gamePanelEl, "task");
         playSfx("order");
         state.questIndex += 1;
         saveGame();
@@ -1321,6 +1375,8 @@
       audioBtn.textContent = `音效: ${state.audioEnabled ? "开" : "关"}`;
       lowPerfBtn.classList.toggle("active", state.lowPerfMode);
       lowPerfBtn.textContent = `低性能模式: ${state.lowPerfMode ? "开" : "关"}`;
+      lowPerfAudioBtn.classList.toggle("active", state.lowPerfAudioSafe);
+      lowPerfAudioBtn.textContent = `低性能音效保护: ${state.lowPerfAudioSafe ? "开" : "关"}`;
     };
 
     const render = () => {
@@ -1634,7 +1690,16 @@
 
       if (target.id === "lowPerfBtn") {
         state.lowPerfMode = !state.lowPerfMode;
+        if (state.lowPerfMode) state.lowPerfAudioSafe = true;
         pushLog(`低性能模式已${state.lowPerfMode ? "开启" : "关闭"}`);
+        saveGame();
+        render();
+        return;
+      }
+
+      if (target.id === "lowPerfAudioBtn") {
+        state.lowPerfAudioSafe = !state.lowPerfAudioSafe;
+        pushLog(`低性能音效保护已${state.lowPerfAudioSafe ? "开启" : "关闭"}`);
         saveGame();
         render();
       }
@@ -1656,7 +1721,7 @@
       if (progress < order.target) return;
       grantReward(order.reward, `订单完成（${order.title}）`, "high");
       triggerPanelPulse(document.getElementById("orderPanel"));
-      triggerScreenShake();
+      triggerScreenShake(gamePanelEl, "order");
       playSfx("order");
       state.activeOrder = null;
       ensureOrder();
@@ -1672,7 +1737,7 @@
       pushLog("已刷新生产订单");
       spawnFloatingGain(rerollOrderBtn, `-${ORDER_REROLL_COST} 齿轮`, "gear");
       triggerPanelPulse(document.getElementById("orderPanel"));
-      triggerScreenShake();
+      triggerScreenShake(gamePanelEl, "order");
       playSfx("order");
       render();
     });
@@ -1689,7 +1754,7 @@
       state.researchPoints += gain;
       pushLog(`执行 Prestige，获得 RP +${gain}`);
       playSfx("prestige");
-      triggerScreenShake();
+      triggerScreenShake(gamePanelEl, "prestige");
       state.gears = 0;
       state.purchaseMode = "1";
       state.pendingOfflineGears = 0;
