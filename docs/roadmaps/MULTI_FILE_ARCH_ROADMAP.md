@@ -52,6 +52,8 @@ src/
 - ✅ 已落地 `src/systems/taskSystem.js` 纯函数（订单加权选择/订单生成/进度计算），并由 bootstrap 调用。
 - ✅ 已落地 `src/systems/audioSystem.js` 音效合成与低性能保护逻辑，并由 bootstrap 调用。
 - ✅ 已落地 `src/ui/renderTopbar.js` 顶部资源与摘要渲染，bootstrap 改为传参与调用。
+- ✅ 已落地 `src/ui/renderPanels.js`（栏目折叠态 + 目标红点提醒渲染）。
+- ✅ 已落地 `src/ui/bindControls.js`（顶部控制条与栏目折叠交互绑定）。
 - 将“纯计算”与“副作用”分离：
   - 纯函数：价格计算、奖励结算、订单生成。
   - 副作用：DOM 更新、音频播放、localStorage。

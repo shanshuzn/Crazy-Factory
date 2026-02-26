@@ -61,6 +61,8 @@ import { getCurrentPrice as calcCurrentPrice, getPrestigeGain as calcPrestigeGai
 import { createOrderFromTemplate, getOrderProgress as calcOrderProgress, pickWeightedOrderTemplate as pickWeightedTemplate } from "../systems/taskSystem.js";
 import { createAudioSystem } from "../systems/audioSystem.js";
 import { renderTopbar } from "../ui/renderTopbar.js";
+import { renderCategoryAlerts, renderCategoryCollapse } from "../ui/renderPanels.js";
+import { bindPrimaryControls } from "../ui/bindControls.js";
 
 export function boot() {
 const PRESTIGE_BRANCHES = [
@@ -1176,27 +1178,6 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       }
     };
 
-    const renderCategoryCollapse = () => {
-      for (const section of document.querySelectorAll(".category[data-category]")) {
-        const key = section.getAttribute("data-category");
-        const collapsed = Boolean(state.categoryCollapse?.[key]);
-        section.classList.toggle("collapsed", collapsed);
-        const btn = section.querySelector("[data-toggle-category]");
-        if (btn) {
-          const label = btn.querySelector(".label");
-          if (label) label.textContent = collapsed ? "展开" : "折叠";
-        }
-      }
-    };
-
-    const renderCategoryAlerts = () => {
-      const goalToggle = document.querySelector("[data-toggle-category=\"goals\"]");
-      if (!goalToggle) return;
-      const hasUnclaimedOrder = Boolean(state.activeOrder) && getOrderProgress(state.activeOrder) >= state.activeOrder.target;
-      const hasClaimableAchievement = achievements.some((a) => !a.done && a.check());
-      goalToggle.classList.toggle("has-alert", hasUnclaimedOrder || hasClaimableAchievement);
-    };
-
     const renderMode = () => {
       for (const btn of modeButtons) {
         btn.classList.toggle("active", btn.dataset.mode === state.purchaseMode);
@@ -1546,8 +1527,12 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       }
 
       renderMode();
-      renderCategoryCollapse();
-      renderCategoryAlerts();
+      renderCategoryCollapse({ categoryCollapse: state.categoryCollapse });
+      renderCategoryAlerts({
+        activeOrder: state.activeOrder,
+        orderProgress: getOrderProgress(state.activeOrder),
+        achievements
+      });
     };
 
     const tryAutoBuy = () => {
@@ -1697,77 +1682,56 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
       saveGame();
     });
 
-    document.querySelector(".controls").addEventListener("click", (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLButtonElement)) return;
-
-      const mode = target.dataset.mode;
-      if (mode) {
+    bindPrimaryControls({
+      controlsRoot: document.querySelector(".controls"),
+      categoryGrid: document.querySelector('.category-grid'),
+      onSetPurchaseMode: (mode) => {
         state.purchaseMode = mode;
         saveGame();
         render();
-        return;
-      }
-
-      const speed = Number(target.dataset.speed);
-      if ([1, 2, 4].includes(speed)) {
+      },
+      onSetSpeed: (speed) => {
         state.gameSpeed = speed;
         saveGame();
         render();
-        return;
-      }
-
-      if (target.id === "autoBuyBtn") {
+      },
+      onToggleAutoBuy: () => {
         state.autoBuy = !state.autoBuy;
         pushLog(`自动购买已${state.autoBuy ? "开启" : "关闭"}`);
         saveGame();
         render();
-        return;
-      }
-
-      if (target.id === "audioBtn") {
+      },
+      onToggleAudio: () => {
         state.audioEnabled = !state.audioEnabled;
         if (state.audioEnabled) audioSystem.playSfx("click");
         pushLog(`音效已${state.audioEnabled ? "开启" : "关闭"}`);
         saveGame();
         render();
-        return;
-      }
-
-      if (target.id === "lowPerfBtn") {
+      },
+      onToggleLowPerf: () => {
         state.lowPerfMode = !state.lowPerfMode;
         if (state.lowPerfMode) state.lowPerfAudioSafe = true;
         pushLog(`低性能模式已${state.lowPerfMode ? "开启" : "关闭"}`);
         saveGame();
         render();
-        return;
-      }
-
-      if (target.id === "lowPerfAudioBtn") {
+      },
+      onToggleLowPerfAudio: () => {
         state.lowPerfAudioSafe = !state.lowPerfAudioSafe;
         pushLog(`低性能音效保护已${state.lowPerfAudioSafe ? "开启" : "关闭"}`);
         saveGame();
         render();
-        return;
-      }
-
-      if (target.id === "debugToggleBtn") {
+      },
+      onToggleDebugPanel: () => {
         state.debugPanelOpen = !state.debugPanelOpen;
         pushLog(`调试面板已${state.debugPanelOpen ? "开启" : "关闭"}`);
         saveGame();
         render();
+      },
+      onToggleCategory: (key) => {
+        state.categoryCollapse[key] = !state.categoryCollapse[key];
+        saveGame();
+        renderCategoryCollapse({ categoryCollapse: state.categoryCollapse });
       }
-    });
-
-
-    document.querySelector('.category-grid').addEventListener('click', (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLButtonElement)) return;
-      const key = target.dataset.toggleCategory;
-      if (!key) return;
-      state.categoryCollapse[key] = !state.categoryCollapse[key];
-      saveGame();
-      renderCategoryCollapse();
     });
 
     debugAddGearsBtn.addEventListener("click", () => {
