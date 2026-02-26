@@ -11,7 +11,7 @@
   - `src/main.js`
 - 交付标准：页面行为与原版一致，核心校验脚本通过。
 
-## 阶段 1：建立目录边界（1 个迭代）
+## 阶段 1：建立目录边界（已完成）
 
 ### 目录规划
 ```txt
@@ -36,9 +36,9 @@ src/
 ```
 
 ### 交付项
-- 将 `src/main.js` 切分为上述文件并通过 `src/app/bootstrap.js` 统一启动。
-- 将“可调手感参数”全部收拢到 `src/core/constants.js`，避免散落常量导致调参成本升高。
-- 引入 `feedbackBus` 事件通道：经济系统只发事件，不直接操作 DOM 动画。
+- ✅ 已将入口切分为 `src/main.js` + `src/app/bootstrap.js`，通过 bootstrap 统一启动。
+- ✅ 已将“可调手感参数/核心阈值”集中到 `src/core/constants.js`。
+- ✅ 已引入 `src/fx/feedbackBus.js` 作为反馈事件总线边界。
 
 ### 验收标准
 - `node --check` 覆盖所有新增 JS 文件通过。

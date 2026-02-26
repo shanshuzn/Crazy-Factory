@@ -74,7 +74,22 @@ price = floor(basePrice * 1.15 ^ owned)
 .
 ├── index.html
 ├── src/
-│   └── main.js
+│   ├── main.js
+│   ├── app/
+│   │   └── bootstrap.js
+│   ├── core/
+│   │   ├── constants.js
+│   │   └── state.js
+│   ├── fx/
+│   │   └── feedbackBus.js
+│   ├── systems/
+│   │   ├── economySystem.js
+│   │   ├── taskSystem.js
+│   │   └── audioSystem.js
+│   └── ui/
+│       ├── renderTopbar.js
+│       ├── renderPanels.js
+│       └── bindControls.js
 ├── styles/
 │   └── main.css
 ├── README.md
