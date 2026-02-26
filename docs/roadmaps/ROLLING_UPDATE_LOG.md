@@ -40,6 +40,13 @@
 - 校验：npm run check + skill validate/package
 - 回滚点：回退到手工维护日志
 
+
+## 2026-02-26 / Iteration G
+- 目标：发展 skill 的执行效率。
+- 改动：新增 `bootstrap_iteration.py` 与切片执行手册，强化迭代前置模板化。
+- 校验：`npm run check` + skill validate/package。
+- 回滚点：回退到手工写 TODO。
+
 ## 模板（后续复用）
 ```md
 ## YYYY-MM-DD / Iteration X

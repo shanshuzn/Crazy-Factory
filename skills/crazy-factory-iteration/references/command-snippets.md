@@ -5,6 +5,14 @@
 npm run check
 ```
 
+## 初始化本轮 TODO
+```bash
+python3 skills/crazy-factory-iteration/scripts/bootstrap_iteration.py \
+  --id G \
+  --slice "fx-event" \
+  --goal "统一反馈事件契约"
+```
+
 ## 追加一条滚动更新日志
 ```bash
 python3 skills/crazy-factory-iteration/scripts/add_iteration_log.py \

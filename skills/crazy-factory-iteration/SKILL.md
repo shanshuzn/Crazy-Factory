@@ -10,10 +10,11 @@ description: "Use when iterating on the Crazy-Factory repo with modular refactor
 ## Workflow
 
 1. 读取当前路线图：`docs/roadmaps/MULTI_FILE_ARCH_ROADMAP.md`。
-2. 选择一个垂直切片（系统 / UI / FX / 文档闭环），只做一件事。
-3. 更新路线图文档；必要时用脚本追加 `ROLLING_UPDATE_LOG.md`。
-4. 运行校验命令（优先执行 `npm run check`）。
-5. 提交 commit，并创建 PR。
+2. 用 `scripts/bootstrap_iteration.py` 生成本轮 TODO。
+3. 选择一个垂直切片（系统 / UI / FX / 文档闭环），只做一件事。
+4. 更新路线图文档；必要时用脚本追加 `ROLLING_UPDATE_LOG.md`。
+5. 运行校验命令（优先执行 `npm run check`）。
+6. 提交 commit，并创建 PR。
 
 ## Iteration Rules
 
@@ -49,8 +50,9 @@ node scripts/kpi_dashboard_checks.js
 复用脚本：
 
 - `scripts/run_iteration_checks.sh`
+- `scripts/bootstrap_iteration.py`
 - `scripts/add_iteration_log.py`
-- 参考命令：`references/command-snippets.md`
+- 参考命令：`references/command-snippets.md`、`references/slice-playbook.md`
 
 ## Output Contract
 
