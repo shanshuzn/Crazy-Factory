@@ -57,6 +57,7 @@ import {
 } from "../core/constants.js";
 import { createInitialState } from "../core/state.js";
 import { createFeedbackBus } from "../fx/feedbackBus.js";
+import { getCurrentPrice as calcCurrentPrice, getPrestigeGain as calcPrestigeGain } from "../systems/economySystem.js";
 
 export function boot() {
 const PRESTIGE_BRANCHES = [
@@ -252,21 +253,25 @@ const PRESTIGE_BRANCHES = [
     const getBuildingOutputMultiplier = (buildingId) => 1 + getSpecializationLevel(buildingId, "output") * 0.2;
     const getDiscountMultiplier = (buildingId) => Math.max(0.7, 1 - getSkillLevel("bulk_discount") * 0.03) * getBuildingCostMultiplier(buildingId);
 
-    // 经济曲线二次调优：中后期把“拥有数量”映射为更平缓的有效指数，避免增长斜率过陡造成停滞。
-    const getEffectiveOwnedForPrice = (owned) => {
-      if (owned <= PRICE_CURVE_MID_START) return owned;
-      if (owned <= PRICE_CURVE_LATE_START) {
-        return PRICE_CURVE_MID_START + (owned - PRICE_CURVE_MID_START) * PRICE_CURVE_MID_FACTOR;
+const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
+      basePrice: building.basePrice,
+      owned: building.owned,
+      ownedOffset,
+      growth: PRICE_GROWTH,
+      discountMultiplier: getDiscountMultiplier(building.id),
+      curve: {
+        midStart: PRICE_CURVE_MID_START,
+        lateStart: PRICE_CURVE_LATE_START,
+        midFactor: PRICE_CURVE_MID_FACTOR,
+        lateFactor: PRICE_CURVE_LATE_FACTOR
       }
-      const midSegment = (PRICE_CURVE_LATE_START - PRICE_CURVE_MID_START) * PRICE_CURVE_MID_FACTOR;
-      const lateSegment = (owned - PRICE_CURVE_LATE_START) * PRICE_CURVE_LATE_FACTOR;
-      return PRICE_CURVE_MID_START + midSegment + lateSegment;
-    };
+    });
 
-    const getCurrentPrice = (building, ownedOffset = 0) => {
-      const effectiveOwned = getEffectiveOwnedForPrice(building.owned + ownedOffset);
-      return Math.floor(building.basePrice * Math.pow(PRICE_GROWTH, effectiveOwned) * getDiscountMultiplier(building.id));
-    };
+    const getPrestigeGain = (lifetimeGears) => calcPrestigeGain(lifetimeGears, {
+      baseDivisor: PRESTIGE_BASE_DIVISOR,
+      lateBonusStart: PRESTIGE_LATE_BONUS_START,
+      lateBonusStep: PRESTIGE_LATE_BONUS_STEP
+    });
 
     const getBaseGPS = () => buildings.reduce((sum, b) => sum + b.dps * b.owned * getBuildingOutputMultiplier(b.id), 0);
     const getResearchMultiplier = () => 1 + state.researchPoints * 0.1;
@@ -292,13 +297,6 @@ const PRESTIGE_BRANCHES = [
     const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier() * getSkillGpsMultiplier() * getIndustryChainMultiplier() * getPrestigeGpsMultiplier() * getOverdriveMultiplier() * state.debugGpsMult;
     const getComboMultiplier = () => 1 + Math.min(COMBO_MAX_STREAK, state.comboStreak) * COMBO_BONUS_PER_STACK;
     const getManualGain = () => state.manualPower * getSkillManualMultiplier() * getComboMultiplier() * getPrestigeManualMultiplier() * state.debugManualMult;
-
-    const getPrestigeGain = (lifetimeGears) => {
-      const base = Math.floor(Math.sqrt(lifetimeGears / PRESTIGE_BASE_DIVISOR));
-      if (lifetimeGears < PRESTIGE_LATE_BONUS_START) return base;
-      const lateBonus = Math.floor((lifetimeGears - PRESTIGE_LATE_BONUS_START) / PRESTIGE_LATE_BONUS_STEP) + 1;
-      return base + lateBonus;
-    };
 
     const FINANCE_MARKET_STATES = {
       stable: { label: "平稳", aprDelta: 0, cycleScale: 0.8, orderWeight: 1 },
