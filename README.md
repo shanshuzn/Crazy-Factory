@@ -68,7 +68,13 @@ price = floor(basePrice * 1.15 ^ owned)
 python3 scripts/capture_screenshot.py
 ```
 
-脚本会按 `Firefox -> WebKit -> Chromium` 依次回退。
+脚本默认按 `Firefox -> WebKit -> Chromium` 依次回退，并可通过环境变量调整：
+
+```bash
+SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 SCREENSHOT_OUT=artifacts/factory-screenshot.png python3 scripts/capture_screenshot.py
+```
+
+> 在容器中若 Chromium 不稳定（SIGSEGV），建议保持 Firefox 优先。
 
 ## 路线图
 
