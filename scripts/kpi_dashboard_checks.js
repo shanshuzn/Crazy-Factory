@@ -2,7 +2,7 @@
 
 const { execFileSync } = require('node:child_process');
 const { getPrestigeGain } = require('./economy_pure');
-const { BUILDINGS, createOwnedState, getPrice, getGps, autoBuyDescending } = require('./sim_common');
+const { BUILDINGS, createOwnedState, getPrice, getGps, autoBuyDescending, runSimulationSeconds } = require('./sim_common');
 
 const state = { gears: 0, lifetime: 0, clicks: 0, owned: createOwnedState() };
 
@@ -12,46 +12,52 @@ let firstPrestigeTargetSec = null;
 let longestIdle = 0;
 let currentIdle = 0;
 
-for (let sec = 1; sec <= 30 * 60; sec += 1) {
-  const gps = getGps(state.owned);
-  state.clicks += 1;
-  const gain = gps + 1;
-  state.gears += gain;
-  state.lifetime += gain;
+runSimulationSeconds({
+  seconds: 30 * 60,
+  state,
+  autoBuy: autoBuyDescending,
+  beforeAutoBuy: (_, runState) => {
+    runState.clicks += 1;
+    runState.__beforeOwned = BUILDINGS.reduce((sum, b) => sum + runState.owned[b.id], 0);
+  },
+  onTick: (sec, runState) => {
+    if (firstTaskSec === null && runState.clicks >= 20) firstTaskSec = sec;
+    if (firstHighValueSec === null && getGps(runState.owned) >= 50) firstHighValueSec = sec;
+    if (firstPrestigeTargetSec === null && getPrestigeGain(runState.lifetime) >= 28) firstPrestigeTargetSec = sec;
 
-  const beforeOwned = BUILDINGS.reduce((s, b) => s + state.owned[b.id], 0);
-  autoBuyDescending(state);
-  const afterOwned = BUILDINGS.reduce((s, b) => s + state.owned[b.id], 0);
-
-  if (firstTaskSec === null && state.clicks >= 20) firstTaskSec = sec;
-  if (firstHighValueSec === null && getGps(state.owned) >= 50) firstHighValueSec = sec;
-  if (firstPrestigeTargetSec === null && getPrestigeGain(state.lifetime) >= 28) firstPrestigeTargetSec = sec;
-
-  if (afterOwned === beforeOwned) {
-    currentIdle += 1;
-    longestIdle = Math.max(longestIdle, currentIdle);
-  } else {
-    currentIdle = 0;
+    const postOwned = BUILDINGS.reduce((sum, b) => sum + runState.owned[b.id], 0);
+    if (postOwned === runState.__beforeOwned) {
+      currentIdle += 1;
+      longestIdle = Math.max(longestIdle, currentIdle);
+    } else {
+      currentIdle = 0;
+    }
   }
-}
+});
 
 const prePrestigeGps = getGps(state.owned);
 const rpGain = getPrestigeGain(state.lifetime);
 const reset = { gears: 0, lifetime: 0, owned: createOwnedState() };
 let recoverSec = 0;
-for (let sec = 1; sec <= 15 * 60; sec += 1) {
-  const gps = getGps(reset.owned) * (1 + rpGain * 0.1);
-  reset.gears += gps + 1;
-  reset.lifetime += gps + 1;
-  for (const b of [...BUILDINGS].reverse()) {
-    while (reset.gears >= getPrice(reset.owned, b.id)) {
-      reset.gears -= getPrice(reset.owned, b.id);
-      reset.owned[b.id] += 1;
+
+runSimulationSeconds({
+  seconds: 15 * 60,
+  state: reset,
+  perSecondGain: (gps) => gps * (1 + rpGain * 0.1) + 1,
+  autoBuy: (runState) => {
+    for (const b of [...BUILDINGS].reverse()) {
+      while (runState.gears >= getPrice(runState.owned, b.id)) {
+        runState.gears -= getPrice(runState.owned, b.id);
+        runState.owned[b.id] += 1;
+      }
     }
+  },
+  onTick: (sec, runState) => {
+    if (recoverSec) return;
+    const nowGps = getGps(runState.owned) * (1 + rpGain * 0.1);
+    if (nowGps >= prePrestigeGps) recoverSec = sec;
   }
-  const nowGps = getGps(reset.owned) * (1 + rpGain * 0.1);
-  if (nowGps >= prePrestigeGps) { recoverSec = sec; break; }
-}
+});
 
 const rerollRecoverSec = Math.ceil((200 * 3) / Math.max(1, getGps(state.owned)));
 

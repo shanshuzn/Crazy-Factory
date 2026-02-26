@@ -3,7 +3,7 @@
 // 15 分钟基线仿真：用于记录“经济参数改动前后”的可对比快照。
 // 设计为纯计算脚本（无 DOM / 无随机），便于 CI 或本地快速重复。
 
-const { BUILDINGS, createOwnedState, getPrice, getGps } = require('./sim_common');
+const { BUILDINGS, createOwnedState, getPrice, getGps, runSimulationSeconds } = require('./sim_common');
 
 const SIM_SECONDS = 15 * 60;
 const STEP = 1; // 1s 固定步长，和主游戏 fixed-step 思路保持一致
@@ -35,23 +35,23 @@ const tryAutoBuy = () => {
   }
 };
 
-for (let t = 1; t <= SIM_SECONDS; t += STEP) {
-  const gps = getGps(state.owned);
-  const gain = gps * STEP + 1; // baseline 假设：玩家每秒约 1 次手动点击
-  state.gears += gain;
-  state.lifetimeGears += gain;
-  tryAutoBuy();
-
-  if (t % 180 === 0 || t === SIM_SECONDS) {
-    state.timeline.push({
-      atSec: t,
-      gears: Math.floor(state.gears),
-      lifetimeGears: Math.floor(state.lifetimeGears),
-      gps: Number(getGps(state.owned).toFixed(2)),
-      owned: { ...state.owned }
-    });
+runSimulationSeconds({
+  seconds: SIM_SECONDS,
+  state,
+  perSecondGain: (gps) => gps * STEP + 1,
+  autoBuy: () => tryAutoBuy(),
+  onTick: (sec) => {
+    if (sec % 180 === 0 || sec === SIM_SECONDS) {
+      state.timeline.push({
+        atSec: sec,
+        gears: Math.floor(state.gears),
+        lifetimeGears: Math.floor(state.lifetimeGears),
+        gps: Number(getGps(state.owned).toFixed(2)),
+        owned: { ...state.owned }
+      });
+    }
   }
-}
+});
 
 console.log('baseline_15m snapshot');
 console.log(JSON.stringify({

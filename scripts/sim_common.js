@@ -43,11 +43,35 @@ const autoBuyDescending = (state) => {
   }
 };
 
+const runSimulationSeconds = ({
+  seconds,
+  state,
+  perSecondGain = (currentGps) => currentGps + 1,
+  beforeAutoBuy,
+  afterAutoBuy,
+  autoBuy = autoBuyDescending,
+  onTick
+}) => {
+  for (let sec = 1; sec <= seconds; sec += 1) {
+    const gps = getGps(state.owned);
+    const gain = perSecondGain(gps, sec, state);
+    state.gears += gain;
+    if (typeof state.lifetimeGears === 'number') state.lifetimeGears += gain;
+    if (typeof state.lifetime === 'number') state.lifetime += gain;
+
+    if (beforeAutoBuy) beforeAutoBuy(sec, state, gps);
+    autoBuy(state);
+    if (afterAutoBuy) afterAutoBuy(sec, state, gps);
+    if (onTick) onTick(sec, state, gps);
+  }
+};
+
 module.exports = {
   BUILDINGS,
   createOwnedState,
   getPrice,
   getChain,
   getGps,
-  autoBuyDescending
+  autoBuyDescending,
+  runSimulationSeconds
 };
