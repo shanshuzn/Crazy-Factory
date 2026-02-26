@@ -3,13 +3,7 @@
 // 15 分钟基线仿真：用于记录“经济参数改动前后”的可对比快照。
 // 设计为纯计算脚本（无 DOM / 无随机），便于 CI 或本地快速重复。
 
-const PRICE_GROWTH = 1.15;
-const PRICE_CURVE_MID_START = 40;
-const PRICE_CURVE_LATE_START = 100;
-const PRICE_CURVE_MID_FACTOR = 0.82;
-const PRICE_CURVE_LATE_FACTOR = 0.68;
-const CHAIN_BONUS_PER_STAGE = 0.08;
-const CHAIN_MAX_STAGES = 10;
+const { getBuildingPrice, getIndustryChainMultiplier } = require('./economy_pure');
 
 const BUILDINGS = [
   { id: 'intern', basePrice: 15, dps: 1 },
@@ -27,33 +21,14 @@ const state = {
   timeline: []
 };
 
-const getEffectiveOwnedForPrice = (owned) => {
-  if (owned <= PRICE_CURVE_MID_START) return owned;
-  if (owned <= PRICE_CURVE_LATE_START) {
-    return PRICE_CURVE_MID_START + (owned - PRICE_CURVE_MID_START) * PRICE_CURVE_MID_FACTOR;
-  }
-  const midSegment = (PRICE_CURVE_LATE_START - PRICE_CURVE_MID_START) * PRICE_CURVE_MID_FACTOR;
-  const lateSegment = (owned - PRICE_CURVE_LATE_START) * PRICE_CURVE_LATE_FACTOR;
-  return PRICE_CURVE_MID_START + midSegment + lateSegment;
-};
-
 const getPrice = (buildingId, ownedOffset = 0) => {
   const b = BUILDINGS.find((it) => it.id === buildingId);
-  const effectiveOwned = getEffectiveOwnedForPrice(state.owned[buildingId] + ownedOffset);
-  return Math.floor(b.basePrice * Math.pow(PRICE_GROWTH, effectiveOwned));
+  return getBuildingPrice(b.basePrice, state.owned[buildingId] + ownedOffset, 1);
 };
 
-const getIndustryChainMultiplier = () => {
-  const internOwned = state.owned.intern || 0;
-  const conveyorOwned = state.owned.conveyor || 0;
-  const assemblerOwned = state.owned.assembler || 0;
-  const chainStage = Math.min(internOwned / 20, conveyorOwned / 10, assemblerOwned / 5);
-  const clampedStage = Math.max(0, Math.min(CHAIN_MAX_STAGES, chainStage));
-  const imbalance = Math.max(0, (Math.max(internOwned, conveyorOwned, assemblerOwned) - Math.min(internOwned, conveyorOwned, assemblerOwned)) / 120);
-  return Math.max(1, 1 + clampedStage * CHAIN_BONUS_PER_STAGE - imbalance * 0.06);
-};
+const getChain = () => getIndustryChainMultiplier(state.owned.intern || 0, state.owned.conveyor || 0, state.owned.assembler || 0);
 
-const getGps = () => BUILDINGS.reduce((sum, b) => sum + state.owned[b.id] * b.dps, 0) * getIndustryChainMultiplier();
+const getGps = () => BUILDINGS.reduce((sum, b) => sum + state.owned[b.id] * b.dps, 0) * getChain();
 
 const tryAutoBuy = () => {
   // 贪心：优先买“单位价格产出比”更高的建筑，得到一个稳定可复现的 baseline。

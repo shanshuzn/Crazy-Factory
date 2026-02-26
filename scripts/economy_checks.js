@@ -4,22 +4,21 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-const PRICE_GROWTH = 1.15;
-const PRICE_CURVE_MID_START = 40;
-const PRICE_CURVE_LATE_START = 100;
-const PRICE_CURVE_MID_FACTOR = 0.82;
-const PRICE_CURVE_LATE_FACTOR = 0.68;
-const PRESTIGE_BASE_DIVISOR = 2000;
-const PRESTIGE_LATE_BONUS_START = 2_000_000;
-const PRESTIGE_LATE_BONUS_STEP = 2_000_000;
-const OFFLINE_CAP_SECONDS = 8 * 60 * 60;
+const {
+  ECONOMY_CONFIG,
+  getEffectiveOwnedForPrice,
+  getBuildingPrice,
+  getPrestigeGain,
+  getOfflineReward,
+  getIndustryChainMultiplier
+} = require('./economy_pure');
+
 const COMBO_MAX_STREAK = 40;
 const COMBO_BONUS_PER_STACK = 0.02;
 const FX_MAX_FLOATING_GAINS = 18;
 const FX_PRIORITY_SLOTS = 2;
 const FINANCE_BASE_APR = 0.06;
-const CHAIN_BONUS_PER_STAGE = 0.08;
-const CHAIN_MAX_STAGES = 10;
+const { OFFLINE_CAP_SECONDS, CHAIN_BONUS_PER_STAGE, CHAIN_MAX_STAGES } = ECONOMY_CONFIG;
 
 const ORDER_TEMPLATES = [
   { key: 'clicks', minTier: 1, weight: 3 },
@@ -34,27 +33,7 @@ const ORDER_TEMPLATES = [
 
 const getUnlockedTemplates = (tier) => ORDER_TEMPLATES.filter((t) => t.minTier <= tier);
 
-const getEffectiveOwnedForPrice = (owned) => {
-  if (owned <= PRICE_CURVE_MID_START) return owned;
-  if (owned <= PRICE_CURVE_LATE_START) {
-    return PRICE_CURVE_MID_START + (owned - PRICE_CURVE_MID_START) * PRICE_CURVE_MID_FACTOR;
-  }
-  const midSegment = (PRICE_CURVE_LATE_START - PRICE_CURVE_MID_START) * PRICE_CURVE_MID_FACTOR;
-  const lateSegment = (owned - PRICE_CURVE_LATE_START) * PRICE_CURVE_LATE_FACTOR;
-  return PRICE_CURVE_MID_START + midSegment + lateSegment;
-};
-
-const getCurrentPrice = (basePrice, owned, discountMultiplier = 1) =>
-  Math.floor(basePrice * Math.pow(PRICE_GROWTH, getEffectiveOwnedForPrice(owned)) * discountMultiplier);
-
 const getResearchMultiplier = (rp) => 1 + rp * 0.1;
-
-const getPrestigeGain = (lifetimeGears) => {
-  const base = Math.floor(Math.sqrt(lifetimeGears / PRESTIGE_BASE_DIVISOR));
-  if (lifetimeGears < PRESTIGE_LATE_BONUS_START) return base;
-  const lateBonus = Math.floor((lifetimeGears - PRESTIGE_LATE_BONUS_START) / PRESTIGE_LATE_BONUS_STEP) + 1;
-  return base + lateBonus;
-};
 
 const getComboMultiplier = (streak) => 1 + Math.min(COMBO_MAX_STREAK, streak) * COMBO_BONUS_PER_STACK;
 const getBuildingCostMultiplier = (costLevel) => Math.max(0.65, 1 - costLevel * 0.04);
@@ -78,19 +57,6 @@ const getFinanceApr = (tier, totalClicks = 0) => {
   return Math.max(0.01, FINANCE_BASE_APR + tier * 0.025 + cycleBoost);
 };
 const getFinanceIncomePerSecond = (capital, tier, totalClicks = 0) => capital * getFinanceApr(tier, totalClicks);
-
-const getIndustryChainMultiplier = (internOwned, conveyorOwned, assemblerOwned) => {
-  const chainStage = Math.min(internOwned / 20, conveyorOwned / 10, assemblerOwned / 5);
-  const clampedStage = Math.max(0, Math.min(CHAIN_MAX_STAGES, chainStage));
-  const imbalance = Math.max(0, (Math.max(internOwned, conveyorOwned, assemblerOwned) - Math.min(internOwned, conveyorOwned, assemblerOwned)) / 120);
-  const synergy = 1 + clampedStage * CHAIN_BONUS_PER_STAGE;
-  return Math.max(1, synergy - imbalance * 0.06);
-};
-
-const getOfflineReward = (gps, savedAtMs, nowMs) => {
-  const offlineSeconds = Math.max(0, Math.min((nowMs - savedAtMs) / 1000, OFFLINE_CAP_SECONDS));
-  return gps * offlineSeconds;
-};
 
 const migrateSaveData = (rawData) => {
   if (!rawData || typeof rawData !== 'object') return null;
@@ -120,12 +86,12 @@ const sanitizeImportPayload = (data) => {
 };
 
 // price
-assert(getCurrentPrice(15, 0) === 15, 'base price should be unchanged at owned=0');
-assert(getCurrentPrice(15, 1) === 17, 'price growth step mismatch at owned=1');
-assert(getCurrentPrice(100, 10, 0.9) > 0, 'discounted price should stay positive');
-assert(getCurrentPrice(100, 120) < Math.floor(100 * Math.pow(PRICE_GROWTH, 120)), 'mid-late curve should be softer than pure exponential');
-assert(getCurrentPrice(100, 250) > getCurrentPrice(100, 120), 'price should remain monotonic even with softened curve');
-assert(getCurrentPrice(100, 0, 0.8) < getCurrentPrice(100, 0, 1), 'discount multiplier should lower base price');
+assert(getBuildingPrice(15, 0) === 15, 'base price should be unchanged at owned=0');
+assert(getBuildingPrice(15, 1) === 17, 'price growth step mismatch at owned=1');
+assert(getBuildingPrice(100, 10, 0.9) > 0, 'discounted price should stay positive');
+assert(getBuildingPrice(100, 120) < Math.floor(100 * Math.pow(ECONOMY_CONFIG.PRICE_GROWTH, 120)), 'mid-late curve should be softer than pure exponential');
+assert(getBuildingPrice(100, 250) > getBuildingPrice(100, 120), 'price should remain monotonic even with softened curve');
+assert(getBuildingPrice(100, 0, 0.8) < getBuildingPrice(100, 0, 1), 'discount multiplier should lower base price');
 
 // multipliers
 assert(getResearchMultiplier(0) === 1, 'rp 0 multiplier should be 1');
@@ -165,10 +131,9 @@ assert(getPrestigeGain(2000) === 1, 'prestige gain at 2000 should be 1');
 assert(getPrestigeGain(2_000_000) > Math.floor(Math.sqrt(2_000_000 / 2000)), 'late prestige should include bonus gain');
 
 // offline cap
-const now = Date.now();
-const reward = getOfflineReward(10, now - (OFFLINE_CAP_SECONDS + 600) * 1000, now);
+const reward = getOfflineReward(10, OFFLINE_CAP_SECONDS + 600);
 assert(reward === 10 * OFFLINE_CAP_SECONDS, 'offline reward must be capped at 8h');
-assert(getOfflineReward(50, now, now) === 0, 'offline reward should be zero for no elapsed time');
+assert(getOfflineReward(50, 0) === 0, 'offline reward should be zero for no elapsed time');
 
 // migration
 const migrated = migrateSaveData({ gears: 10, activeOrder: { type: 'unknown', target: 10 } });
