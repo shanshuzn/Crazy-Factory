@@ -11,11 +11,11 @@
       --panel-2: #1f2937;
       --text: #e5e7eb;
       --muted: #9ca3af;
-      --accent: #22d3ee;
       --ok: #34d399;
       --warn: #f59e0b;
       --disabled: #4b5563;
       --border: #374151;
+      --chip: #243044;
     }
 
     * { box-sizing: border-box; }
@@ -32,7 +32,7 @@
     }
 
     .game {
-      width: min(920px, 100%);
+      width: min(960px, 100%);
       background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)) , var(--panel);
       border: 1px solid var(--border);
       border-radius: 16px;
@@ -113,6 +113,36 @@
     .btn:hover:enabled { filter: brightness(1.07); }
     .btn:active:enabled { transform: translateY(1px); }
 
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      background: var(--chip);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .chip.active {
+      background: #0891b2;
+      color: #ecfeff;
+      border-color: #22d3ee;
+    }
+
+    .chip.small {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 500;
+      pointer-events: none;
+    }
+
     .buildings {
       display: grid;
       gap: 10px;
@@ -144,7 +174,7 @@
     }
 
     .buy-btn {
-      min-width: 190px;
+      min-width: 220px;
       text-align: center;
       background: var(--ok);
       color: #052e22;
@@ -165,18 +195,10 @@
     }
 
     @media (max-width: 760px) {
-      .header {
-        grid-template-columns: 1fr;
-      }
-      .stats {
-        width: 100%;
-      }
-      .building {
-        grid-template-columns: 1fr;
-      }
-      .buy-btn {
-        width: 100%;
-      }
+      .header { grid-template-columns: 1fr; }
+      .stats { width: 100%; }
+      .building { grid-template-columns: 1fr; }
+      .buy-btn { width: 100%; }
     }
   </style>
 </head>
@@ -185,7 +207,7 @@
     <section class="header">
       <div>
         <h1 class="title">⚙️ 自动化工厂</h1>
-        <p class="subtitle">点击和自动化并行，持续扩张你的齿轮产线。</p>
+        <p class="subtitle">点击 + 自动化并行，持续扩张你的齿轮产线。</p>
       </div>
       <div class="stats">
         <div class="stat-card">
@@ -208,12 +230,24 @@
         <button id="manualBtn" class="btn">+1 齿轮</button>
       </div>
 
+      <div class="controls">
+        <span class="chip small">购买倍率</span>
+        <button class="chip active" data-mode="1">x1</button>
+        <button class="chip" data-mode="10">x10</button>
+        <button class="chip" data-mode="100">x100</button>
+        <button class="chip" data-mode="max">Max</button>
+      </div>
+
       <div class="buildings" id="buildingList"></div>
     </section>
   </main>
 
   <script>
     const PRICE_GROWTH = 1.15;
+    const SAVE_KEY = "crazy_factory_save_v1";
+    const TICK_RATE = 60;
+    const FIXED_STEP = 1 / TICK_RATE;
+    const MAX_ACCUMULATED_SECONDS = 0.25;
 
     const buildings = [
       { id: "intern", name: "实习生", basePrice: 15, dps: 1, owned: 0 },
@@ -223,23 +257,96 @@
 
     const state = {
       gears: 0,
-      lastTimestamp: performance.now()
+      purchaseMode: "1",
+      lastTimestamp: performance.now(),
+      accumulator: 0
     };
 
     const gearsEl = document.getElementById("gears");
     const gpsEl = document.getElementById("gps");
     const manualBtn = document.getElementById("manualBtn");
     const buildingList = document.getElementById("buildingList");
+    const modeButtons = [...document.querySelectorAll("[data-mode]")];
+
+    const buildingViewMap = new Map();
 
     const format = (num) => {
-      if (num >= 1_000_000) return num.toLocaleString("zh-CN", { maximumFractionDigits: 1 });
-      if (num >= 1000) return num.toLocaleString("zh-CN", { maximumFractionDigits: 2 });
+      if (!Number.isFinite(num)) return "0";
+      const abs = Math.abs(num);
+      if (abs >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(2)}B`;
+      if (abs >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`;
+      if (abs >= 1_000) return `${(num / 1_000).toFixed(2)}K`;
       return num.toLocaleString("zh-CN", { maximumFractionDigits: 2 });
     };
 
-    const getCurrentPrice = (building) => Math.floor(building.basePrice * Math.pow(PRICE_GROWTH, building.owned));
+    const getCurrentPrice = (building, ownedOffset = 0) =>
+      Math.floor(building.basePrice * Math.pow(PRICE_GROWTH, building.owned + ownedOffset));
 
     const getTotalGPS = () => buildings.reduce((sum, b) => sum + b.dps * b.owned, 0);
+
+    const getAffordableCount = (building, budget, mode) => {
+      if (mode === "1") return budget >= getCurrentPrice(building) ? 1 : 0;
+      if (mode === "10" || mode === "100") {
+        const target = Number(mode);
+        let totalCost = 0;
+        for (let i = 0; i < target; i += 1) {
+          totalCost += getCurrentPrice(building, i);
+          if (totalCost > budget) return i;
+        }
+        return target;
+      }
+
+      let count = 0;
+      let totalCost = 0;
+      while (count < 10000) {
+        totalCost += getCurrentPrice(building, count);
+        if (totalCost > budget) return count;
+        count += 1;
+      }
+      return count;
+    };
+
+    const getPurchaseCost = (building, count) => {
+      let cost = 0;
+      for (let i = 0; i < count; i += 1) {
+        cost += getCurrentPrice(building, i);
+      }
+      return cost;
+    };
+
+    const saveGame = () => {
+      const payload = {
+        gears: state.gears,
+        purchaseMode: state.purchaseMode,
+        buildings: buildings.map((b) => ({ id: b.id, owned: b.owned })),
+        savedAt: Date.now()
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+    };
+
+    const loadGame = () => {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== "object") return;
+
+        state.gears = Number(data.gears) || 0;
+        if (["1", "10", "100", "max"].includes(data.purchaseMode)) {
+          state.purchaseMode = data.purchaseMode;
+        }
+
+        if (Array.isArray(data.buildings)) {
+          for (const saved of data.buildings) {
+            const target = buildings.find((b) => b.id === saved.id);
+            if (!target) continue;
+            target.owned = Math.max(0, Math.floor(Number(saved.owned) || 0));
+          }
+        }
+      } catch (error) {
+        console.warn("存档读取失败，已忽略：", error);
+      }
+    };
 
     const createBuildingRow = (building) => {
       const row = document.createElement("div");
@@ -255,46 +362,75 @@
           </div>
           <div class="hint" data-hint="${building.id}"></div>
         </div>
-        <button class="btn buy-btn" data-buy="${building.id}">购买（0 齿轮）</button>
+        <button class="btn buy-btn" data-buy="${building.id}">购买 x1（0 齿轮）</button>
       `;
 
       buildingList.appendChild(row);
+
+      buildingViewMap.set(building.id, {
+        ownedEl: row.querySelector(`[data-owned="${building.id}"]`),
+        buyBtn: row.querySelector(`[data-buy="${building.id}"]`),
+        hintEl: row.querySelector(`[data-hint="${building.id}"]`)
+      });
+    };
+
+    const renderMode = () => {
+      for (const btn of modeButtons) {
+        btn.classList.toggle("active", btn.dataset.mode === state.purchaseMode);
+      }
     };
 
     const render = () => {
       gearsEl.textContent = format(state.gears);
-      const gps = getTotalGPS();
-      gpsEl.textContent = format(gps);
+      gpsEl.textContent = format(getTotalGPS());
 
       for (const building of buildings) {
-        const price = getCurrentPrice(building);
-        const ownedEl = document.querySelector(`[data-owned="${building.id}"]`);
-        const buyBtn = document.querySelector(`[data-buy="${building.id}"]`);
-        const hintEl = document.querySelector(`[data-hint="${building.id}"]`);
+        const view = buildingViewMap.get(building.id);
+        if (!view) continue;
 
-        ownedEl.textContent = building.owned;
-        buyBtn.textContent = `购买（${format(price)} 齿轮）`;
+        const count = getAffordableCount(building, state.gears, state.purchaseMode);
+        const intendedCount = state.purchaseMode === "max" ? count : Math.min(count, Number(state.purchaseMode) || 1);
+        const purchaseCount = Math.max(1, intendedCount || 0);
+        const cost = getPurchaseCost(building, purchaseCount);
 
-        const affordable = state.gears >= price;
-        buyBtn.disabled = !affordable;
-        hintEl.textContent = affordable ? "" : `还差 ${format(price - state.gears)} 齿轮`;
+        view.ownedEl.textContent = building.owned;
+        view.buyBtn.textContent = `购买 x${purchaseCount}（${format(cost)} 齿轮）`;
+
+        const affordable = count > 0;
+        view.buyBtn.disabled = !affordable;
+
+        if (affordable) {
+          view.hintEl.textContent = "";
+        } else {
+          const nextPrice = getCurrentPrice(building);
+          view.hintEl.textContent = `还差 ${format(nextPrice - state.gears)} 齿轮`;
+        }
       }
+
+      renderMode();
     };
 
     const buyBuilding = (id) => {
       const building = buildings.find((b) => b.id === id);
       if (!building) return;
 
-      const price = getCurrentPrice(building);
-      if (state.gears < price) return;
+      const count = getAffordableCount(building, state.gears, state.purchaseMode);
+      if (count <= 0) return;
 
-      state.gears -= price;
-      building.owned += 1;
+      const purchaseCount = state.purchaseMode === "max" ? count : Math.min(count, Number(state.purchaseMode) || 1);
+      const cost = getPurchaseCost(building, purchaseCount);
+
+      if (state.gears < cost) return;
+
+      state.gears -= cost;
+      building.owned += purchaseCount;
+      saveGame();
       render();
     };
 
     manualBtn.addEventListener("click", () => {
       state.gears += 1;
+      saveGame();
       render();
     });
 
@@ -306,14 +442,36 @@
       buyBuilding(id);
     });
 
+    document.querySelector(".controls").addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+      const mode = target.dataset.mode;
+      if (!mode) return;
+      state.purchaseMode = mode;
+      saveGame();
+      render();
+    });
+
     for (const building of buildings) createBuildingRow(building);
 
+    loadGame();
+
+    let lastAutoSave = performance.now();
     const tick = (now) => {
-      const deltaSeconds = Math.min((now - state.lastTimestamp) / 1000, 0.25);
+      const frameDelta = Math.min((now - state.lastTimestamp) / 1000, MAX_ACCUMULATED_SECONDS);
       state.lastTimestamp = now;
+      state.accumulator += frameDelta;
 
       const gps = getTotalGPS();
-      state.gears += gps * deltaSeconds;
+      while (state.accumulator >= FIXED_STEP) {
+        state.gears += gps * FIXED_STEP;
+        state.accumulator -= FIXED_STEP;
+      }
+
+      if (now - lastAutoSave > 5000) {
+        saveGame();
+        lastAutoSave = now;
+      }
 
       render();
       requestAnimationFrame(tick);
