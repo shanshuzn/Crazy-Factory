@@ -99,7 +99,11 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 
 ## 路线图
 
-后续迭代见 `ROADMAP.md`（已精简为可执行清单）。
+- 总览整合版：`MASTER_ROADMAP.md`（建议优先阅读）
+- 产品年度路线：`ROADMAP.md`
+- 执行节奏路线：`WORKPLAN.md`
+- 金融专项路线：`FINANCE_ROADMAP.md`
+- 种子轮融资路线：`SEED_ROUND_ROADMAP.md`
 
 ## 贡献方向
 
@@ -113,5 +117,3 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 ## 工作路线图（执行版）
 - 详见 `WORKPLAN.md`（双周冲刺节奏、验证命令、复盘模板）。
 
-- 金融专项路线图见 `FINANCE_ROADMAP.md`。
-- 种子轮投资路线图见 `SEED_ROUND_ROADMAP.md`。
