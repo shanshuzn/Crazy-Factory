@@ -73,6 +73,10 @@ price = floor(basePrice * 1.15 ^ owned)
 ```txt
 .
 ├── index.html
+├── src/
+│   └── main.js
+├── styles/
+│   └── main.css
 ├── README.md
 ├── docs/
 │   └── roadmaps/
