@@ -336,6 +336,7 @@
         <div class="stat-card">
           <div class="label">GPS（每秒产出）</div>
           <div class="value" id="gps">0</div>
+          <div class="subtitle" id="rp">研究点 RP：0</div>
         </div>
       </div>
     </section>
@@ -355,6 +356,7 @@
         <button class="chip" data-mode="10">x10</button>
         <button class="chip" data-mode="100">x100</button>
         <button class="chip" data-mode="max">Max</button>
+        <button class="chip" id="prestigeBtn">软重置</button>
         <button class="chip" id="resetSaveBtn">重置存档</button>
       </div>
 
@@ -422,7 +424,8 @@
       manualPower: 1,
       gpsMultiplier: 1,
       totalClicks: 0,
-      lifetimeGears: 0
+      lifetimeGears: 0,
+      researchPoints: 0
     };
 
     const gearsEl = document.getElementById("gears");
@@ -430,6 +433,7 @@
     const manualBtn = document.getElementById("manualBtn");
     const buildingList = document.getElementById("buildingList");
     const modeButtons = [...document.querySelectorAll("[data-mode]")];
+    const prestigeBtn = document.getElementById("prestigeBtn");
     const resetSaveBtn = document.getElementById("resetSaveBtn");
     const offlineNoticeEl = document.getElementById("offlineNotice");
     const offlineTextEl = document.getElementById("offlineText");
@@ -440,6 +444,7 @@
     const goalFillEl = document.getElementById("goalFill");
     const goalHintEl = document.getElementById("goalHint");
     const goalPctEl = document.getElementById("goalPct");
+    const rpEl = document.getElementById("rp");
 
     const buildingViewMap = new Map();
     const upgradeViewMap = new Map();
@@ -458,7 +463,8 @@
       Math.floor(building.basePrice * Math.pow(PRICE_GROWTH, building.owned + ownedOffset));
 
     const getBaseGPS = () => buildings.reduce((sum, b) => sum + b.dps * b.owned, 0);
-    const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier;
+    const getResearchMultiplier = () => 1 + state.researchPoints * 0.1;
+    const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier();
     const getManualGain = () => state.manualPower;
 
     const getAffordableCount = (building, budget, mode) => {
@@ -502,6 +508,7 @@
         totalClicks: state.totalClicks,
         lifetimeGears: state.lifetimeGears,
         achievements: achievements.map((a) => ({ id: a.id, done: a.done })),
+        researchPoints: state.researchPoints,
         savedAt: Date.now()
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
@@ -531,6 +538,7 @@
         state.gpsMultiplier = Math.max(1, Number(data.gpsMultiplier) || 1);
         state.totalClicks = Math.max(0, Number(data.totalClicks) || 0);
         state.lifetimeGears = Math.max(0, Number(data.lifetimeGears) || 0);
+        state.researchPoints = Math.max(0, Math.floor(Number(data.researchPoints) || 0));
 
         if (Array.isArray(data.upgrades)) {
           for (const saved of data.upgrades) {
@@ -628,6 +636,7 @@
     const render = () => {
       gearsEl.textContent = format(state.gears);
       gpsEl.textContent = format(getTotalGPS());
+      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}）`;
 
       for (const building of buildings) {
         const view = buildingViewMap.get(building.id);
@@ -767,6 +776,32 @@
       state.gears += state.pendingOfflineGears;
       state.lifetimeGears += state.pendingOfflineGears;
       state.pendingOfflineGears = 0;
+      saveGame();
+      render();
+    });
+
+    prestigeBtn.addEventListener("click", () => {
+      const gain = Math.floor(Math.sqrt(state.lifetimeGears / 2000));
+      if (gain <= 0) {
+        window.alert("累计齿轮不足，无法获得研究点。继续扩张产线吧！");
+        return;
+      }
+      const ok = window.confirm(`执行软重置可获得 ${gain} 研究点（RP），是否继续？`);
+      if (!ok) return;
+
+      state.researchPoints += gain;
+      state.gears = 0;
+      state.purchaseMode = "1";
+      state.pendingOfflineGears = 0;
+      state.accumulator = 0;
+      state.manualPower = 1;
+      state.gpsMultiplier = 1;
+      state.totalClicks = 0;
+      state.lifetimeGears = 0;
+      state.researchPoints = 0;
+      for (const b of buildings) b.owned = 0;
+      for (const u of upgrades) u.purchased = false;
+      for (const a of achievements) a.done = false;
       saveGame();
       render();
     });
