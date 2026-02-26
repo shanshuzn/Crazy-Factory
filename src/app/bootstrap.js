@@ -5,6 +5,8 @@ import {
   CHAIN_MAX_STAGES,
   COMBO_BONUS_PER_STACK,
   COMBO_DECAY_SECONDS,
+  COMBO_HEAT_PEAK_RATIO,
+  COMBO_HEAT_WARN_RATIO,
   COMBO_MAX_STREAK,
   DEFAULT_FINANCE_ASSETS,
   FINANCE_BASE_APR,
@@ -146,6 +148,10 @@ const PRESTIGE_BRANCHES = [
     const gearsEl = document.getElementById("gears");
     const gpsEl = document.getElementById("gps");
     const manualBtn = document.getElementById("manualBtn");
+    const comboHeatEl = document.querySelector(".combo-heat");
+    const comboHeatLabelEl = document.getElementById("comboHeatLabel");
+    const comboHeatMetaEl = document.getElementById("comboHeatMeta");
+    const comboHeatFillEl = document.getElementById("comboHeatFill");
     const manualHintEl = document.getElementById("manualHint");
     const buildingList = document.getElementById("buildingList");
     const modeButtons = [...document.querySelectorAll("[data-mode]")];
@@ -1328,6 +1334,20 @@ const getCurrentPrice = (building, ownedOffset = 0) => calcCurrentPrice({
 
       if (manualHintEl) {
         manualHintEl.textContent = `连击 x${(getComboMultiplier()).toFixed(2)}（${state.comboStreak} 连，${COMBO_DECAY_SECONDS}s 衰减）`;
+      }
+      if (comboHeatFillEl && comboHeatLabelEl && comboHeatMetaEl && comboHeatEl) {
+        const comboRatio = Math.min(1, state.comboStreak / COMBO_MAX_STREAK);
+        comboHeatFillEl.style.width = `${(comboRatio * 100).toFixed(1)}%`;
+        comboHeatMetaEl.textContent = `${state.comboStreak} / ${COMBO_MAX_STREAK}`;
+        const decayLeft = Math.max(0, state.comboTimer).toFixed(1);
+        const heatText = comboRatio >= COMBO_HEAT_PEAK_RATIO
+          ? `连击热度：过载（${decayLeft}s）`
+          : comboRatio >= COMBO_HEAT_WARN_RATIO
+            ? `连击热度：升温（${decayLeft}s）`
+            : `连击热度：冷却中（${decayLeft}s）`;
+        comboHeatLabelEl.textContent = heatText;
+        comboHeatEl.classList.toggle("is-warn", comboRatio >= COMBO_HEAT_WARN_RATIO && comboRatio < COMBO_HEAT_PEAK_RATIO);
+        comboHeatEl.classList.toggle("is-peak", comboRatio >= COMBO_HEAT_PEAK_RATIO);
       }
 
       const orderUnlocked = state.lifetimeGears >= ORDER_UNLOCK_LIFETIME_GEARS;

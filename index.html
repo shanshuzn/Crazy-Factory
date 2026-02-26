@@ -29,12 +29,19 @@
     </section>
 
     <section class="content">
-      <div class="manual">
+      <div class="manual" id="manualPanel">
         <div>
           <strong>手动生产</strong>
           <div class="subtitle" id="manualHint" style="margin-top:4px">每次点击 +1 齿轮</div>
         </div>
         <button id="manualBtn" class="btn">+1 齿轮</button>
+      </div>
+      <div class="combo-heat" aria-live="polite">
+        <div class="combo-heat-head">
+          <strong id="comboHeatLabel">连击热度：冷却中</strong>
+          <span id="comboHeatMeta">0 / 40</span>
+        </div>
+        <div class="combo-heat-track"><div id="comboHeatFill" class="combo-heat-fill"></div></div>
       </div>
 
       <div class="controls">

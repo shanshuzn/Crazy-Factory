@@ -776,3 +776,48 @@
       .progress-meta.compact-grid { grid-template-columns: 1fr; }
     }
   
+
+
+.combo-heat {
+  margin-top: -4px;
+  border: 1px solid var(--border);
+  background: rgba(31, 41, 55, 0.75);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.combo-heat-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.combo-heat-track {
+  height: 8px;
+  width: 100%;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.7);
+  overflow: hidden;
+}
+
+.combo-heat-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22d3ee, #3b82f6);
+  transition: width 120ms ease-out, filter 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.combo-heat.is-warn .combo-heat-fill {
+  background: linear-gradient(90deg, #22c55e, #f59e0b);
+}
+
+.combo-heat.is-peak .combo-heat-fill {
+  background: linear-gradient(90deg, #f59e0b, #ef4444, #d946ef);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+  filter: saturate(1.12);
+}
