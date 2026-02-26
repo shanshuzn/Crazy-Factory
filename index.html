@@ -379,11 +379,12 @@
       </div>
 
       <div class="progress-wrap">
-        <div class="progress-title" id="goalTitle">新手目标：购买 1 台实习生</div>
+        <div class="progress-title" id="goalTitle">阶段任务：完成引导目标</div>
         <div class="progress-track"><div id="goalFill" class="progress-fill"></div></div>
         <div class="progress-meta">
           <span id="goalHint">还差 1 台实习生</span>
           <span id="goalPct">0%</span>
+          <span id="questReward">奖励：-</span>
         </div>
         <div class="subtitle" id="rewardFeed" style="margin-top:8px">成就奖励将显示在这里</div>
       </div>
@@ -420,6 +421,15 @@
       { id: "gps_50", name: "产线启动", desc: "总 GPS 达到 50", reward: { type: "rp", value: 1 }, check: () => getTotalGPS() >= 50, done: false, claimed: false }
     ];
 
+    const questChain = [
+      { id: "q_click", title: "任务 1：手动点击 20 次", rewardText: "奖励 +120 齿轮", reward: { type: "gear", value: 120 },
+        progress: () => Math.min(state.totalClicks, 20), target: 20 },
+      { id: "q_intern", title: "任务 2：拥有 10 台实习生", rewardText: "奖励 +300 齿轮", reward: { type: "gear", value: 300 },
+        progress: () => Math.min((buildings.find((b) => b.id === "intern")?.owned || 0), 10), target: 10 },
+      { id: "q_gps", title: "任务 3：总 GPS 达到 100", rewardText: "奖励 +1 RP", reward: { type: "rp", value: 1 },
+        progress: () => Math.min(getTotalGPS(), 100), target: 100 }
+    ];
+
     const buildings = [
       { id: "intern", name: "实习生", basePrice: 15, dps: 1, owned: 0, unlockLifetimeGears: 0 },
       { id: "conveyor", name: "传送带", basePrice: 100, dps: 8, owned: 0, unlockLifetimeGears: 200 },
@@ -438,7 +448,8 @@
       lifetimeGears: 0,
       researchPoints: 0,
       lastRewardText: "",
-      gameSpeed: 1
+      gameSpeed: 1,
+      questIndex: 0
     };
 
     const gearsEl = document.getElementById("gears");
@@ -458,6 +469,7 @@
     const goalFillEl = document.getElementById("goalFill");
     const goalHintEl = document.getElementById("goalHint");
     const goalPctEl = document.getElementById("goalPct");
+    const questRewardEl = document.getElementById("questReward");
     const rpEl = document.getElementById("rp");
     const rewardFeedEl = document.getElementById("rewardFeed");
 
@@ -517,6 +529,7 @@
         gears: state.gears,
         purchaseMode: state.purchaseMode,
         gameSpeed: state.gameSpeed,
+        questIndex: state.questIndex,
         buildings: buildings.map((b) => ({ id: b.id, owned: b.owned })),
         upgrades: upgrades.map((u) => ({ id: u.id, purchased: u.purchased })),
         manualPower: state.manualPower,
@@ -544,6 +557,7 @@
         if ([1,2,4].includes(Number(data.gameSpeed))) {
           state.gameSpeed = Number(data.gameSpeed);
         }
+        state.questIndex = Math.max(0, Math.min(Number(data.questIndex) || 0, questChain.length));
 
         if (Array.isArray(data.buildings)) {
           for (const saved of data.buildings) {
@@ -655,14 +669,7 @@
     const claimAchievementReward = (achievement) => {
       if (!achievement.reward || achievement.claimed) return;
       achievement.claimed = true;
-      if (achievement.reward.type === "gear") {
-        state.gears += achievement.reward.value;
-        state.lifetimeGears += achievement.reward.value;
-        state.lastRewardText = `成就奖励：+${format(achievement.reward.value)} 齿轮（${achievement.name}）`;
-      } else if (achievement.reward.type === "rp") {
-        state.researchPoints += achievement.reward.value;
-        state.lastRewardText = `成就奖励：+${achievement.reward.value} RP（${achievement.name}）`;
-      }
+      grantReward(achievement.reward, `成就奖励（${achievement.name}）`);
       saveGame();
     };
 
@@ -678,6 +685,46 @@
         if (required && !required.purchased) return `前置：${required.name}`;
       }
       return "";
+    };
+
+    
+    const grantReward = (reward, label) => {
+      if (!reward) return;
+      if (reward.type === "gear") {
+        state.gears += reward.value;
+        state.lifetimeGears += reward.value;
+        state.lastRewardText = `${label}：+${format(reward.value)} 齿轮`;
+      }
+      if (reward.type === "rp") {
+        state.researchPoints += reward.value;
+        state.lastRewardText = `${label}：+${reward.value} RP`;
+      }
+    };
+
+    const updateQuestProgress = () => {
+      if (state.questIndex >= questChain.length) {
+        goalTitleEl.textContent = "阶段任务：已全部完成";
+        goalFillEl.style.width = "100%";
+        goalHintEl.textContent = "你已完成当前任务链";
+        goalPctEl.textContent = "100%";
+        questRewardEl.textContent = "奖励：已领取完毕";
+        return;
+      }
+
+      const quest = questChain[state.questIndex];
+      const current = quest.progress();
+      const pct = Math.min(100, (current / quest.target) * 100);
+      goalTitleEl.textContent = `阶段任务：${quest.title}`;
+      goalFillEl.style.width = `${pct}%`;
+      goalHintEl.textContent = current >= quest.target ? "任务已完成，奖励已发放" : `进度 ${format(current)} / ${format(quest.target)}`;
+      goalPctEl.textContent = `${pct.toFixed(0)}%`;
+      questRewardEl.textContent = `奖励：${quest.rewardText}`;
+
+      if (current >= quest.target) {
+        grantReward(quest.reward, `任务奖励（${quest.title}）`);
+        state.questIndex += 1;
+        saveGame();
+      }
     };
 
     const renderMode = () => {
@@ -738,15 +785,7 @@
         view.btn.textContent = `研发（${format(upgrade.price)} 齿轮）`;
         view.btn.disabled = state.gears < upgrade.price || Boolean(lockedReason);
       }
-
-
-      const internOwned = buildings.find((b) => b.id === "intern")?.owned || 0;
-      const targetIntern = 1;
-      const internPct = Math.min(100, (internOwned / targetIntern) * 100);
-      goalTitleEl.textContent = "新手目标：购买 1 台实习生";
-      goalFillEl.style.width = `${internPct}%`;
-      goalHintEl.textContent = internOwned >= targetIntern ? "目标已完成" : `还差 ${targetIntern - internOwned} 台实习生`;
-      goalPctEl.textContent = `${internPct.toFixed(0)}%`;
+      updateQuestProgress();
 
       for (const achievement of achievements) {
         if (!achievement.done && achievement.check()) {
@@ -882,6 +921,7 @@
       state.lifetimeGears = 0;
       state.lastRewardText = "";
       state.gameSpeed = 1;
+      state.questIndex = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const a of achievements) { a.done = false; a.claimed = false; }
@@ -904,6 +944,7 @@
       state.researchPoints = 0;
       state.lastRewardText = "";
       state.gameSpeed = 1;
+      state.questIndex = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const a of achievements) { a.done = false; a.claimed = false; }
