@@ -362,6 +362,10 @@
         <button class="chip" data-mode="10">x10</button>
         <button class="chip" data-mode="100">x100</button>
         <button class="chip" data-mode="max">Max</button>
+        <span class="chip small">仿真速度</span>
+        <button class="chip active" data-speed="1">1x</button>
+        <button class="chip" data-speed="2">2x</button>
+        <button class="chip" data-speed="4">4x</button>
         <button class="chip" id="prestigeBtn">软重置</button>
         <button class="chip" id="resetSaveBtn">重置存档</button>
       </div>
@@ -433,7 +437,8 @@
       totalClicks: 0,
       lifetimeGears: 0,
       researchPoints: 0,
-      lastRewardText: ""
+      lastRewardText: "",
+      gameSpeed: 1
     };
 
     const gearsEl = document.getElementById("gears");
@@ -441,6 +446,7 @@
     const manualBtn = document.getElementById("manualBtn");
     const buildingList = document.getElementById("buildingList");
     const modeButtons = [...document.querySelectorAll("[data-mode]")];
+    const speedButtons = [...document.querySelectorAll("[data-speed]")];
     const prestigeBtn = document.getElementById("prestigeBtn");
     const resetSaveBtn = document.getElementById("resetSaveBtn");
     const offlineNoticeEl = document.getElementById("offlineNotice");
@@ -510,6 +516,7 @@
       const payload = {
         gears: state.gears,
         purchaseMode: state.purchaseMode,
+        gameSpeed: state.gameSpeed,
         buildings: buildings.map((b) => ({ id: b.id, owned: b.owned })),
         upgrades: upgrades.map((u) => ({ id: u.id, purchased: u.purchased })),
         manualPower: state.manualPower,
@@ -533,6 +540,9 @@
         state.gears = Number(data.gears) || 0;
         if (["1", "10", "100", "max"].includes(data.purchaseMode)) {
           state.purchaseMode = data.purchaseMode;
+        }
+        if ([1,2,4].includes(Number(data.gameSpeed))) {
+          state.gameSpeed = Number(data.gameSpeed);
         }
 
         if (Array.isArray(data.buildings)) {
@@ -674,12 +684,15 @@
       for (const btn of modeButtons) {
         btn.classList.toggle("active", btn.dataset.mode === state.purchaseMode);
       }
+      for (const btn of speedButtons) {
+        btn.classList.toggle("active", Number(btn.dataset.speed) === state.gameSpeed);
+      }
     };
 
     const render = () => {
       gearsEl.textContent = format(state.gears);
       gpsEl.textContent = format(getTotalGPS());
-      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}）`;
+      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}，速度 x${state.gameSpeed}）`;
 
       for (const building of buildings) {
         const view = buildingViewMap.get(building.id);
@@ -823,11 +836,21 @@
     document.querySelector(".controls").addEventListener("click", (event) => {
       const target = event.target;
       if (!(target instanceof HTMLButtonElement)) return;
+
       const mode = target.dataset.mode;
-      if (!mode) return;
-      state.purchaseMode = mode;
-      saveGame();
-      render();
+      if (mode) {
+        state.purchaseMode = mode;
+        saveGame();
+        render();
+        return;
+      }
+
+      const speed = Number(target.dataset.speed);
+      if ([1, 2, 4].includes(speed)) {
+        state.gameSpeed = speed;
+        saveGame();
+        render();
+      }
     });
 
     claimOfflineBtn.addEventListener("click", () => {
@@ -858,6 +881,7 @@
       state.totalClicks = 0;
       state.lifetimeGears = 0;
       state.lastRewardText = "";
+      state.gameSpeed = 1;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const a of achievements) { a.done = false; a.claimed = false; }
@@ -879,6 +903,7 @@
       state.lifetimeGears = 0;
       state.researchPoints = 0;
       state.lastRewardText = "";
+      state.gameSpeed = 1;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const a of achievements) { a.done = false; a.claimed = false; }
@@ -899,7 +924,7 @@
 
       const gps = getTotalGPS();
       while (state.accumulator >= FIXED_STEP) {
-        const gain = gps * FIXED_STEP;
+        const gain = gps * FIXED_STEP * state.gameSpeed;
         state.gears += gain;
         state.lifetimeGears += gain;
         state.accumulator -= FIXED_STEP;
