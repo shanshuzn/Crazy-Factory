@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { getCurrentPrice, getEffectiveOwnedForPrice, getPrestigeGain } from '../src/systems/economySystem.js';
 import { createOrderFromTemplate, getOrderProgress, pickWeightedOrderTemplate } from '../src/systems/taskSystem.js';
+import { createSfxGate } from '../src/systems/audioSystem.js';
 import { createInitialState } from '../src/core/state.js';
 import { createFeedbackBus } from '../src/fx/feedbackBus.js';
 import { migrateSaveData } from '../src/core/saveMigrations.js';
@@ -30,6 +31,18 @@ function runEconomyChecks() {
 
   assert.equal(getPrestigeGain(1000, { baseDivisor: 2000, lateBonusStart: 2_000_000, lateBonusStep: 2_000_000 }), 0);
   assert.equal(getPrestigeGain(2_000_000, { baseDivisor: 2000, lateBonusStart: 2_000_000, lateBonusStep: 2_000_000 }), 32);
+}
+
+
+function runAudioGateChecks() {
+  const gate = createSfxGate();
+  assert.equal(gate.canPlay('click', 1000, false), true);
+  assert.equal(gate.canPlay('click', 1010, false), false);
+  assert.equal(gate.canPlay('click', 1030, false), true);
+
+  assert.equal(gate.canPlay('reward', 2000, true), true);
+  assert.equal(gate.canPlay('reward', 2070, true), false);
+  assert.equal(gate.canPlay('reward', 2130, true), true);
 }
 
 function runTaskChecks() {
@@ -125,6 +138,7 @@ function runCoreChecks() {
 }
 
 runEconomyChecks();
+runAudioGateChecks();
 runTaskChecks();
 runMigrationChecks();
 runGameFeelChecks();

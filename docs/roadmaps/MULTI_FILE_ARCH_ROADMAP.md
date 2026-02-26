@@ -67,6 +67,7 @@ src/
 - `node scripts/module_checks.mjs` 通过。
 - ✅ `scripts/module_checks.mjs` 已覆盖 `src/fx/gameFeelSystem.js` 反馈订阅回归。
 - `scripts/module_checks.mjs` 已覆盖存档迁移映射回归（v1→v4）。
+- `scripts/module_checks.mjs` 已覆盖音效节流门（normal/safe 冷却阈值）回归。
 - 老存档导入成功率维持 100%。
 
 ## 阶段 3：Vibe 反馈工程化（1 个迭代）
@@ -85,6 +86,7 @@ src/
 - 动画只改 `transform/opacity`，避免频繁触发布局。
 - 浮字节点池化，避免每帧创建/销毁 DOM 造成 GC 抖动。
 - 高频音效节流（低性能模式下提高冷却阈值）。
+- ✅ 已在 `src/systems/audioSystem.js` 落地按事件类型节流门（低性能模式使用更长冷却阈值）。
 
 ### 验收标准
 - 30 分钟稳定性脚本通过。
