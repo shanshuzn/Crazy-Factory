@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Ctext y=%2752%27 font-size=%2752%27%3E%E2%9A%99%EF%B8%8F%3C/text%3E%3C/svg%3E" />
   <title>自动化工厂 - 放置游戏原型</title>
   <style>
     :root {
@@ -28,9 +29,11 @@
       font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
       background: radial-gradient(1200px 800px at 20% -20%, #1d4ed8 0%, var(--bg) 45%);
       color: var(--text);
-      display: grid;
-      place-items: center;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
       padding: 24px;
+      overflow-y: auto;
     }
 
     .game {
@@ -356,6 +359,53 @@
       flex-wrap: wrap;
     }
 
+    .progress-meta.compact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .metric-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      border-radius: 9px;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(15, 23, 42, 0.55);
+      color: #dbeafe;
+    }
+
+    .metric-pill.good {
+      border-color: rgba(34, 197, 94, 0.45);
+      background: rgba(22, 101, 52, 0.2);
+      color: #bbf7d0;
+    }
+
+    .metric-pill.warn {
+      border-color: rgba(245, 158, 11, 0.45);
+      background: rgba(120, 53, 15, 0.2);
+      color: #fde68a;
+    }
+
+    .metric-pill.danger {
+      border-color: rgba(239, 68, 68, 0.48);
+      background: rgba(127, 29, 29, 0.24);
+      color: #fecaca;
+    }
+
+    .action-group {
+      margin-top: 10px;
+    }
+
+    .action-group-title {
+      margin: 0 0 6px;
+      font-size: 0.78rem;
+      color: #93c5fd;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
     .order-actions {
       display: flex;
       flex-wrap: wrap;
@@ -385,6 +435,13 @@
       background: #1d4ed8;
       color: #dbeafe;
       border-color: #2563eb;
+    }
+
+    .order-btn.active {
+      background: linear-gradient(90deg, #0891b2, #2563eb);
+      color: #ecfeff;
+      border-color: #22d3ee;
+      box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
     }
 
 
@@ -719,10 +776,12 @@
     }
 
     @media (max-width: 760px) {
+      body { padding: 12px; }
       .header { grid-template-columns: 1fr; }
       .stats { width: 100%; }
       .building { grid-template-columns: 1fr; }
       .buy-btn { width: 100%; }
+      .progress-meta.compact-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -773,6 +832,7 @@
         <button class="chip" id="importSaveBtn">导入存档</button>
         <button class="chip" id="prestigeBtn">软重置</button>
         <button class="chip" id="resetSaveBtn">重置存档</button>
+        <button class="chip" id="debugToggleBtn">调试面板: 关</button>
       </div>
 
       <div id="offlineNotice" class="manual" style="display:none">
@@ -781,6 +841,24 @@
           <div class="subtitle" id="offlineText" style="margin-top:4px"></div>
         </div>
         <button id="claimOfflineBtn" class="btn">领取</button>
+      </div>
+
+      <div class="progress-wrap" id="debugPanel" style="display:none">
+        <div class="progress-title">开发调试面板</div>
+        <div class="progress-meta">
+          <span id="debugSnapshotInfo">快照：未生成</span>
+          <span>用于数值验证，不影响正式玩法</span>
+        </div>
+        <div class="order-actions">
+          <button class="order-btn secondary" id="debugAddGearsBtn">+10k 齿轮</button>
+          <button class="order-btn secondary" id="debugAddRpBtn">+5 RP</button>
+          <button class="order-btn secondary" id="debugSnapshotBtn">记录快照</button>
+        </div>
+        <div class="order-actions">
+          <button class="order-btn secondary" id="debugManualMultBtn">手动倍率 x1.00</button>
+          <button class="order-btn secondary" id="debugGpsMultBtn">产线倍率 x1.00</button>
+          <button class="order-btn secondary" id="debugResetMultBtn">重置调试倍率</button>
+        </div>
       </div>
 
       <div class="progress-wrap">
@@ -827,26 +905,57 @@
       <div class="progress-wrap" id="financePanel">
         <div class="progress-title" id="financeTitle">金融系统：尚未解锁</div>
         <div class="progress-track"><div id="financeFill" class="progress-fill"></div></div>
-        <div class="progress-meta">
-          <span id="financeHint">累计齿轮达到 1200 后解锁</span>
-          <span id="financeYield">年化：0%</span>
-          <span id="financeCapital">资金池：0</span>
-          <span id="financeBreakdown">构成：基础 0% / 波动 0% / 风控 0%</span>
-          <span id="financeMarket">市场：平稳</span>
-          <span id="financeStrategy">策略：平衡</span>
+        <div class="progress-meta compact-grid">
+          <span id="financeHint" class="metric-pill">累计齿轮达到 1200 后解锁</span>
+          <span id="financeYield" class="metric-pill">年化：0%</span>
+          <span id="financeCapital" class="metric-pill">资金池：0</span>
+          <span id="financeBreakdown" class="metric-pill">构成：基础 0% / 波动 0% / 风控 0%</span>
+          <span id="financeMarket" class="metric-pill">市场：平稳</span>
+          <span id="financeStrategy" class="metric-pill">策略：平衡</span>
+          <span id="financeSwitches" class="metric-pill">切换：0 次</span>
+          <span id="financeSeason" class="metric-pill">赛季：高通胀</span>
+          <span id="financeIntel" class="metric-pill">情报：下一步市场 -</span>
+          <span id="financeLeaderboard" class="metric-pill">赛季榜：暂无</span>
+          <span id="financeAssets" class="metric-pill">资产：债 34% / 股 33% / 衍 33%</span>
+          <span id="financeLiquidity" class="metric-pill">流动性：正常</span>
         </div>
         <div class="subtitle finance-advice info" id="financeAdvice">建议：解锁后会在这里显示下一步操作</div>
-        <div class="order-actions" id="financeStrategyActions">
+        <div class="action-group">
+          <div class="action-group-title">策略切换</div>
+          <div class="order-actions" id="financeStrategyActions">
           <button class="order-btn secondary" id="financeStrategyConservativeBtn" disabled>策略：稳健</button>
           <button class="order-btn secondary" id="financeStrategyBalancedBtn" disabled>策略：平衡</button>
           <button class="order-btn secondary" id="financeStrategyAggressiveBtn" disabled>策略：激进</button>
+          </div>
         </div>
-        <div class="order-actions">
+        <div class="action-group">
+          <div class="action-group-title">资金操作</div>
+          <div class="order-actions">
           <button class="order-btn" id="financeInvestBtn" disabled>投入 10% 齿轮</button>
           <button class="order-btn secondary" id="financeWithdrawBtn" disabled>提取 25% 资金</button>
           <button class="order-btn secondary" id="financeUpgradeBtn" disabled>风控升级（1 RP）</button>
           <button class="order-btn secondary" id="financeHedgeBtn" disabled>对冲（6%资金，12s）</button>
+          <button class="order-btn secondary" id="financeSettleBtn" disabled>赛季结算</button>
+          <button class="order-btn secondary" id="financeAutoBtn" disabled>半自动策略：关</button>
+          </div>
         </div>
+        <div class="action-group">
+          <div class="action-group-title">资产再平衡</div>
+          <div class="order-actions">
+          <button class="order-btn secondary" id="financeAssetBondBtn" disabled>债券 +10%</button>
+          <button class="order-btn secondary" id="financeAssetEquityBtn" disabled>股权 +10%</button>
+          <button class="order-btn secondary" id="financeAssetDerivativeBtn" disabled>衍生 +10%</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress-wrap" id="prestigeBranchPanel">
+        <div class="progress-title">Prestige 2.0：传承分支</div>
+        <div class="progress-meta">
+          <span id="prestigeBranchHint">通过软重置获得 RP 后，可定向强化长期成长路线</span>
+          <span id="prestigeBranchSummary">分支：工匠 Lv.0 / 产线 Lv.0</span>
+        </div>
+        <div class="buildings" id="prestigeBranchList"></div>
       </div>
 
       <div class="category-grid">
@@ -900,7 +1009,7 @@
     const PRESTIGE_LATE_BONUS_STEP = 2_000_000;
     const SAVE_KEY = "crazy_factory_save_v1";
     const SAVE_BACKUP_KEY = "crazy_factory_save_backup";
-    const SAVE_VERSION = 2;
+    const SAVE_VERSION = 4;
     const TICK_RATE = 60;
     const FIXED_STEP = 1 / TICK_RATE;
     const MAX_ACCUMULATED_SECONDS = 0.25;
@@ -941,6 +1050,11 @@
     const FX_SHAKE_COOLDOWN_MS = 260;
     const LOW_PERF_FLOAT_SCALE = 0.55;
     const FX_HIGHLIGHT_DURATION_MS = 1250;
+
+    const PRESTIGE_BRANCHES = [
+      { id: "legacy_manual", name: "传承：工匠路线", desc: "手动产出永久 +12%", cost: 2, maxLevel: 5, type: "manual", value: 0.12 },
+      { id: "legacy_line", name: "传承：产线路线", desc: "总 GPS 永久 +10%", cost: 2, maxLevel: 5, type: "gps", value: 0.10 }
+    ];
 
     const ORDER_TEMPLATES = [
       { key: "clicks", type: "clicks", minTier: 1, weight: 3, title: "订单：人工质检", desc: "手动点击完成一次人工抽检" },
@@ -1036,7 +1150,17 @@
       financeHedgeUntil: 0,
       financeMetaPoints: 0,
       financeCreditBase: 0,
-      financeStrategySwitches: 0
+      financeStrategySwitches: 0,
+      prestigeBranches: { legacy_manual: 0, legacy_line: 0 },
+      debugPanelOpen: false,
+      debugManualMult: 1,
+      debugGpsMult: 1,
+      financeSeasonIndex: 0,
+      financeLeaderboard: [],
+      financeAssets: { bond: 0.34, equity: 0.33, derivative: 0.33 },
+      financeLineage: 0,
+      financeAutoPilot: false,
+      financeAutoAccumulator: 0
     };
 
     const gearsEl = document.getElementById("gears");
@@ -1054,13 +1178,25 @@
     const importSaveBtn = document.getElementById("importSaveBtn");
     const prestigeBtn = document.getElementById("prestigeBtn");
     const resetSaveBtn = document.getElementById("resetSaveBtn");
+    const debugToggleBtn = document.getElementById("debugToggleBtn");
     const offlineNoticeEl = document.getElementById("offlineNotice");
     const offlineTextEl = document.getElementById("offlineText");
     const claimOfflineBtn = document.getElementById("claimOfflineBtn");
+    const debugPanelEl = document.getElementById("debugPanel");
+    const debugSnapshotInfoEl = document.getElementById("debugSnapshotInfo");
+    const debugAddGearsBtn = document.getElementById("debugAddGearsBtn");
+    const debugAddRpBtn = document.getElementById("debugAddRpBtn");
+    const debugSnapshotBtn = document.getElementById("debugSnapshotBtn");
+    const debugManualMultBtn = document.getElementById("debugManualMultBtn");
+    const debugGpsMultBtn = document.getElementById("debugGpsMultBtn");
+    const debugResetMultBtn = document.getElementById("debugResetMultBtn");
     const upgradeList = document.getElementById("upgradeList");
     const achievementList = document.getElementById("achievementList");
     const skillList = document.getElementById("skillList");
     const specializationList = document.getElementById("specializationList");
+    const prestigeBranchList = document.getElementById("prestigeBranchList");
+    const prestigeBranchSummaryEl = document.getElementById("prestigeBranchSummary");
+    const prestigeBranchHintEl = document.getElementById("prestigeBranchHint");
     const goalTitleEl = document.getElementById("goalTitle");
     const goalFillEl = document.getElementById("goalFill");
     const goalHintEl = document.getElementById("goalHint");
@@ -1091,6 +1227,12 @@
     const financeBreakdownEl = document.getElementById("financeBreakdown");
     const financeMarketEl = document.getElementById("financeMarket");
     const financeStrategyEl = document.getElementById("financeStrategy");
+    const financeSwitchesEl = document.getElementById("financeSwitches");
+    const financeSeasonEl = document.getElementById("financeSeason");
+    const financeIntelEl = document.getElementById("financeIntel");
+    const financeLeaderboardEl = document.getElementById("financeLeaderboard");
+    const financeAssetsEl = document.getElementById("financeAssets");
+    const financeLiquidityEl = document.getElementById("financeLiquidity");
     const financeAdviceEl = document.getElementById("financeAdvice");
     const financeStrategyConservativeBtn = document.getElementById("financeStrategyConservativeBtn");
     const financeStrategyBalancedBtn = document.getElementById("financeStrategyBalancedBtn");
@@ -1099,6 +1241,19 @@
     const financeWithdrawBtn = document.getElementById("financeWithdrawBtn");
     const financeUpgradeBtn = document.getElementById("financeUpgradeBtn");
     const financeHedgeBtn = document.getElementById("financeHedgeBtn");
+    const financeSettleBtn = document.getElementById("financeSettleBtn");
+    const financeAutoBtn = document.getElementById("financeAutoBtn");
+    const financeAssetBondBtn = document.getElementById("financeAssetBondBtn");
+
+    const setMetricPillTone = (el, tone) => {
+      if (!el) return;
+      el.classList.remove("good", "warn", "danger");
+      if (tone && ["good", "warn", "danger"].includes(tone)) {
+        el.classList.add(tone);
+      }
+    };
+    const financeAssetEquityBtn = document.getElementById("financeAssetEquityBtn");
+    const financeAssetDerivativeBtn = document.getElementById("financeAssetDerivativeBtn");
     const fxLayerEl = document.getElementById("fxLayer");
     const highlightLayerEl = document.getElementById("highlightLayer");
     const gamePanelEl = document.querySelector(".game");
@@ -1108,6 +1263,7 @@
     const achievementViewMap = new Map();
     const skillViewMap = new Map();
     const specializationViewMap = new Map();
+    const prestigeBranchViewMap = new Map();
 
     const format = (num) => {
       if (!Number.isFinite(num)) return "0";
@@ -1142,6 +1298,9 @@
 
     const getBaseGPS = () => buildings.reduce((sum, b) => sum + b.dps * b.owned * getBuildingOutputMultiplier(b.id), 0);
     const getResearchMultiplier = () => 1 + state.researchPoints * 0.1;
+    const getPrestigeBranchLevel = (id) => Math.max(0, Number(state.prestigeBranches?.[id]) || 0);
+    const getPrestigeManualMultiplier = () => 1 + getPrestigeBranchLevel("legacy_manual") * 0.12;
+    const getPrestigeGpsMultiplier = () => 1 + getPrestigeBranchLevel("legacy_line") * 0.10;
     const getSkillGpsMultiplier = () => 1 + getSkillLevel("line_optimizer") * 0.2;
     const getSkillManualMultiplier = () => 1 + getSkillLevel("manual_mastery") * 0.25;
     const getIndustryChainMultiplier = () => {
@@ -1156,9 +1315,9 @@
       return Math.max(1, synergy - imbalance * 0.06);
     };
 
-    const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier() * getSkillGpsMultiplier() * getIndustryChainMultiplier();
+    const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier() * getSkillGpsMultiplier() * getIndustryChainMultiplier() * getPrestigeGpsMultiplier() * state.debugGpsMult;
     const getComboMultiplier = () => 1 + Math.min(COMBO_MAX_STREAK, state.comboStreak) * COMBO_BONUS_PER_STACK;
-    const getManualGain = () => state.manualPower * getSkillManualMultiplier() * getComboMultiplier();
+    const getManualGain = () => state.manualPower * getSkillManualMultiplier() * getComboMultiplier() * getPrestigeManualMultiplier() * state.debugManualMult;
 
     const getPrestigeGain = (lifetimeGears) => {
       const base = Math.floor(Math.sqrt(lifetimeGears / PRESTIGE_BASE_DIVISOR));
@@ -1179,12 +1338,33 @@
       aggressive: { label: "激进", aprMult: 1.22, mainlineMult: 0.92, orderRewardMult: 1.12 }
     };
     const FINANCE_MARKET_TIMELINE = ["stable", "overheat", "pullback", "panic"];
+    const FINANCE_SEASONS = [
+      { key: "inflation", label: "高通胀", aprShift: 0.012, capMult: 1.05, aiPressure: 0.18 },
+      { key: "tightening", label: "紧缩", aprShift: -0.009, capMult: 0.9, aiPressure: 0.38 },
+      { key: "supply_shock", label: "供给冲击", aprShift: -0.003, capMult: 0.95, aiPressure: 0.46 }
+    ];
 
     const getCurrentMarketKey = () => {
       const idx = Math.floor(state.totalClicks / 75) % FINANCE_MARKET_TIMELINE.length;
       return FINANCE_MARKET_TIMELINE[idx];
     };
     const getCurrentMarketState = () => FINANCE_MARKET_STATES[getCurrentMarketKey()];
+    const getCurrentSeason = () => FINANCE_SEASONS[state.financeSeasonIndex % FINANCE_SEASONS.length];
+    const getIntelPreview = (steps = 2) => {
+      const start = Math.floor(state.totalClicks / 75);
+      const arr = [];
+      for (let i = 1; i <= steps; i += 1) {
+        const key = FINANCE_MARKET_TIMELINE[(start + i) % FINANCE_MARKET_TIMELINE.length];
+        arr.push(FINANCE_MARKET_STATES[key].label);
+      }
+      return arr.join(" → ");
+    };
+    const getAssetRiskBudget = () => state.financeAssets.bond * 0.6 + state.financeAssets.equity * 1 + state.financeAssets.derivative * 1.45;
+    const getAiLiquidityPressure = () => {
+      const season = getCurrentSeason();
+      const wave = (Math.sin(state.totalClicks / 38) + 1) / 2;
+      return Math.min(1, season.aiPressure * 0.7 + wave * 0.45);
+    };
     const getCurrentStrategyProfile = () => FINANCE_STRATEGIES[state.financeStrategy] || FINANCE_STRATEGIES.balanced;
     const isHedgeActive = (nowMs = Date.now()) => state.financeHedgeUntil > nowMs;
     const getFinanceCreditLevel = () => {
@@ -1203,27 +1383,31 @@
       const strategy = getCurrentStrategyProfile();
       const market = getCurrentMarketState();
       const hedgeOn = isHedgeActive(nowMs);
+      const season = getCurrentSeason();
+      const aiPressure = getAiLiquidityPressure();
       const base = FINANCE_BASE_APR;
       const cycle = FINANCE_CYCLE_AMPLITUDE * Math.sin(state.totalClicks / 45) * market.cycleScale * (hedgeOn ? FINANCE_HEDGE_VOL_MULT : 1);
       const creditLevel = getFinanceCreditLevel();
       const sprintOn = isPrestigeSprintWindow();
       const riskControl = state.financeTier * FINANCE_TIER_APR_BONUS;
-      const marketShift = market.aprDelta + creditLevel * 0.003;
+      const marketShift = market.aprDelta + creditLevel * 0.003 + season.aprShift;
       const strategyShift = base * (strategy.aprMult - 1);
-      const metaShift = state.financeMetaPoints * FINANCE_META_APR_PER_POINT;
+      const metaShift = state.financeMetaPoints * FINANCE_META_APR_PER_POINT + state.financeLineage * 0.002;
       const sprintShift = sprintOn ? FINANCE_PRESTIGE_SPRINT_APR_BONUS : 0;
       const hedgeShift = hedgeOn ? (base * FINANCE_HEDGE_APR_MULT - base) : 0;
+      const assetShift = (getAssetRiskBudget() - 1) * 0.01;
+      const liquidityShift = -aiPressure * 0.012;
       const cycleBoost = sprintOn ? FINANCE_PRESTIGE_SPRINT_VOL_MULT : 1;
-      return { base, cycle: cycle * cycleBoost, riskControl, marketShift, strategyShift, metaShift, sprintShift, hedgeShift, creditLevel, sprintOn };
+      return { base, cycle: cycle * cycleBoost, riskControl, marketShift, strategyShift, metaShift, sprintShift, hedgeShift, assetShift, liquidityShift, creditLevel, sprintOn, season, aiPressure };
     };
     const getFinanceApr = (nowMs = Date.now()) => {
       const c = getFinanceAprComponents(nowMs);
-      return Math.max(0.01, c.base + c.cycle + c.riskControl + c.marketShift + c.strategyShift + c.metaShift + c.sprintShift + c.hedgeShift);
+      return Math.max(0.01, c.base + c.cycle + c.riskControl + c.marketShift + c.strategyShift + c.metaShift + c.sprintShift + c.hedgeShift + c.assetShift + c.liquidityShift);
     };
     // 金融收益做“主线占比封顶”：避免单一路线碾压，同时策略会影响主线权重。
     const getFinanceIncomePerSecond = (baseGps = getTotalGPS(), nowMs = Date.now()) => {
       const raw = state.financeCapital * getFinanceApr(nowMs);
-      const cap = Math.max(FINANCE_MIN_CAP_GPS, baseGps * FINANCE_MAX_SHARE_OF_MAINLINE);
+      const cap = Math.max(FINANCE_MIN_CAP_GPS, baseGps * FINANCE_MAX_SHARE_OF_MAINLINE * getCurrentSeason().capMult * (1 - getAiLiquidityPressure() * 0.25));
       return Math.min(raw, cap);
     };
 
@@ -1237,7 +1421,7 @@
       if (!unlocked) return { tone: "info", text: `建议：先把累计齿轮推到 ${FINANCE_UNLOCK_LIFETIME_GEARS} 解锁金融。` };
 
       const upgradeCost = 1 + state.financeTier;
-      const cap = Math.max(FINANCE_MIN_CAP_GPS, mainlineGps * FINANCE_MAX_SHARE_OF_MAINLINE);
+      const cap = Math.max(FINANCE_MIN_CAP_GPS, mainlineGps * FINANCE_MAX_SHARE_OF_MAINLINE * getCurrentSeason().capMult * (1 - getAiLiquidityPressure() * 0.25));
       const capRatio = cap > 0 ? financeIncome / cap : 0;
       const marketKey = getCurrentMarketKey();
 
@@ -1552,6 +1736,26 @@
         }
       }
 
+      if (version < 3) {
+        data.saveVersion = 3;
+        if (!data.prestigeBranches || typeof data.prestigeBranches !== "object") {
+          data.prestigeBranches = { legacy_manual: 0, legacy_line: 0 };
+        }
+      }
+
+      if (version < 4) {
+        data.saveVersion = 4;
+        data.financeSeasonIndex = Math.max(0, Math.floor(Number(data.financeSeasonIndex) || 0));
+        data.financeLeaderboard = Array.isArray(data.financeLeaderboard) ? data.financeLeaderboard : [];
+        if (!data.financeAssets || typeof data.financeAssets !== "object") {
+          data.financeAssets = { bond: 0.34, equity: 0.33, derivative: 0.33 };
+        }
+        if (!Number.isFinite(Number(data.financeLineage))) data.financeLineage = 0;
+        if (!Number.isFinite(Number(data.debugManualMult))) data.debugManualMult = 1;
+        if (!Number.isFinite(Number(data.debugGpsMult))) data.debugGpsMult = 1;
+        if (typeof data.debugPanelOpen !== "boolean") data.debugPanelOpen = false;
+      }
+
       if (!Number.isFinite(Number(data.saveVersion))) {
         data.saveVersion = SAVE_VERSION;
       }
@@ -1590,6 +1794,15 @@
         financeMetaPoints: state.financeMetaPoints,
         financeCreditBase: state.financeCreditBase,
         financeStrategySwitches: state.financeStrategySwitches,
+        financeSeasonIndex: state.financeSeasonIndex,
+        financeLeaderboard: state.financeLeaderboard,
+        financeAssets: state.financeAssets,
+        financeLineage: state.financeLineage,
+        financeAutoPilot: state.financeAutoPilot,
+        prestigeBranches: state.prestigeBranches,
+        debugPanelOpen: state.debugPanelOpen,
+        debugManualMult: state.debugManualMult,
+        debugGpsMult: state.debugGpsMult,
         saveVersion: SAVE_VERSION,
         savedAt: Date.now()
       };
@@ -1616,6 +1829,8 @@
       if (!data || typeof data !== "object") return null;
       if (!Array.isArray(data.buildings) || !Array.isArray(data.upgrades)) return null;
       if (!Array.isArray(data.skills) || !Array.isArray(data.achievements)) return null;
+      if (data.financeLeaderboard && !Array.isArray(data.financeLeaderboard)) return null;
+      if (data.financeAssets && typeof data.financeAssets !== "object") return null;
       return data;
     };
 
@@ -1671,6 +1886,24 @@
         state.financeMetaPoints = Math.max(0, Math.floor(Number(data.financeMetaPoints) || 0));
         state.financeCreditBase = Math.max(0, Math.floor(Number(data.financeCreditBase) || 0));
         state.financeStrategySwitches = Math.max(0, Math.floor(Number(data.financeStrategySwitches) || 0));
+        state.financeSeasonIndex = Math.max(0, Math.floor(Number(data.financeSeasonIndex) || 0)) % FINANCE_SEASONS.length;
+        state.financeLeaderboard = Array.isArray(data.financeLeaderboard) ? data.financeLeaderboard.slice(0, 5).map((x) => Number(x) || 0) : [];
+        const fa = data.financeAssets && typeof data.financeAssets === "object" ? data.financeAssets : {};
+        const b = Math.max(0, Number(fa.bond) || 0.34);
+        const e = Math.max(0, Number(fa.equity) || 0.33);
+        const d = Math.max(0, Number(fa.derivative) || 0.33);
+        const sum = b + e + d || 1;
+        state.financeAssets = { bond: b/sum, equity: e/sum, derivative: d/sum };
+        state.financeLineage = Math.max(0, Math.floor(Number(data.financeLineage) || 0));
+        state.financeAutoPilot = Boolean(data.financeAutoPilot);
+        state.financeAutoAccumulator = 0;
+        state.prestigeBranches = {
+          legacy_manual: Math.max(0, Math.min(5, Math.floor(Number(data.prestigeBranches?.legacy_manual) || 0))),
+          legacy_line: Math.max(0, Math.min(5, Math.floor(Number(data.prestigeBranches?.legacy_line) || 0)))
+        };
+        state.debugPanelOpen = Boolean(data.debugPanelOpen);
+        state.debugManualMult = Math.max(0.2, Math.min(5, Number(data.debugManualMult) || 1));
+        state.debugGpsMult = Math.max(0.2, Math.min(5, Number(data.debugGpsMult) || 1));
         if (data.categoryCollapse && typeof data.categoryCollapse === "object") {
           state.categoryCollapse.economy = Boolean(data.categoryCollapse.economy);
           state.categoryCollapse.goals = Boolean(data.categoryCollapse.goals);
@@ -1839,6 +2072,37 @@
       });
     };
 
+    const createPrestigeBranchRow = (branch) => {
+      const row = document.createElement("div");
+      row.className = "skill";
+      row.dataset.id = branch.id;
+      row.innerHTML = `
+        <div>
+          <div class="name">${branch.name}</div>
+          <div class="meta">${branch.desc}</div>
+          <div class="meta" data-branch-meta="${branch.id}"></div>
+        </div>
+        <button class="btn skill-btn" data-branch-buy="${branch.id}">升级（${branch.cost} RP）</button>
+      `;
+      prestigeBranchList.appendChild(row);
+      prestigeBranchViewMap.set(branch.id, {
+        btn: row.querySelector(`[data-branch-buy="${branch.id}"]`),
+        meta: row.querySelector(`[data-branch-meta="${branch.id}"]`)
+      });
+    };
+
+    const buyPrestigeBranch = (id) => {
+      const branch = PRESTIGE_BRANCHES.find((b) => b.id === id);
+      if (!branch) return;
+      const level = getPrestigeBranchLevel(id);
+      if (level >= branch.maxLevel || state.researchPoints < branch.cost) return;
+      state.researchPoints -= branch.cost;
+      state.prestigeBranches[id] = level + 1;
+      pushLog(`Prestige 分支升级：${branch.name} Lv.${state.prestigeBranches[id]}`);
+      saveGame();
+      render();
+    };
+
     const buySpecialization = (id) => {
       const spec = specializationUpgrades.find((sp) => sp.id === id);
       if (!spec) return;
@@ -1983,12 +2247,14 @@
       lowPerfBtn.textContent = `低性能模式: ${state.lowPerfMode ? "开" : "关"}`;
       lowPerfAudioBtn.classList.toggle("active", state.lowPerfAudioSafe);
       lowPerfAudioBtn.textContent = `低性能音效保护: ${state.lowPerfAudioSafe ? "开" : "关"}`;
+      debugToggleBtn.classList.toggle("active", state.debugPanelOpen);
+      debugToggleBtn.textContent = `调试面板: ${state.debugPanelOpen ? "开" : "关"}`;
     };
 
     const render = () => {
       gearsEl.textContent = format(state.gears);
       gpsEl.textContent = format(getTotalGPS());
-      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}，速度 x${state.gameSpeed}，金融 +${format(getFinanceIncomePerSecond())}/s，产业链 x${getIndustryChainMultiplier().toFixed(2)}，信用 Lv.${getFinanceCreditLevel()}，金融元进度 ${state.financeMetaPoints}）`;
+      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}，速度 x${state.gameSpeed}，金融 +${format(getFinanceIncomePerSecond())}/s，产业链 x${getIndustryChainMultiplier().toFixed(2)}，信用 Lv.${getFinanceCreditLevel()}，金融元进度 ${state.financeMetaPoints}，Prestige 手动 x${getPrestigeManualMultiplier().toFixed(2)} / 产线 x${getPrestigeGpsMultiplier().toFixed(2)}）`;
 
       for (const building of buildings) {
         const view = buildingViewMap.get(building.id);
@@ -2062,6 +2328,24 @@
         }
       }
 
+      const manualLegacy = getPrestigeBranchLevel("legacy_manual");
+      const lineLegacy = getPrestigeBranchLevel("legacy_line");
+      prestigeBranchSummaryEl.textContent = `分支：工匠 Lv.${manualLegacy} / 产线 Lv.${lineLegacy}`;
+      prestigeBranchHintEl.textContent = `当前永久加成：手动 x${getPrestigeManualMultiplier().toFixed(2)} / 产线 x${getPrestigeGpsMultiplier().toFixed(2)}`;
+      for (const branch of PRESTIGE_BRANCHES) {
+        const view = prestigeBranchViewMap.get(branch.id);
+        if (!view) continue;
+        const level = getPrestigeBranchLevel(branch.id);
+        view.meta.textContent = `等级 ${level}/${branch.maxLevel}`;
+        if (level >= branch.maxLevel) {
+          view.btn.disabled = true;
+          view.btn.textContent = "已满级";
+        } else {
+          view.btn.disabled = state.researchPoints < branch.cost;
+          view.btn.textContent = `升级（${branch.cost} RP）`;
+        }
+      }
+
       for (const achievement of achievements) {
         if (!achievement.done && achievement.check()) {
           achievement.done = true;
@@ -2072,6 +2356,11 @@
         view.badge.classList.toggle("done", achievement.done);
         view.badge.textContent = achievement.done ? (achievement.claimed ? "已完成+奖励" : "已完成") : "未完成";
       }
+
+      debugPanelEl.style.display = state.debugPanelOpen ? "block" : "none";
+      debugSnapshotInfoEl.textContent = `快照：齿轮 ${format(state.gears)} / RP ${state.researchPoints} / GPS ${format(getTotalGPS())}`;
+      debugManualMultBtn.textContent = `手动倍率 x${state.debugManualMult.toFixed(2)}`;
+      debugGpsMultBtn.textContent = `产线倍率 x${state.debugGpsMult.toFixed(2)}`;
 
       if (state.pendingOfflineGears > 0) {
         offlineNoticeEl.style.display = "flex";
@@ -2149,13 +2438,32 @@
         financeBreakdownEl.textContent = "构成：基础 0% / 波动 0% / 风控 0%";
         financeMarketEl.textContent = "市场：平稳";
         financeStrategyEl.textContent = "策略：平衡";
+        financeSwitchesEl.textContent = "切换：0 次";
+        financeSeasonEl.textContent = "赛季：-";
+        financeIntelEl.textContent = "情报：下一步市场 -";
+        financeLeaderboardEl.textContent = "赛季榜：暂无";
+        financeAssetsEl.textContent = "资产：债 34% / 股 33% / 衍 33%";
+        financeLiquidityEl.textContent = "流动性：正常";
+        setMetricPillTone(financeMarketEl, null);
+        setMetricPillTone(financeSeasonEl, null);
+        setMetricPillTone(financeLiquidityEl, null);
         financeStrategyConservativeBtn.disabled = true;
         financeStrategyBalancedBtn.disabled = true;
         financeStrategyAggressiveBtn.disabled = true;
+        financeStrategyConservativeBtn.classList.remove("active");
+        financeStrategyBalancedBtn.classList.remove("active");
+        financeStrategyAggressiveBtn.classList.remove("active");
         financeInvestBtn.disabled = true;
         financeWithdrawBtn.disabled = true;
         financeUpgradeBtn.disabled = true;
         financeHedgeBtn.disabled = true;
+        financeSettleBtn.disabled = true;
+        financeAutoBtn.disabled = true;
+        financeAutoBtn.classList.remove("active");
+        financeAutoBtn.textContent = "半自动策略：关";
+        financeAssetBondBtn.disabled = true;
+        financeAssetEquityBtn.disabled = true;
+        financeAssetDerivativeBtn.disabled = true;
         const advice = getFinanceAdvice({ unlocked: false, mainlineGps: 0, financeIncome: 0, investCooling: false, withdrawCooling: false });
         financeAdviceEl.textContent = advice.text;
         financeAdviceEl.className = `subtitle finance-advice ${advice.tone}`;
@@ -2171,7 +2479,7 @@
         financeFillEl.style.width = `${Math.min(100, (state.financeTier / 8) * 100)}%`;
         const mainlineGps = getTotalGPS();
         const effectiveFinance = getFinanceIncomePerSecond(mainlineGps);
-        const cap = Math.max(FINANCE_MIN_CAP_GPS, mainlineGps * FINANCE_MAX_SHARE_OF_MAINLINE);
+        const cap = Math.max(FINANCE_MIN_CAP_GPS, mainlineGps * FINANCE_MAX_SHARE_OF_MAINLINE * getCurrentSeason().capMult * (1 - getAiLiquidityPressure() * 0.25));
         financeHintEl.textContent = `秒收益：+${format(effectiveFinance)} 齿轮（封顶 ${format(cap)}）`;
         financeYieldEl.textContent = `年化：${(apr * 100).toFixed(1)}%`;
         financeCapitalEl.textContent = `资金池：${format(state.financeCapital)}`;
@@ -2179,6 +2487,19 @@
         financeBreakdownEl.textContent = `构成：基础 ${(comp.base * 100).toFixed(1)}% / 波动 ${(comp.cycle * 100).toFixed(1)}% / 风控 ${(comp.riskControl * 100).toFixed(1)}% / 信用 Lv.${comp.creditLevel} / 元进度 +${(state.financeMetaPoints * FINANCE_META_APR_PER_POINT * 100).toFixed(1)}%${sprintText}`;
         financeMarketEl.textContent = `市场：${market.label}`;
         financeStrategyEl.textContent = `策略：${strategy.label}`;
+        financeSwitchesEl.textContent = `切换：${state.financeStrategySwitches} 次`;
+        financeSeasonEl.textContent = `赛季：${comp.season.label}`;
+        financeIntelEl.textContent = `情报：下一步市场 ${getIntelPreview(2)}`;
+        const lb = state.financeLeaderboard.slice(0, 3).map((x, i) => `#${i+1} ${x}`).join(" | ");
+        financeLeaderboardEl.textContent = `赛季榜：${lb || "暂无"}`;
+        financeAssetsEl.textContent = `资产：债 ${(state.financeAssets.bond*100).toFixed(0)}% / 股 ${(state.financeAssets.equity*100).toFixed(0)}% / 衍 ${(state.financeAssets.derivative*100).toFixed(0)}%`;
+        financeLiquidityEl.textContent = comp.aiPressure > 0.6 ? "流动性：紧张" : (comp.aiPressure > 0.35 ? "流动性：偏紧" : "流动性：正常");
+        setMetricPillTone(financeMarketEl, market.factor >= 0.01 ? "good" : (market.factor <= -0.01 ? "danger" : "warn"));
+        setMetricPillTone(financeSeasonEl, comp.season.capMult >= 1 ? "good" : "warn");
+        setMetricPillTone(financeLiquidityEl, comp.aiPressure > 0.6 ? "danger" : (comp.aiPressure > 0.35 ? "warn" : "good"));
+        financeStrategyConservativeBtn.classList.toggle("active", state.financeStrategy === "conservative");
+        financeStrategyBalancedBtn.classList.toggle("active", state.financeStrategy === "balanced");
+        financeStrategyAggressiveBtn.classList.toggle("active", state.financeStrategy === "aggressive");
         financeStrategyConservativeBtn.disabled = false;
         financeStrategyBalancedBtn.disabled = false;
         financeStrategyAggressiveBtn.disabled = false;
@@ -2193,6 +2514,13 @@
         const hedgeCost = Math.max(1, Math.floor(state.financeCapital * FINANCE_HEDGE_COST_RATIO));
         financeHedgeBtn.disabled = isHedgeActive() || state.financeCapital < hedgeCost;
         financeHedgeBtn.textContent = isHedgeActive() ? "对冲生效中..." : `对冲（${format(hedgeCost)} 资金，12s）`;
+        financeSettleBtn.disabled = state.financeCapital < 100;
+        financeAutoBtn.disabled = false;
+        financeAutoBtn.classList.toggle("active", state.financeAutoPilot);
+        financeAutoBtn.textContent = `半自动策略：${state.financeAutoPilot ? "开" : "关"}`;
+        financeAssetBondBtn.disabled = false;
+        financeAssetEquityBtn.disabled = false;
+        financeAssetDerivativeBtn.disabled = false;
         const advice = getFinanceAdvice({
           unlocked: true,
           mainlineGps,
@@ -2339,6 +2667,13 @@
       buySpecialization(id);
     });
 
+    prestigeBranchList.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+      const id = target.dataset.branchBuy;
+      if (!id) return;
+      buyPrestigeBranch(id);
+    });
 
     exportSaveBtn.addEventListener("click", () => {
       exportSave();
@@ -2401,6 +2736,14 @@
         pushLog(`低性能音效保护已${state.lowPerfAudioSafe ? "开启" : "关闭"}`);
         saveGame();
         render();
+        return;
+      }
+
+      if (target.id === "debugToggleBtn") {
+        state.debugPanelOpen = !state.debugPanelOpen;
+        pushLog(`调试面板已${state.debugPanelOpen ? "开启" : "关闭"}`);
+        saveGame();
+        render();
       }
     });
 
@@ -2413,6 +2756,56 @@
       state.categoryCollapse[key] = !state.categoryCollapse[key];
       saveGame();
       renderCategoryCollapse();
+    });
+
+    debugAddGearsBtn.addEventListener("click", () => {
+      if (!state.debugPanelOpen) return;
+      state.gears += 10000;
+      state.lifetimeGears += 10000;
+      pushLog("[Debug] 注入 +10k 齿轮");
+      saveGame();
+      render();
+    });
+
+    debugAddRpBtn.addEventListener("click", () => {
+      if (!state.debugPanelOpen) return;
+      state.researchPoints += 5;
+      pushLog("[Debug] 注入 +5 RP");
+      saveGame();
+      render();
+    });
+
+    debugSnapshotBtn.addEventListener("click", () => {
+      if (!state.debugPanelOpen) return;
+      const line = `[Debug快照] gears=${format(state.gears)} rp=${state.researchPoints} gps=${format(getTotalGPS())} lifetime=${format(state.lifetimeGears)} manualMult=${state.debugManualMult.toFixed(2)} gpsMult=${state.debugGpsMult.toFixed(2)}`;
+      pushLog(line);
+      saveGame();
+      render();
+    });
+
+    debugManualMultBtn.addEventListener("click", () => {
+      if (!state.debugPanelOpen) return;
+      state.debugManualMult = state.debugManualMult >= 3 ? 1 : Math.min(3, +(state.debugManualMult + 0.5).toFixed(2));
+      pushLog(`[Debug] 手动倍率调整为 x${state.debugManualMult.toFixed(2)}`);
+      saveGame();
+      render();
+    });
+
+    debugGpsMultBtn.addEventListener("click", () => {
+      if (!state.debugPanelOpen) return;
+      state.debugGpsMult = state.debugGpsMult >= 3 ? 1 : Math.min(3, +(state.debugGpsMult + 0.5).toFixed(2));
+      pushLog(`[Debug] 产线倍率调整为 x${state.debugGpsMult.toFixed(2)}`);
+      saveGame();
+      render();
+    });
+
+    debugResetMultBtn.addEventListener("click", () => {
+      if (!state.debugPanelOpen) return;
+      state.debugManualMult = 1;
+      state.debugGpsMult = 1;
+      pushLog("[Debug] 已重置调试倍率到 x1.00");
+      saveGame();
+      render();
     });
 
     claimOfflineBtn.addEventListener("click", () => {
@@ -2466,6 +2859,101 @@
     financeStrategyConservativeBtn.addEventListener("click", () => setFinanceStrategy("conservative"));
     financeStrategyBalancedBtn.addEventListener("click", () => setFinanceStrategy("balanced"));
     financeStrategyAggressiveBtn.addEventListener("click", () => setFinanceStrategy("aggressive"));
+
+    const runFinanceAutopilotStep = () => {
+      if (!state.financeAutoPilot || state.lifetimeGears < FINANCE_UNLOCK_LIFETIME_GEARS) return;
+      const nowMs = Date.now();
+      const marketKey = getCurrentMarketKey();
+      const strategy = state.financeStrategy;
+      const mainlineGps = getTotalGPS();
+      const cap = Math.max(FINANCE_MIN_CAP_GPS, mainlineGps * FINANCE_MAX_SHARE_OF_MAINLINE * getCurrentSeason().capMult * (1 - getAiLiquidityPressure() * 0.25));
+      const financeIncome = getFinanceIncomePerSecond(mainlineGps);
+      const capRatio = cap > 0 ? financeIncome / cap : 0;
+      const investCooling = nowMs - state.financeLastInvestAt < FINANCE_COOLDOWN_MS;
+      const withdrawCooling = nowMs - state.financeLastWithdrawAt < FINANCE_COOLDOWN_MS;
+
+      if (marketKey === "panic" && !isHedgeActive(nowMs)) {
+        const hedgeCost = Math.max(1, Math.floor(state.financeCapital * FINANCE_HEDGE_COST_RATIO));
+        if (state.financeCapital >= hedgeCost) {
+          state.financeCapital -= hedgeCost;
+          state.financeHedgeUntil = nowMs + FINANCE_HEDGE_DURATION_MS;
+          pushLog(`[Finance/半自动] 触发对冲，成本 ${format(hedgeCost)}`);
+          return;
+        }
+      }
+
+      if (marketKey === "overheat" && strategy !== "aggressive") {
+        setFinanceStrategy("aggressive");
+        pushLog("[Finance/半自动] 过热期切换激进策略");
+        return;
+      }
+      if (marketKey === "pullback" && strategy === "aggressive") {
+        setFinanceStrategy("balanced");
+        pushLog("[Finance/半自动] 回调期回归平衡策略");
+        return;
+      }
+
+      if (!investCooling && state.gears >= 100 && capRatio < 0.7) {
+        const invest = Math.floor(state.gears * 0.1);
+        if (invest >= 100) {
+          state.gears -= invest;
+          state.financeCapital += invest;
+          state.financeLastInvestAt = nowMs;
+          pushLog(`[Finance/半自动] 投入 ${format(invest)} 齿轮`);
+          return;
+        }
+      }
+
+      if (!withdrawCooling && state.financeCapital > 0 && capRatio > 0.92) {
+        const withdraw = Math.floor(state.financeCapital * 0.25);
+        if (withdraw > 0) {
+          state.financeCapital -= withdraw;
+          state.gears += withdraw;
+          state.lifetimeGears += withdraw;
+          state.financeLastWithdrawAt = nowMs;
+          pushLog(`[Finance/半自动] 提取 ${format(withdraw)} 齿轮`);
+        }
+      }
+    };
+
+    financeAutoBtn.addEventListener("click", () => {
+      if (state.lifetimeGears < FINANCE_UNLOCK_LIFETIME_GEARS) return;
+      state.financeAutoPilot = !state.financeAutoPilot;
+      pushLog(`[Finance/半自动] 已${state.financeAutoPilot ? "开启" : "关闭"}`);
+      saveGame();
+      render();
+    });
+
+    financeSettleBtn.addEventListener("click", () => {
+      if (state.lifetimeGears < FINANCE_UNLOCK_LIFETIME_GEARS || state.financeCapital < 100) return;
+      const riskBudget = getAssetRiskBudget();
+      const score = Math.max(1, Math.floor((state.financeCapital * getFinanceApr()) / Math.max(0.6, riskBudget)));
+      state.financeLeaderboard.push(score);
+      state.financeLeaderboard = state.financeLeaderboard.sort((a,b) => b-a).slice(0,5);
+      state.researchPoints += Math.max(1, Math.floor(score / 8000));
+      state.financeSeasonIndex = (state.financeSeasonIndex + 1) % FINANCE_SEASONS.length;
+      pushLog(`[Finance/赛季结算] 风险调整评分 ${score}`);
+      triggerEventHighlight("order", `赛季结算评分 ${score}`);
+      saveGame();
+      render();
+    });
+
+    const rebalanceAssets = (target) => {
+      const keys = ["bond", "equity", "derivative"];
+      for (const k of keys) state.financeAssets[k] = Math.max(0.1, state.financeAssets[k] - 0.05);
+      state.financeAssets[target] = Math.min(0.8, state.financeAssets[target] + 0.1);
+      const sum = state.financeAssets.bond + state.financeAssets.equity + state.financeAssets.derivative;
+      state.financeAssets.bond /= sum;
+      state.financeAssets.equity /= sum;
+      state.financeAssets.derivative /= sum;
+      pushLog(`[Finance/资产] 调整至偏${target === "bond" ? "债券" : target === "equity" ? "股权" : "衍生"}`);
+      saveGame();
+      render();
+    };
+
+    financeAssetBondBtn.addEventListener("click", () => rebalanceAssets("bond"));
+    financeAssetEquityBtn.addEventListener("click", () => rebalanceAssets("equity"));
+    financeAssetDerivativeBtn.addEventListener("click", () => rebalanceAssets("derivative"));
 
     financeHedgeBtn.addEventListener("click", () => {
       if (state.lifetimeGears < FINANCE_UNLOCK_LIFETIME_GEARS) return;
@@ -2542,8 +3030,9 @@
       const retainedMeta = Math.max(1, Math.floor(state.financeTier / 2) + Math.floor(getFinanceCreditLevel() / 2));
       state.financeMetaPoints += retainedMeta;
       state.financeCreditBase = Math.max(0, Math.floor(getFinanceCreditLevel() * 0.5));
+      state.financeLineage += Math.max(1, Math.floor(getFinanceCreditLevel() / 2));
       triggerEventHighlight("prestige", `Prestige +${gain} RP`, "本轮效率重塑完成");
-      pushLog(`执行 Prestige，获得 RP +${gain}（保留金融元进度 +${retainedMeta}）`);
+      pushLog(`执行 Prestige，获得 RP +${gain}（保留金融元进度 +${retainedMeta}，金融谱系 +${Math.max(1, Math.floor(getFinanceCreditLevel() / 2))}）`);
       playSfx("prestige");
       triggerScreenShake(gamePanelEl, "prestige");
       state.gears = 0;
@@ -2569,6 +3058,12 @@
       state.financeStrategy = "balanced";
       state.financeHedgeUntil = 0;
       state.financeStrategySwitches = 0;
+      state.financeSeasonIndex = 0;
+      state.financeLeaderboard = [];
+      state.financeAssets = { bond: 0.34, equity: 0.33, derivative: 0.33 };
+      state.financeLineage = 0;
+      state.financeAutoPilot = false;
+      state.financeAutoAccumulator = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const s of skills) s.level = 0;
@@ -2609,6 +3104,16 @@
       state.financeMetaPoints = 0;
       state.financeCreditBase = 0;
       state.financeStrategySwitches = 0;
+      state.financeSeasonIndex = 0;
+      state.financeLeaderboard = [];
+      state.financeAssets = { bond: 0.34, equity: 0.33, derivative: 0.33 };
+      state.financeLineage = 0;
+      state.financeAutoPilot = false;
+      state.financeAutoAccumulator = 0;
+      state.prestigeBranches = { legacy_manual: 0, legacy_line: 0 };
+      state.debugPanelOpen = false;
+      state.debugManualMult = 1;
+      state.debugGpsMult = 1;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const s of skills) s.level = 0;
@@ -2621,6 +3126,7 @@
     for (const upgrade of upgrades) createUpgradeRow(upgrade);
     for (const skill of skills) createSkillRow(skill);
     for (const spec of specializationUpgrades) createSpecializationRow(spec);
+    for (const branch of PRESTIGE_BRANCHES) createPrestigeBranchRow(branch);
     for (const achievement of achievements) createAchievementRow(achievement);
 
     loadGame();
@@ -2644,6 +3150,14 @@
           state.comboTimer = Math.max(0, state.comboTimer - FIXED_STEP * state.gameSpeed);
           if (state.comboTimer === 0 && state.comboStreak > 0) {
             state.comboStreak = 0;
+          }
+        }
+
+        if (state.financeAutoPilot) {
+          state.financeAutoAccumulator += FIXED_STEP * state.gameSpeed;
+          if (state.financeAutoAccumulator >= 2) {
+            state.financeAutoAccumulator = 0;
+            runFinanceAutopilotStep();
           }
         }
 

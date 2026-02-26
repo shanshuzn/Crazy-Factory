@@ -5,10 +5,12 @@
 ## 快速开始
 
 ```bash
-python3 -m http.server 4173
+node scripts/serve_static.js
 ```
 
 浏览器打开：`http://127.0.0.1:4173`
+
+> 若你使用截图容器/CI，请优先使用 `node scripts/serve_static.js`。该脚本会对未知路径回退到 `index.html`，可避免截图时出现 `Not Found` 空白页。
 
 ## 项目定位
 
@@ -72,9 +74,17 @@ price = floor(basePrice * 1.15 ^ owned)
 .
 ├── index.html
 ├── README.md
-├── ROADMAP.md
+├── docs/
+│   └── roadmaps/
+│       ├── ROADMAP.md
+│       ├── WORKPLAN.md
+│       ├── FINANCE_ROADMAP.md
+│       ├── ROLLING_UPDATE_MONITORING_ROADMAP.md
+│       ├── ROLLING_UPDATE_RUNBOOK.md
+│       └── SEED_ROUND_ROADMAP.md
 └── scripts/
-    └── capture_screenshot.py
+    ├── capture_screenshot.py
+    └── serve_static.js
 ```
 
 ## 截图与调试（容器/CI）
@@ -99,7 +109,12 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 
 ## 路线图
 
-后续迭代见 `ROADMAP.md`（已精简为可执行清单）。
+- 产品年度路线：`docs/roadmaps/ROADMAP.md`
+- 执行节奏路线：`docs/roadmaps/WORKPLAN.md`
+- 金融专项路线：`docs/roadmaps/FINANCE_ROADMAP.md`
+- 滚动更新监控路线：`docs/roadmaps/ROLLING_UPDATE_MONITORING_ROADMAP.md`
+- 滚动更新执行手册：`docs/roadmaps/ROLLING_UPDATE_RUNBOOK.md`
+- 种子轮融资路线：`docs/roadmaps/SEED_ROUND_ROADMAP.md`
 
 ## 贡献方向
 
@@ -111,6 +126,4 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 
 
 ## 工作路线图（执行版）
-- 详见 `WORKPLAN.md`（双周冲刺节奏、验证命令、复盘模板）。
-
-- 金融专项路线图见 `FINANCE_ROADMAP.md`。
+- 详见 `docs/roadmaps/WORKPLAN.md`（双周冲刺节奏、验证命令、复盘模板）。
