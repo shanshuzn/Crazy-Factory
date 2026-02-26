@@ -606,6 +606,8 @@
     const COMBO_MAX_STREAK = 40;
     const COMBO_BONUS_PER_STACK = 0.02;
     const FX_SHAKE_DURATION_MS = 360;
+    const FX_MAX_FLOATING_GAINS = 18;
+    const FX_SHAKE_COOLDOWN_MS = 260;
 
     const ORDER_TEMPLATES = [
       { key: "clicks", type: "clicks", minTier: 1, weight: 3, title: "订单：人工质检", desc: "手动点击完成一次人工抽检" },
@@ -669,7 +671,9 @@
       activeOrder: null,
       audioEnabled: AUDIO_ENABLED_DEFAULT,
       comboStreak: 0,
-      comboTimer: 0
+      comboTimer: 0,
+      activeFloatingGains: 0,
+      lastShakeAt: 0
     };
 
     const gearsEl = document.getElementById("gears");
@@ -814,6 +818,10 @@
 
     const triggerScreenShake = (el = gamePanelEl) => {
       if (!el) return;
+      const now = performance.now();
+      // 限制高频震屏，避免连击/奖励堆叠时造成视觉疲劳。
+      if (now - state.lastShakeAt < FX_SHAKE_COOLDOWN_MS) return;
+      state.lastShakeAt = now;
       el.classList.remove("screen-shake");
       void el.offsetWidth;
       el.classList.add("screen-shake");
@@ -822,6 +830,9 @@
 
     const spawnFloatingGain = (anchorEl, text, kind = "gear") => {
       if (!fxLayerEl || !anchorEl) return;
+      if (state.activeFloatingGains >= FX_MAX_FLOATING_GAINS) return;
+      state.activeFloatingGains += 1;
+
       const rect = anchorEl.getBoundingClientRect();
       const item = document.createElement("div");
       item.className = `floating-gain ${kind}`;
@@ -829,7 +840,10 @@
       item.style.left = `${rect.left + rect.width / 2}px`;
       item.style.top = `${rect.top - 6}px`;
       fxLayerEl.appendChild(item);
-      window.setTimeout(() => item.remove(), FX_FLOAT_DURATION_MS + 80);
+      window.setTimeout(() => {
+        item.remove();
+        state.activeFloatingGains = Math.max(0, state.activeFloatingGains - 1);
+      }, FX_FLOAT_DURATION_MS + 80);
     };
 
     let audioContext = null;
@@ -1045,6 +1059,12 @@
         state.audioEnabled = data.audioEnabled !== false;
         state.comboStreak = 0;
         state.comboTimer = 0;
+      state.activeFloatingGains = 0;
+      state.lastShakeAt = 0;
+      state.activeFloatingGains = 0;
+      state.lastShakeAt = 0;
+        state.activeFloatingGains = 0;
+        state.lastShakeAt = 0;
         state.questIndex = Math.max(0, Math.min(Number(data.questIndex) || 0, questChain.length));
         if (Array.isArray(data.logs)) state.logs = data.logs.slice(0, 20);
 
