@@ -108,3 +108,5 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 
 ## 工作路线图（执行版）
 - 详见 `WORKPLAN.md`（双周冲刺节奏、验证命令、复盘模板）。
+
+- 金融专项路线图见 `FINANCE_ROADMAP.md`。
