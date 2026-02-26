@@ -96,9 +96,10 @@ src/
 - 增加 `npm scripts` 统一命令入口（check/test/sim/screenshot）。
 - ✅ 已新增 `package.json` 并提供 `serve/check/sim/screenshot` 统一命令入口。
 - 文档补齐：
-  - 模块依赖图
-  - 状态流转图
+  - 模块依赖图（`docs/roadmaps/MODULE_DEPENDENCY_MAP.md`）
+  - 状态流转图（`docs/roadmaps/STATE_FLOW_MAP.md`）
   - 反馈事件清单（`docs/roadmaps/FEEDBACK_EVENT_CATALOG.md`）
+- ✅ 已补齐模块依赖图与状态流转图文档。
 - 在 `docs/roadmaps` 维护“滚动更新日志”，确保每轮拆分可追踪。
 
 ## 里程碑清单

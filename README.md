@@ -155,6 +155,8 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 - 滚动更新执行手册：`docs/roadmaps/ROLLING_UPDATE_RUNBOOK.md`
 - 种子轮融资路线：`docs/roadmaps/SEED_ROUND_ROADMAP.md`
 - 反馈事件清单：`docs/roadmaps/FEEDBACK_EVENT_CATALOG.md`
+- 模块依赖图：`docs/roadmaps/MODULE_DEPENDENCY_MAP.md`
+- 状态流转图：`docs/roadmaps/STATE_FLOW_MAP.md`
 
 ## 贡献方向
 
