@@ -564,6 +564,13 @@
 
   <script>
     const PRICE_GROWTH = 1.15;
+    const PRICE_CURVE_MID_START = 40;
+    const PRICE_CURVE_LATE_START = 100;
+    const PRICE_CURVE_MID_FACTOR = 0.82;
+    const PRICE_CURVE_LATE_FACTOR = 0.68;
+    const PRESTIGE_BASE_DIVISOR = 2000;
+    const PRESTIGE_LATE_BONUS_START = 2_000_000;
+    const PRESTIGE_LATE_BONUS_STEP = 2_000_000;
     const SAVE_KEY = "crazy_factory_save_v1";
     const SAVE_VERSION = 2;
     const TICK_RATE = 60;
@@ -702,8 +709,22 @@
 
     const getSkillLevel = (id) => skills.find((s) => s.id === id)?.level || 0;
     const getDiscountMultiplier = () => Math.max(0.7, 1 - getSkillLevel("bulk_discount") * 0.03);
-    const getCurrentPrice = (building, ownedOffset = 0) =>
-      Math.floor(building.basePrice * Math.pow(PRICE_GROWTH, building.owned + ownedOffset) * getDiscountMultiplier());
+
+    // 经济曲线二次调优：中后期把“拥有数量”映射为更平缓的有效指数，避免增长斜率过陡造成停滞。
+    const getEffectiveOwnedForPrice = (owned) => {
+      if (owned <= PRICE_CURVE_MID_START) return owned;
+      if (owned <= PRICE_CURVE_LATE_START) {
+        return PRICE_CURVE_MID_START + (owned - PRICE_CURVE_MID_START) * PRICE_CURVE_MID_FACTOR;
+      }
+      const midSegment = (PRICE_CURVE_LATE_START - PRICE_CURVE_MID_START) * PRICE_CURVE_MID_FACTOR;
+      const lateSegment = (owned - PRICE_CURVE_LATE_START) * PRICE_CURVE_LATE_FACTOR;
+      return PRICE_CURVE_MID_START + midSegment + lateSegment;
+    };
+
+    const getCurrentPrice = (building, ownedOffset = 0) => {
+      const effectiveOwned = getEffectiveOwnedForPrice(building.owned + ownedOffset);
+      return Math.floor(building.basePrice * Math.pow(PRICE_GROWTH, effectiveOwned) * getDiscountMultiplier());
+    };
 
     const getBaseGPS = () => buildings.reduce((sum, b) => sum + b.dps * b.owned, 0);
     const getResearchMultiplier = () => 1 + state.researchPoints * 0.1;
@@ -711,6 +732,13 @@
     const getSkillManualMultiplier = () => 1 + getSkillLevel("manual_mastery") * 0.25;
     const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier() * getSkillGpsMultiplier();
     const getManualGain = () => state.manualPower * getSkillManualMultiplier();
+
+    const getPrestigeGain = (lifetimeGears) => {
+      const base = Math.floor(Math.sqrt(lifetimeGears / PRESTIGE_BASE_DIVISOR));
+      if (lifetimeGears < PRESTIGE_LATE_BONUS_START) return base;
+      const lateBonus = Math.floor((lifetimeGears - PRESTIGE_LATE_BONUS_START) / PRESTIGE_LATE_BONUS_STEP) + 1;
+      return base + lateBonus;
+    };
 
     const getAffordableCount = (building, budget, mode) => {
       if (mode === "1") return budget >= getCurrentPrice(building) ? 1 : 0;
@@ -1549,7 +1577,7 @@
     });
 
     prestigeBtn.addEventListener("click", () => {
-      const gain = Math.floor(Math.sqrt(state.lifetimeGears / 2000));
+      const gain = getPrestigeGain(state.lifetimeGears);
       if (gain <= 0) {
         window.alert("累计齿轮不足，无法获得研究点。继续扩张产线吧！");
         return;

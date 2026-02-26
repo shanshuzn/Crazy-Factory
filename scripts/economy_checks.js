@@ -5,6 +5,13 @@ const assert = (condition, message) => {
 };
 
 const PRICE_GROWTH = 1.15;
+const PRICE_CURVE_MID_START = 40;
+const PRICE_CURVE_LATE_START = 100;
+const PRICE_CURVE_MID_FACTOR = 0.82;
+const PRICE_CURVE_LATE_FACTOR = 0.68;
+const PRESTIGE_BASE_DIVISOR = 2000;
+const PRESTIGE_LATE_BONUS_START = 2_000_000;
+const PRESTIGE_LATE_BONUS_STEP = 2_000_000;
 const OFFLINE_CAP_SECONDS = 8 * 60 * 60;
 
 const ORDER_TEMPLATES = [
@@ -17,12 +24,27 @@ const ORDER_TEMPLATES = [
 
 const getUnlockedTemplates = (tier) => ORDER_TEMPLATES.filter((t) => t.minTier <= tier);
 
+const getEffectiveOwnedForPrice = (owned) => {
+  if (owned <= PRICE_CURVE_MID_START) return owned;
+  if (owned <= PRICE_CURVE_LATE_START) {
+    return PRICE_CURVE_MID_START + (owned - PRICE_CURVE_MID_START) * PRICE_CURVE_MID_FACTOR;
+  }
+  const midSegment = (PRICE_CURVE_LATE_START - PRICE_CURVE_MID_START) * PRICE_CURVE_MID_FACTOR;
+  const lateSegment = (owned - PRICE_CURVE_LATE_START) * PRICE_CURVE_LATE_FACTOR;
+  return PRICE_CURVE_MID_START + midSegment + lateSegment;
+};
+
 const getCurrentPrice = (basePrice, owned, discountMultiplier = 1) =>
-  Math.floor(basePrice * Math.pow(PRICE_GROWTH, owned) * discountMultiplier);
+  Math.floor(basePrice * Math.pow(PRICE_GROWTH, getEffectiveOwnedForPrice(owned)) * discountMultiplier);
 
 const getResearchMultiplier = (rp) => 1 + rp * 0.1;
 
-const getPrestigeGain = (lifetimeGears) => Math.floor(Math.sqrt(lifetimeGears / 2000));
+const getPrestigeGain = (lifetimeGears) => {
+  const base = Math.floor(Math.sqrt(lifetimeGears / PRESTIGE_BASE_DIVISOR));
+  if (lifetimeGears < PRESTIGE_LATE_BONUS_START) return base;
+  const lateBonus = Math.floor((lifetimeGears - PRESTIGE_LATE_BONUS_START) / PRESTIGE_LATE_BONUS_STEP) + 1;
+  return base + lateBonus;
+};
 
 const getOfflineReward = (gps, savedAtMs, nowMs) => {
   const offlineSeconds = Math.max(0, Math.min((nowMs - savedAtMs) / 1000, OFFLINE_CAP_SECONDS));
@@ -53,6 +75,7 @@ const migrateSaveData = (rawData) => {
 assert(getCurrentPrice(15, 0) === 15, 'base price should be unchanged at owned=0');
 assert(getCurrentPrice(15, 1) === 17, 'price growth step mismatch at owned=1');
 assert(getCurrentPrice(100, 10, 0.9) > 0, 'discounted price should stay positive');
+assert(getCurrentPrice(100, 120) < Math.floor(100 * Math.pow(PRICE_GROWTH, 120)), 'mid-late curve should be softer than pure exponential');
 
 // multipliers
 assert(getResearchMultiplier(0) === 1, 'rp 0 multiplier should be 1');
@@ -61,6 +84,7 @@ assert(getResearchMultiplier(5) === 1.5, 'rp 5 multiplier should be 1.5');
 // prestige
 assert(getPrestigeGain(0) === 0, 'prestige gain at zero should be 0');
 assert(getPrestigeGain(2000) === 1, 'prestige gain at 2000 should be 1');
+assert(getPrestigeGain(2_000_000) > Math.floor(Math.sqrt(2_000_000 / 2000)), 'late prestige should include bonus gain');
 
 // offline cap
 const now = Date.now();

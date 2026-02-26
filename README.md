@@ -55,6 +55,7 @@ price = floor(basePrice * 1.15 ^ owned)
 - 离线收益：离线结算（8 小时封顶）
 - 存档：本地自动保存 + 手动重置
 - 经济校验脚本：`node scripts/economy_checks.js` 可快速验证价格/离线/Prestige/存档迁移边界
+- 经济曲线二次调优：中后期建筑价格增长斜率放缓，Prestige 在高累计阶段增加额外成长奖励
 
 ## 项目结构
 
