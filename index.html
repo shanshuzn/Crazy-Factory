@@ -490,6 +490,7 @@
         <button class="chip" data-speed="2">2x</button>
         <button class="chip" data-speed="4">4x</button>
         <button class="chip" id="autoBuyBtn">自动购买: 关</button>
+        <button class="chip" id="audioBtn">音效: 开</button>
         <button class="chip" id="exportSaveBtn">导出存档</button>
         <button class="chip" id="importSaveBtn">导入存档</button>
         <button class="chip" id="prestigeBtn">软重置</button>
@@ -577,6 +578,8 @@
     const FX_PANEL_PULSE_MS = 300;
     const FX_BTN_POP_MS = 200;
     const ORDER_TIER_STEP = 2000;
+    const AUDIO_VOLUME = 0.03;
+    const AUDIO_ENABLED_DEFAULT = true;
 
     const ORDER_TEMPLATES = [
       { key: "clicks", type: "clicks", minTier: 1, weight: 3, title: "订单：人工质检", desc: "手动点击完成一次人工抽检" },
@@ -637,7 +640,8 @@
       logs: [],
       autoBuy: false,
       autoBuyAccumulator: 0,
-      activeOrder: null
+      activeOrder: null,
+      audioEnabled: AUDIO_ENABLED_DEFAULT
     };
 
     const gearsEl = document.getElementById("gears");
@@ -647,6 +651,7 @@
     const modeButtons = [...document.querySelectorAll("[data-mode]")];
     const speedButtons = [...document.querySelectorAll("[data-speed]")];
     const autoBuyBtn = document.getElementById("autoBuyBtn");
+    const audioBtn = document.getElementById("audioBtn");
     const exportSaveBtn = document.getElementById("exportSaveBtn");
     const importSaveBtn = document.getElementById("importSaveBtn");
     const prestigeBtn = document.getElementById("prestigeBtn");
@@ -768,6 +773,46 @@
       window.setTimeout(() => item.remove(), FX_FLOAT_DURATION_MS + 80);
     };
 
+    let audioContext = null;
+
+    const getAudioContext = () => {
+      if (audioContext) return audioContext;
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      audioContext = new Ctx();
+      return audioContext;
+    };
+
+    // 统一音效入口：后续可替换为 sample 播放，当前用合成音保证零资源依赖。
+    const playSfx = (kind) => {
+      if (!state.audioEnabled) return;
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      if (ctx.state === "suspended") ctx.resume();
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const now = ctx.currentTime;
+      const profile = {
+        click: { f0: 680, f1: 520, t: 0.06 },
+        reward: { f0: 900, f1: 1200, t: 0.1 },
+        order: { f0: 480, f1: 720, t: 0.12 },
+        prestige: { f0: 320, f1: 860, t: 0.18 }
+      }[kind] || { f0: 600, f1: 700, t: 0.08 };
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(profile.f0, now);
+      osc.frequency.exponentialRampToValueAtTime(profile.f1, now + profile.t);
+
+      gain.gain.setValueAtTime(AUDIO_VOLUME, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + profile.t);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + profile.t);
+    };
+
     const getOrderProgress = (order = state.activeOrder) => {
       if (!order) return 0;
       if (order.type === "clicks") return Math.max(0, state.totalClicks - order.startValue);
@@ -886,6 +931,7 @@
         skills: skills.map((s) => ({ id: s.id, level: s.level })),
         researchPoints: state.researchPoints,
         activeOrder: state.activeOrder,
+        audioEnabled: state.audioEnabled,
         saveVersion: SAVE_VERSION,
         savedAt: Date.now()
       };
@@ -937,6 +983,7 @@
           state.gameSpeed = Number(data.gameSpeed);
         }
         state.autoBuy = Boolean(data.autoBuy);
+        state.audioEnabled = data.audioEnabled !== false;
         state.questIndex = Math.max(0, Math.min(Number(data.questIndex) || 0, questChain.length));
         if (Array.isArray(data.logs)) state.logs = data.logs.slice(0, 20);
 
@@ -1120,6 +1167,7 @@
         pushLog(state.lastRewardText);
         spawnFloatingGain(gamePanelEl, `+${format(reward.value)} 齿轮`, "gear");
         triggerPanelPulse(gamePanelEl);
+        playSfx("reward");
       }
       if (reward.type === "rp") {
         state.researchPoints += reward.value;
@@ -1127,6 +1175,7 @@
         pushLog(state.lastRewardText);
         spawnFloatingGain(gamePanelEl, `+${reward.value} RP`, "rp");
         triggerPanelPulse(gamePanelEl);
+        playSfx("reward");
       }
     };
 
@@ -1165,6 +1214,8 @@
       }
       autoBuyBtn.classList.toggle("active", state.autoBuy);
       autoBuyBtn.textContent = `自动购买: ${state.autoBuy ? "开" : "关"}`;
+      audioBtn.classList.toggle("active", state.audioEnabled);
+      audioBtn.textContent = `音效: ${state.audioEnabled ? "开" : "关"}`;
     };
 
     const render = () => {
@@ -1385,6 +1436,7 @@
       if (state.totalClicks === 1) pushLog("首次手动生产");
       triggerButtonPop(manualBtn);
       spawnFloatingGain(manualBtn, `+${format(gain)}`, "gear");
+      playSfx("click");
       saveGame();
       render();
     });
@@ -1449,6 +1501,15 @@
         pushLog(`自动购买已${state.autoBuy ? "开启" : "关闭"}`);
         saveGame();
         render();
+        return;
+      }
+
+      if (target.id === "audioBtn") {
+        state.audioEnabled = !state.audioEnabled;
+        if (state.audioEnabled) playSfx("click");
+        pushLog(`音效已${state.audioEnabled ? "开启" : "关闭"}`);
+        saveGame();
+        render();
       }
     });
 
@@ -1468,6 +1529,7 @@
       if (progress < order.target) return;
       grantReward(order.reward, `订单完成（${order.title}）`);
       triggerPanelPulse(document.getElementById("orderPanel"));
+      playSfx("order");
       state.activeOrder = null;
       ensureOrder();
       saveGame();
@@ -1482,6 +1544,7 @@
       pushLog("已刷新生产订单");
       spawnFloatingGain(rerollOrderBtn, `-${ORDER_REROLL_COST} 齿轮`, "gear");
       triggerPanelPulse(document.getElementById("orderPanel"));
+      playSfx("order");
       render();
     });
 
@@ -1496,6 +1559,7 @@
 
       state.researchPoints += gain;
       pushLog(`执行 Prestige，获得 RP +${gain}`);
+      playSfx("prestige");
       state.gears = 0;
       state.purchaseMode = "1";
       state.pendingOfflineGears = 0;
