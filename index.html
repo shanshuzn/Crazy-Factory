@@ -875,7 +875,11 @@
       { key: "lifetime", type: "lifetime", minTier: 1, weight: 3, title: "订单：加急出货", desc: "在当前阶段额外生产齿轮" },
       { key: "conveyor", type: "building", buildingId: "conveyor", minTier: 1, weight: 2, title: "订单：扩展传送线", desc: "新增传送带以提升物流效率" },
       { key: "assembler", type: "building", buildingId: "assembler", minTier: 2, weight: 1, title: "订单：精密组装", desc: "扩充组装机以提升高阶产线" },
-      { key: "intern", type: "building", buildingId: "intern", minTier: 3, weight: 2, title: "订单：培训冲刺", desc: "扩招实习生补充基础产线" }
+      { key: "intern", type: "building", buildingId: "intern", minTier: 3, weight: 2, title: "订单：培训冲刺", desc: "扩招实习生补充基础产线" },
+      // Week3 扩展模板：限时、组合、高风险高收益。通过 target/reward 系数复用已有流程，避免增加状态复杂度。
+      { key: "rush_clicks", type: "clicks", minTier: 2, weight: 2, title: "限时单：质检冲刺", desc: "短平快点击冲刺，适合补短线收益", targetScale: 0.75, rewardScale: 0.9 },
+      { key: "hybrid_line", type: "building", buildingId: "conveyor", minTier: 3, weight: 2, title: "组合单：物流联动", desc: "同步扩建传送与基础人力，强调中期联动", targetScale: 1.25, rewardScale: 1.45 },
+      { key: "all_in_prestige", type: "lifetime", minTier: 4, weight: 1, title: "高风险单：全压出货", desc: "重载长单，完成后直接给 RP，适合冲 Prestige 前夕", targetScale: 1.85, rewardType: "rp", rewardScale: 1.8 }
     ];
 
     const upgrades = [
@@ -1248,6 +1252,8 @@
       const rewardRP = 1 + Math.floor(tier / 3);
       const template = pickWeightedOrderTemplate(tier);
       const timestamp = Date.now();
+      const targetScale = Math.max(0.6, Number(template.targetScale) || 1);
+      const rewardScale = Math.max(0.5, Number(template.rewardScale) || 1);
 
       if (template.type === "clicks") {
         state.activeOrder = {
@@ -1255,9 +1261,9 @@
           type: "clicks",
           title: template.title,
           desc: template.desc,
-          target: 25 + tier * 5,
+          target: Math.max(10, Math.floor((25 + tier * 5) * targetScale)),
           startValue: state.totalClicks,
-          reward: { type: "gear", value: rewardGear }
+          reward: { type: template.rewardType || "gear", value: Math.max(1, Math.floor(rewardGear * rewardScale)) }
         };
       }
 
@@ -1267,9 +1273,12 @@
           type: "lifetime",
           title: template.title,
           desc: template.desc,
-          target: 800 + tier * 250,
+          target: Math.max(400, Math.floor((800 + tier * 250) * targetScale)),
           startValue: state.lifetimeGears,
-          reward: { type: "gear", value: rewardGear * 2 }
+          reward: {
+            type: template.rewardType || "gear",
+            value: Math.max(1, Math.floor((template.rewardType === "rp" ? rewardRP : rewardGear * 2) * rewardScale))
+          }
         };
       }
 
@@ -1282,9 +1291,12 @@
           buildingId,
           title: template.title,
           desc: template.desc,
-          target: baseTarget + Math.floor(tier / 2),
+          target: Math.max(1, Math.floor((baseTarget + Math.floor(tier / 2)) * targetScale)),
           startValue: buildings.find((b) => b.id === buildingId)?.owned || 0,
-          reward: { type: buildingId === "assembler" ? "rp" : "gear", value: buildingId === "assembler" ? rewardRP : rewardGear }
+          reward: {
+            type: template.rewardType || (buildingId === "assembler" ? "rp" : "gear"),
+            value: Math.max(1, Math.floor((buildingId === "assembler" ? rewardRP : rewardGear) * rewardScale))
+          }
         };
       }
 

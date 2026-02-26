@@ -23,7 +23,10 @@ const ORDER_TEMPLATES = [
   { key: 'lifetime', minTier: 1, weight: 3 },
   { key: 'conveyor', minTier: 1, weight: 2 },
   { key: 'assembler', minTier: 2, weight: 1 },
-  { key: 'intern', minTier: 3, weight: 2 }
+  { key: 'intern', minTier: 3, weight: 2 },
+  { key: 'rush_clicks', minTier: 2, weight: 2 },
+  { key: 'hybrid_line', minTier: 3, weight: 2 },
+  { key: 'all_in_prestige', minTier: 4, weight: 1 }
 ];
 
 const getUnlockedTemplates = (tier) => ORDER_TEMPLATES.filter((t) => t.minTier <= tier);
@@ -134,6 +137,8 @@ assert(migrated.activeOrder === null, 'invalid order should be nulled during mig
 
 // order template unlock
 assert(getUnlockedTemplates(1).length === 3, 'tier1 should unlock 3 templates');
-assert(getUnlockedTemplates(2).some((t) => t.key === 'assembler'), 'tier2 should unlock assembler template');
-assert(getUnlockedTemplates(3).length === 5, 'tier3 should unlock all templates');
+assert(getUnlockedTemplates(2).some((t) => t.key === 'rush_clicks'), 'tier2 should unlock rush clicks template');
+assert(getUnlockedTemplates(3).some((t) => t.key === 'hybrid_line'), 'tier3 should unlock hybrid line template');
+assert(getUnlockedTemplates(4).some((t) => t.key === 'all_in_prestige'), 'tier4 should unlock high-risk prestige template');
+assert(getUnlockedTemplates(4).length === 8, 'tier4 should unlock all templates');
 console.log('economy checks passed');
