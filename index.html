@@ -236,6 +236,83 @@
       min-height: 1.2em;
     }
 
+    .progress-wrap {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .progress-title {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #0b1220;
+      border: 1px solid #243244;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22d3ee, #34d399);
+      transition: width 0.2s ease;
+    }
+
+    .progress-meta {
+      margin-top: 8px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .achievement {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .achievement .name {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .achievement .meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .badge {
+      font-size: 0.76rem;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 4px 9px;
+      border: 1px solid var(--border);
+      background: #263244;
+      color: #9ca3af;
+    }
+
+    .badge.done {
+      background: #14532d;
+      color: #dcfce7;
+      border-color: #22c55e;
+    }
+
     @media (max-width: 760px) {
       .header { grid-template-columns: 1fr; }
       .stats { width: 100%; }
@@ -289,11 +366,23 @@
         <button id="claimOfflineBtn" class="btn">领取</button>
       </div>
 
+      <div class="progress-wrap">
+        <div class="progress-title" id="goalTitle">新手目标：购买 1 台实习生</div>
+        <div class="progress-track"><div id="goalFill" class="progress-fill"></div></div>
+        <div class="progress-meta">
+          <span id="goalHint">还差 1 台实习生</span>
+          <span id="goalPct">0%</span>
+        </div>
+      </div>
+
       <h2 class="section-title">自动化建筑</h2>
       <div class="buildings" id="buildingList"></div>
 
       <h2 class="section-title">工厂升级</h2>
       <div class="buildings" id="upgradeList"></div>
+
+      <h2 class="section-title">成就</h2>
+      <div class="buildings" id="achievementList"></div>
     </section>
   </main>
 
@@ -311,6 +400,13 @@
       { id: "ai", name: "调度 AI", price: 5000, desc: "总 GPS x2", type: "gps", value: 2, purchased: false }
     ];
 
+    const achievements = [
+      { id: "first_click", name: "开工！", desc: "首次手动生产", check: () => state.totalClicks >= 1, done: false },
+      { id: "intern", name: "第一位员工", desc: "拥有 1 台实习生", check: () => (buildings.find((b) => b.id === "intern")?.owned || 0) >= 1, done: false },
+      { id: "hundred_gears", name: "齿轮仓储", desc: "累计获得 100 齿轮", check: () => state.lifetimeGears >= 100, done: false },
+      { id: "gps_50", name: "产线启动", desc: "总 GPS 达到 50", check: () => getTotalGPS() >= 50, done: false }
+    ];
+
     const buildings = [
       { id: "intern", name: "实习生", basePrice: 15, dps: 1, owned: 0 },
       { id: "conveyor", name: "传送带", basePrice: 100, dps: 8, owned: 0 },
@@ -324,7 +420,9 @@
       accumulator: 0,
       pendingOfflineGears: 0,
       manualPower: 1,
-      gpsMultiplier: 1
+      gpsMultiplier: 1,
+      totalClicks: 0,
+      lifetimeGears: 0
     };
 
     const gearsEl = document.getElementById("gears");
@@ -337,9 +435,15 @@
     const offlineTextEl = document.getElementById("offlineText");
     const claimOfflineBtn = document.getElementById("claimOfflineBtn");
     const upgradeList = document.getElementById("upgradeList");
+    const achievementList = document.getElementById("achievementList");
+    const goalTitleEl = document.getElementById("goalTitle");
+    const goalFillEl = document.getElementById("goalFill");
+    const goalHintEl = document.getElementById("goalHint");
+    const goalPctEl = document.getElementById("goalPct");
 
     const buildingViewMap = new Map();
     const upgradeViewMap = new Map();
+    const achievementViewMap = new Map();
 
     const format = (num) => {
       if (!Number.isFinite(num)) return "0";
@@ -395,6 +499,9 @@
         upgrades: upgrades.map((u) => ({ id: u.id, purchased: u.purchased })),
         manualPower: state.manualPower,
         gpsMultiplier: state.gpsMultiplier,
+        totalClicks: state.totalClicks,
+        lifetimeGears: state.lifetimeGears,
+        achievements: achievements.map((a) => ({ id: a.id, done: a.done })),
         savedAt: Date.now()
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
@@ -422,12 +529,22 @@
 
         state.manualPower = Math.max(1, Number(data.manualPower) || 1);
         state.gpsMultiplier = Math.max(1, Number(data.gpsMultiplier) || 1);
+        state.totalClicks = Math.max(0, Number(data.totalClicks) || 0);
+        state.lifetimeGears = Math.max(0, Number(data.lifetimeGears) || 0);
 
         if (Array.isArray(data.upgrades)) {
           for (const saved of data.upgrades) {
             const target = upgrades.find((u) => u.id === saved.id);
             if (!target) continue;
             target.purchased = Boolean(saved.purchased);
+          }
+        }
+
+        if (Array.isArray(data.achievements)) {
+          for (const saved of data.achievements) {
+            const target = achievements.find((a) => a.id === saved.id);
+            if (!target) continue;
+            target.done = Boolean(saved.done);
           }
         }
 
@@ -485,6 +602,23 @@
       });
     };
 
+    const createAchievementRow = (achievement) => {
+      const row = document.createElement("div");
+      row.className = "achievement";
+      row.dataset.id = achievement.id;
+      row.innerHTML = `
+        <div>
+          <div class="name">${achievement.name}</div>
+          <div class="meta">${achievement.desc}</div>
+        </div>
+        <span class="badge" data-achievement-badge="${achievement.id}">未完成</span>
+      `;
+      achievementList.appendChild(row);
+      achievementViewMap.set(achievement.id, {
+        badge: row.querySelector(`[data-achievement-badge="${achievement.id}"]`)
+      });
+    };
+
     const renderMode = () => {
       for (const btn of modeButtons) {
         btn.classList.toggle("active", btn.dataset.mode === state.purchaseMode);
@@ -528,6 +662,25 @@
         }
         view.btn.textContent = `研发（${format(upgrade.price)} 齿轮）`;
         view.btn.disabled = state.gears < upgrade.price;
+      }
+
+
+      const internOwned = buildings.find((b) => b.id === "intern")?.owned || 0;
+      const targetIntern = 1;
+      const internPct = Math.min(100, (internOwned / targetIntern) * 100);
+      goalTitleEl.textContent = "新手目标：购买 1 台实习生";
+      goalFillEl.style.width = `${internPct}%`;
+      goalHintEl.textContent = internOwned >= targetIntern ? "目标已完成" : `还差 ${targetIntern - internOwned} 台实习生`;
+      goalPctEl.textContent = `${internPct.toFixed(0)}%`;
+
+      for (const achievement of achievements) {
+        if (!achievement.done && achievement.check()) {
+          achievement.done = true;
+        }
+        const view = achievementViewMap.get(achievement.id);
+        if (!view) continue;
+        view.badge.classList.toggle("done", achievement.done);
+        view.badge.textContent = achievement.done ? "已完成" : "未完成";
       }
 
       if (state.pendingOfflineGears > 0) {
@@ -575,7 +728,10 @@
     };
 
     manualBtn.addEventListener("click", () => {
-      state.gears += getManualGain();
+      const gain = getManualGain();
+      state.gears += gain;
+      state.lifetimeGears += gain;
+      state.totalClicks += 1;
       saveGame();
       render();
     });
@@ -609,6 +765,7 @@
     claimOfflineBtn.addEventListener("click", () => {
       if (state.pendingOfflineGears <= 0) return;
       state.gears += state.pendingOfflineGears;
+      state.lifetimeGears += state.pendingOfflineGears;
       state.pendingOfflineGears = 0;
       saveGame();
       render();
@@ -624,13 +781,17 @@
       state.accumulator = 0;
       state.manualPower = 1;
       state.gpsMultiplier = 1;
+      state.totalClicks = 0;
+      state.lifetimeGears = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
+      for (const a of achievements) a.done = false;
       render();
     });
 
     for (const building of buildings) createBuildingRow(building);
     for (const upgrade of upgrades) createUpgradeRow(upgrade);
+    for (const achievement of achievements) createAchievementRow(achievement);
 
     loadGame();
 
@@ -642,7 +803,9 @@
 
       const gps = getTotalGPS();
       while (state.accumulator >= FIXED_STEP) {
-        state.gears += gps * FIXED_STEP;
+        const gain = gps * FIXED_STEP;
+        state.gears += gain;
+        state.lifetimeGears += gain;
         state.accumulator -= FIXED_STEP;
       }
 
