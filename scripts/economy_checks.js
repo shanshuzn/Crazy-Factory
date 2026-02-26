@@ -17,6 +17,7 @@ const COMBO_MAX_STREAK = 40;
 const COMBO_BONUS_PER_STACK = 0.02;
 const FX_MAX_FLOATING_GAINS = 18;
 const FX_PRIORITY_SLOTS = 2;
+const FINANCE_BASE_APR = 0.06;
 
 const ORDER_TEMPLATES = [
   { key: 'clicks', minTier: 1, weight: 3 },
@@ -69,6 +70,13 @@ const getSafeAudioProfile = (profile, audioSafeMode) => ({
   osc: audioSafeMode ? "sine" : "triangle"
 });
 
+
+const getFinanceApr = (tier, totalClicks = 0) => {
+  const cycleBoost = 0.03 * Math.sin(totalClicks / 45);
+  return Math.max(0.01, FINANCE_BASE_APR + tier * 0.025 + cycleBoost);
+};
+const getFinanceIncomePerSecond = (capital, tier, totalClicks = 0) => capital * getFinanceApr(tier, totalClicks);
+
 const getOfflineReward = (gps, savedAtMs, nowMs) => {
   const offlineSeconds = Math.max(0, Math.min((nowMs - savedAtMs) / 1000, OFFLINE_CAP_SECONDS));
   return gps * offlineSeconds;
@@ -117,6 +125,13 @@ assert(shouldSpawnFloatingGain(FX_MAX_FLOATING_GAINS + FX_PRIORITY_SLOTS, 'high'
 const safeAudio = getSafeAudioProfile({ f0: 900, f1: 1200, t: 0.1 }, true);
 assert(safeAudio.f1 <= 780, 'low-perf audio safe mode should clamp high frequency');
 assert(safeAudio.osc === 'sine', 'low-perf audio safe mode should use sine oscillator');
+
+
+// finance
+assert(getFinanceApr(0, 0) >= 0.01, 'finance apr should have lower bound');
+assert(getFinanceApr(5, 0) > getFinanceApr(0, 0), 'finance apr should grow with risk-control tier');
+assert(getFinanceIncomePerSecond(1000, 2, 120) > 0, 'finance income should be positive when capital exists');
+assert(getFinanceIncomePerSecond(0, 8, 9999) === 0, 'finance income should be zero with no capital');
 
 // prestige
 assert(getPrestigeGain(0) === 0, 'prestige gain at zero should be 0');

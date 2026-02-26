@@ -795,6 +795,22 @@
         </div>
       </div>
 
+
+      <div class="progress-wrap" id="financePanel">
+        <div class="progress-title" id="financeTitle">金融系统：尚未解锁</div>
+        <div class="progress-track"><div id="financeFill" class="progress-fill"></div></div>
+        <div class="progress-meta">
+          <span id="financeHint">累计齿轮达到 1200 后解锁</span>
+          <span id="financeYield">年化：0%</span>
+          <span id="financeCapital">资金池：0</span>
+        </div>
+        <div class="order-actions">
+          <button class="order-btn" id="financeInvestBtn" disabled>投入 10% 齿轮</button>
+          <button class="order-btn secondary" id="financeWithdrawBtn" disabled>提取 25% 资金</button>
+          <button class="order-btn secondary" id="financeUpgradeBtn" disabled>风控升级（1 RP）</button>
+        </div>
+      </div>
+
       <div class="category-grid">
         <section class="category" data-category="economy">
           <div class="category-head">
@@ -853,6 +869,8 @@
     const OFFLINE_CAP_SECONDS = 8 * 60 * 60;
     const ORDER_UNLOCK_LIFETIME_GEARS = 300;
     const ORDER_REROLL_COST = 200;
+    const FINANCE_UNLOCK_LIFETIME_GEARS = 1200;
+    const FINANCE_BASE_APR = 0.06;
 
     // 手感参数：集中在这里，便于快速调“多汁感”。
     const FX_FLOAT_DURATION_MS = 850;
@@ -953,7 +971,9 @@
       lastShakeAt: 0,
       lowPerfMode: false,
       lowPerfAudioSafe: false,
-      categoryCollapse: { economy: false, goals: false }
+      categoryCollapse: { economy: false, goals: false },
+      financeCapital: 0,
+      financeTier: 0
     };
 
     const gearsEl = document.getElementById("gears");
@@ -999,6 +1019,14 @@
     const orderRewardEl = document.getElementById("orderReward");
     const claimOrderBtn = document.getElementById("claimOrderBtn");
     const rerollOrderBtn = document.getElementById("rerollOrderBtn");
+    const financeTitleEl = document.getElementById("financeTitle");
+    const financeFillEl = document.getElementById("financeFill");
+    const financeHintEl = document.getElementById("financeHint");
+    const financeYieldEl = document.getElementById("financeYield");
+    const financeCapitalEl = document.getElementById("financeCapital");
+    const financeInvestBtn = document.getElementById("financeInvestBtn");
+    const financeWithdrawBtn = document.getElementById("financeWithdrawBtn");
+    const financeUpgradeBtn = document.getElementById("financeUpgradeBtn");
     const fxLayerEl = document.getElementById("fxLayer");
     const highlightLayerEl = document.getElementById("highlightLayer");
     const gamePanelEl = document.querySelector(".game");
@@ -1054,6 +1082,13 @@
       const lateBonus = Math.floor((lifetimeGears - PRESTIGE_LATE_BONUS_START) / PRESTIGE_LATE_BONUS_STEP) + 1;
       return base + lateBonus;
     };
+
+    // 金融系统：用资金池产息作为中期策略分支，强度可通过 APR 与风控等级快速调参。
+    const getFinanceApr = () => {
+      const cycleBoost = 0.03 * Math.sin(state.totalClicks / 45);
+      return Math.max(0.01, FINANCE_BASE_APR + state.financeTier * 0.025 + cycleBoost);
+    };
+    const getFinanceIncomePerSecond = () => state.financeCapital * getFinanceApr();
 
     const getAffordableCount = (building, budget, mode) => {
       if (mode === "1") return budget >= getCurrentPrice(building) ? 1 : 0;
@@ -1356,6 +1391,8 @@
         lowPerfMode: state.lowPerfMode,
         lowPerfAudioSafe: state.lowPerfAudioSafe,
         categoryCollapse: state.categoryCollapse,
+        financeCapital: state.financeCapital,
+        financeTier: state.financeTier,
         saveVersion: SAVE_VERSION,
         savedAt: Date.now()
       };
@@ -1428,6 +1465,8 @@
         state.audioEnabled = data.audioEnabled !== false;
         state.lowPerfMode = Boolean(data.lowPerfMode);
         state.lowPerfAudioSafe = Boolean(data.lowPerfAudioSafe);
+        state.financeCapital = Math.max(0, Number(data.financeCapital) || 0);
+        state.financeTier = Math.max(0, Math.min(8, Math.floor(Number(data.financeTier) || 0)));
         if (data.categoryCollapse && typeof data.categoryCollapse === "object") {
           state.categoryCollapse.economy = Boolean(data.categoryCollapse.economy);
           state.categoryCollapse.goals = Boolean(data.categoryCollapse.goals);
@@ -1745,7 +1784,7 @@
     const render = () => {
       gearsEl.textContent = format(state.gears);
       gpsEl.textContent = format(getTotalGPS());
-      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}，速度 x${state.gameSpeed}）`;
+      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}，速度 x${state.gameSpeed}，金融 +${format(getFinanceIncomePerSecond())}/s）`;
 
       for (const building of buildings) {
         const view = buildingViewMap.get(building.id);
@@ -1891,6 +1930,30 @@
           : "奖励：-";
         claimOrderBtn.disabled = !(order && progress >= order.target);
         rerollOrderBtn.disabled = state.gears < ORDER_REROLL_COST;
+      }
+
+      const financeUnlocked = state.lifetimeGears >= FINANCE_UNLOCK_LIFETIME_GEARS;
+      if (!financeUnlocked) {
+        const pct = Math.min(100, (state.lifetimeGears / FINANCE_UNLOCK_LIFETIME_GEARS) * 100);
+        financeTitleEl.textContent = "金融系统：尚未解锁";
+        financeFillEl.style.width = `${pct}%`;
+        financeHintEl.textContent = `累计齿轮达到 ${FINANCE_UNLOCK_LIFETIME_GEARS} 后解锁`;
+        financeYieldEl.textContent = "年化：0%";
+        financeCapitalEl.textContent = "资金池：0";
+        financeInvestBtn.disabled = true;
+        financeWithdrawBtn.disabled = true;
+        financeUpgradeBtn.disabled = true;
+      } else {
+        const apr = getFinanceApr();
+        financeTitleEl.textContent = `金融系统：风控等级 ${state.financeTier}`;
+        financeFillEl.style.width = `${Math.min(100, (state.financeTier / 8) * 100)}%`;
+        financeHintEl.textContent = `秒收益：+${format(getFinanceIncomePerSecond())} 齿轮`;
+        financeYieldEl.textContent = `年化：${(apr * 100).toFixed(1)}%`;
+        financeCapitalEl.textContent = `资金池：${format(state.financeCapital)}`;
+        financeInvestBtn.disabled = state.gears < 100;
+        financeWithdrawBtn.disabled = state.financeCapital < 1;
+        financeUpgradeBtn.disabled = state.researchPoints < (1 + state.financeTier) || state.financeTier >= 8;
+        financeUpgradeBtn.textContent = state.financeTier >= 8 ? "风控已满级" : `风控升级（${1 + state.financeTier} RP）`;
       }
 
       renderMode();
@@ -2140,6 +2203,49 @@
       playSfx("order");
       render();
     });
+    financeInvestBtn.addEventListener("click", () => {
+      if (state.lifetimeGears < FINANCE_UNLOCK_LIFETIME_GEARS) return;
+      const invest = Math.floor(state.gears * 0.1);
+      if (invest < 100) return;
+      state.gears -= invest;
+      state.financeCapital += invest;
+      triggerButtonPop(financeInvestBtn);
+      triggerTypedPanelPulse("order", document.getElementById("financePanel"));
+      spawnFloatingGain(financeInvestBtn, `-${format(invest)} 齿轮`, "gear");
+      pushLog(`金融投入 ${format(invest)} 齿轮`);
+      playSfx("click");
+      saveGame();
+      render();
+    });
+
+    financeWithdrawBtn.addEventListener("click", () => {
+      if (state.lifetimeGears < FINANCE_UNLOCK_LIFETIME_GEARS) return;
+      const withdraw = Math.floor(state.financeCapital * 0.25);
+      if (withdraw <= 0) return;
+      state.financeCapital -= withdraw;
+      state.gears += withdraw;
+      state.lifetimeGears += withdraw;
+      triggerButtonPop(financeWithdrawBtn);
+      spawnFloatingGain(financeWithdrawBtn, `+${format(withdraw)} 齿轮`, "gear");
+      pushLog(`金融提取 ${format(withdraw)} 齿轮`);
+      playSfx("reward");
+      saveGame();
+      render();
+    });
+
+    financeUpgradeBtn.addEventListener("click", () => {
+      if (state.lifetimeGears < FINANCE_UNLOCK_LIFETIME_GEARS) return;
+      const cost = 1 + state.financeTier;
+      if (state.financeTier >= 8 || state.researchPoints < cost) return;
+      state.researchPoints -= cost;
+      state.financeTier += 1;
+      triggerEventHighlight("order", `风控升级 Lv.${state.financeTier}`);
+      triggerTypedPanelPulse("order", document.getElementById("financePanel"));
+      pushLog(`金融风控升级至 Lv.${state.financeTier}`);
+      playSfx("order");
+      saveGame();
+      render();
+    });
 
     prestigeBtn.addEventListener("click", () => {
       const gain = getPrestigeGain(state.lifetimeGears);
@@ -2171,6 +2277,8 @@
       state.activeOrder = null;
       state.comboStreak = 0;
       state.comboTimer = 0;
+      state.financeCapital = 0;
+      state.financeTier = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const s of skills) s.level = 0;
@@ -2202,6 +2310,8 @@
       state.activeOrder = null;
       state.comboStreak = 0;
       state.comboTimer = 0;
+      state.financeCapital = 0;
+      state.financeTier = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const s of skills) s.level = 0;
@@ -2227,8 +2337,9 @@
       const gps = getTotalGPS();
       while (state.accumulator >= FIXED_STEP) {
         const gain = gps * FIXED_STEP * state.gameSpeed;
-        state.gears += gain;
-        state.lifetimeGears += gain;
+        const financeGain = getFinanceIncomePerSecond() * FIXED_STEP * state.gameSpeed;
+        state.gears += gain + financeGain;
+        state.lifetimeGears += gain + financeGain;
         state.accumulator -= FIXED_STEP;
 
         if (state.comboTimer > 0) {
