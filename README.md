@@ -72,7 +72,13 @@ price = floor(basePrice * 1.15 ^ owned)
 .
 ├── index.html
 ├── README.md
-├── ROADMAP.md
+├── docs/
+│   └── roadmaps/
+│       ├── MASTER_ROADMAP.md
+│       ├── ROADMAP.md
+│       ├── WORKPLAN.md
+│       ├── FINANCE_ROADMAP.md
+│       └── SEED_ROUND_ROADMAP.md
 └── scripts/
     └── capture_screenshot.py
 ```
@@ -99,11 +105,11 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 
 ## 路线图
 
-- 总览整合版：`MASTER_ROADMAP.md`（建议优先阅读）
-- 产品年度路线：`ROADMAP.md`
-- 执行节奏路线：`WORKPLAN.md`
-- 金融专项路线：`FINANCE_ROADMAP.md`
-- 种子轮融资路线：`SEED_ROUND_ROADMAP.md`
+- 总览整合版：`docs/roadmaps/MASTER_ROADMAP.md`（建议优先阅读）
+- 产品年度路线：`docs/roadmaps/ROADMAP.md`
+- 执行节奏路线：`docs/roadmaps/WORKPLAN.md`
+- 金融专项路线：`docs/roadmaps/FINANCE_ROADMAP.md`
+- 种子轮融资路线：`docs/roadmaps/SEED_ROUND_ROADMAP.md`
 
 ## 贡献方向
 
@@ -115,5 +121,5 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 
 
 ## 工作路线图（执行版）
-- 详见 `WORKPLAN.md`（双周冲刺节奏、验证命令、复盘模板）。
+- 详见 `docs/roadmaps/WORKPLAN.md`（双周冲刺节奏、验证命令、复盘模板）。
 
