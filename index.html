@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>自动化工厂 - 放置游戏原型</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --ok: #34d399;
+      --warn: #f59e0b;
+      --disabled: #4b5563;
+      --border: #374151;
+      --chip: #243044;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(1200px 800px at 20% -20%, #1d4ed8 0%, var(--bg) 45%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .game {
+      width: min(960px, 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)) , var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .title { margin: 0; font-size: 1.5rem; }
+    .subtitle { margin: 6px 0 0; color: var(--muted); font-size: 0.95rem; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(140px, 1fr));
+      gap: 12px;
+      width: min(360px, 100%);
+    }
+
+    .stat-card {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .stat-card .label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .value {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .content {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .manual {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      background: #0ea5e9;
+      color: #082f49;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.08s ease, filter 0.2s ease;
+    }
+
+    .btn:hover:enabled { filter: brightness(1.07); }
+    .btn:active:enabled { transform: translateY(1px); }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      background: var(--chip);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .chip.active {
+      background: #0891b2;
+      color: #ecfeff;
+      border-color: #22d3ee;
+    }
+
+    .chip.small {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 500;
+      pointer-events: none;
+    }
+
+    .buildings {
+      display: grid;
+      gap: 10px;
+    }
+
+    .section-title {
+      margin: 6px 0 2px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .upgrade {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .upgrade .name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .upgrade .meta {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .upgrade-btn {
+      min-width: 220px;
+      text-align: center;
+      background: #f59e0b;
+      color: #3b2300;
+    }
+
+    .upgrade-btn:disabled {
+      cursor: not-allowed;
+      background: var(--disabled);
+      color: #d1d5db;
+      opacity: 0.8;
+    }
+
+    .skill {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .skill .name {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .skill .meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .skill-btn {
+      min-width: 180px;
+      text-align: center;
+      background: #a78bfa;
+      color: #1f1147;
+    }
+
+    .skill-btn:disabled {
+      cursor: not-allowed;
+      background: var(--disabled);
+      color: #d1d5db;
+      opacity: 0.8;
+    }
+
+    .building {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .building .name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .building .meta {
+      color: var(--muted);
+      font-size: 0.88rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .buy-btn {
+      min-width: 220px;
+      text-align: center;
+      background: var(--ok);
+      color: #052e22;
+    }
+
+    .buy-btn:disabled {
+      cursor: not-allowed;
+      background: var(--disabled);
+      color: #d1d5db;
+      opacity: 0.8;
+    }
+
+    .hint {
+      margin-top: 4px;
+      color: var(--warn);
+      font-size: 0.82rem;
+      min-height: 1.2em;
+    }
+
+    .locked-note {
+      color: #fca5a5;
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+
+    .progress-wrap {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .progress-title {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #0b1220;
+      border: 1px solid #243244;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22d3ee, #34d399);
+      transition: width 0.2s ease;
+    }
+
+    .progress-meta {
+      margin-top: 8px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .achievement {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .achievement .name {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .achievement .meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .badge {
+      font-size: 0.76rem;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 4px 9px;
+      border: 1px solid var(--border);
+      background: #263244;
+      color: #9ca3af;
+    }
+
+    .badge.done {
+      background: #14532d;
+      color: #dcfce7;
+      border-color: #22c55e;
+    }
+
+    .log-item {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 760px) {
+      .header { grid-template-columns: 1fr; }
+      .stats { width: 100%; }
+      .building { grid-template-columns: 1fr; }
+      .buy-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="game">
+    <section class="header">
+      <div>
+        <h1 class="title">⚙️ 自动化工厂</h1>
+        <p class="subtitle">点击 + 自动化并行，持续扩张你的齿轮产线。</p>
+      </div>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="label">齿轮总数</div>
+          <div class="value" id="gears">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">GPS（每秒产出）</div>
+          <div class="value" id="gps">0</div>
+          <div class="subtitle" id="rp">研究点 RP：0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content">
+      <div class="manual">
+        <div>
+          <strong>手动生产</strong>
+          <div class="subtitle" style="margin-top:4px">每次点击 +1 齿轮</div>
+        </div>
+        <button id="manualBtn" class="btn">+1 齿轮</button>
+      </div>
+
+      <div class="controls">
+        <span class="chip small">购买倍率</span>
+        <button class="chip active" data-mode="1">x1</button>
+        <button class="chip" data-mode="10">x10</button>
+        <button class="chip" data-mode="100">x100</button>
+        <button class="chip" data-mode="max">Max</button>
+        <span class="chip small">仿真速度</span>
+        <button class="chip active" data-speed="1">1x</button>
+        <button class="chip" data-speed="2">2x</button>
+        <button class="chip" data-speed="4">4x</button>
+        <button class="chip" id="autoBuyBtn">自动购买: 关</button>
+        <button class="chip" id="prestigeBtn">软重置</button>
+        <button class="chip" id="resetSaveBtn">重置存档</button>
+      </div>
+
+      <div id="offlineNotice" class="manual" style="display:none">
+        <div>
+          <strong>离线收益</strong>
+          <div class="subtitle" id="offlineText" style="margin-top:4px"></div>
+        </div>
+        <button id="claimOfflineBtn" class="btn">领取</button>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-title" id="goalTitle">阶段任务：完成引导目标</div>
+        <div class="progress-track"><div id="goalFill" class="progress-fill"></div></div>
+        <div class="progress-meta">
+          <span id="goalHint">还差 1 台实习生</span>
+          <span id="goalPct">0%</span>
+          <span id="questReward">奖励：-</span>
+        </div>
+        <div class="subtitle" id="rewardFeed" style="margin-top:8px">成就奖励将显示在这里</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-title">统计摘要</div>
+        <div class="progress-meta" style="margin-top:0">
+          <span id="statBuildings">建筑总数：0</span>
+          <span id="statUpgrades">升级已研发：0</span>
+          <span id="statAchievements">成就完成：0/0</span>
+        </div>
+        <div class="progress-meta">
+          <span id="statQuest">任务进度：0/0</span>
+          <span id="statMode">自动购买：关</span>
+          <span id="statLifetime">累计齿轮：0</span>
+        </div>
+      </div>
+
+      <h2 class="section-title">自动化建筑</h2>
+      <div class="buildings" id="buildingList"></div>
+
+      <h2 class="section-title">工厂升级</h2>
+      <div class="buildings" id="upgradeList"></div>
+
+      <h2 class="section-title">技能</h2>
+      <div class="buildings" id="skillList"></div>
+
+      <h2 class="section-title">成就</h2>
+      <div class="buildings" id="achievementList"></div>
+
+      <h2 class="section-title">事件日志</h2>
+      <div class="buildings" id="eventLog"></div>
+    </section>
+  </main>
+
+  <script>
+    const PRICE_GROWTH = 1.15;
+    const SAVE_KEY = "crazy_factory_save_v1";
+    const TICK_RATE = 60;
+    const FIXED_STEP = 1 / TICK_RATE;
+    const MAX_ACCUMULATED_SECONDS = 0.25;
+    const OFFLINE_CAP_SECONDS = 8 * 60 * 60;
+
+    const upgrades = [
+      { id: "training", name: "员工培训", price: 250, desc: "手动生产 +1", type: "manual", value: 1, purchased: false, unlockRP: 0, requires: null },
+      { id: "lubricant", name: "润滑油优化", price: 800, desc: "总 GPS x1.5", type: "gps", value: 1.5, purchased: false, unlockRP: 0, requires: "training" },
+      { id: "ai", name: "调度 AI", price: 5000, desc: "总 GPS x2", type: "gps", value: 2, purchased: false, unlockRP: 1, requires: "lubricant" }
+    ];
+
+    const skills = [
+      { id: "manual_mastery", name: "手动精通", desc: "手动产出每级 +25%", maxLevel: 5, level: 0, costRP: 1 },
+      { id: "line_optimizer", name: "产线优化", desc: "总 GPS 每级 +20%", maxLevel: 5, level: 0, costRP: 1 },
+      { id: "bulk_discount", name: "采购折扣", desc: "建筑价格每级 -3%", maxLevel: 5, level: 0, costRP: 1 }
+    ];
+
+    const achievements = [
+      { id: "first_click", name: "开工！", desc: "首次手动生产", reward: { type: "gear", value: 10 }, check: () => state.totalClicks >= 1, done: false, claimed: false },
+      { id: "intern", name: "第一位员工", desc: "拥有 1 台实习生", reward: { type: "gear", value: 50 }, check: () => (buildings.find((b) => b.id === "intern")?.owned || 0) >= 1, done: false, claimed: false },
+      { id: "hundred_gears", name: "齿轮仓储", desc: "累计获得 100 齿轮", reward: { type: "gear", value: 120 }, check: () => state.lifetimeGears >= 100, done: false, claimed: false },
+      { id: "gps_50", name: "产线启动", desc: "总 GPS 达到 50", reward: { type: "rp", value: 1 }, check: () => getTotalGPS() >= 50, done: false, claimed: false }
+    ];
+
+    const questChain = [
+      { id: "q_click", title: "任务 1：手动点击 20 次", rewardText: "奖励 +120 齿轮", reward: { type: "gear", value: 120 },
+        progress: () => Math.min(state.totalClicks, 20), target: 20 },
+      { id: "q_intern", title: "任务 2：拥有 10 台实习生", rewardText: "奖励 +300 齿轮", reward: { type: "gear", value: 300 },
+        progress: () => Math.min((buildings.find((b) => b.id === "intern")?.owned || 0), 10), target: 10 },
+      { id: "q_gps", title: "任务 3：总 GPS 达到 100", rewardText: "奖励 +1 RP", reward: { type: "rp", value: 1 },
+        progress: () => Math.min(getTotalGPS(), 100), target: 100 }
+    ];
+
+    const buildings = [
+      { id: "intern", name: "实习生", basePrice: 15, dps: 1, owned: 0, unlockLifetimeGears: 0 },
+      { id: "conveyor", name: "传送带", basePrice: 100, dps: 8, owned: 0, unlockLifetimeGears: 200 },
+      { id: "assembler", name: "组装机", basePrice: 1100, dps: 47, owned: 0, unlockLifetimeGears: 1500 }
+    ];
+
+    const state = {
+      gears: 0,
+      purchaseMode: "1",
+      lastTimestamp: performance.now(),
+      accumulator: 0,
+      pendingOfflineGears: 0,
+      manualPower: 1,
+      gpsMultiplier: 1,
+      totalClicks: 0,
+      lifetimeGears: 0,
+      researchPoints: 0,
+      lastRewardText: "",
+      gameSpeed: 1,
+      questIndex: 0,
+      logs: [],
+      autoBuy: false,
+      autoBuyAccumulator: 0
+    };
+
+    const gearsEl = document.getElementById("gears");
+    const gpsEl = document.getElementById("gps");
+    const manualBtn = document.getElementById("manualBtn");
+    const buildingList = document.getElementById("buildingList");
+    const modeButtons = [...document.querySelectorAll("[data-mode]")];
+    const speedButtons = [...document.querySelectorAll("[data-speed]")];
+    const autoBuyBtn = document.getElementById("autoBuyBtn");
+    const prestigeBtn = document.getElementById("prestigeBtn");
+    const resetSaveBtn = document.getElementById("resetSaveBtn");
+    const offlineNoticeEl = document.getElementById("offlineNotice");
+    const offlineTextEl = document.getElementById("offlineText");
+    const claimOfflineBtn = document.getElementById("claimOfflineBtn");
+    const upgradeList = document.getElementById("upgradeList");
+    const achievementList = document.getElementById("achievementList");
+    const skillList = document.getElementById("skillList");
+    const goalTitleEl = document.getElementById("goalTitle");
+    const goalFillEl = document.getElementById("goalFill");
+    const goalHintEl = document.getElementById("goalHint");
+    const goalPctEl = document.getElementById("goalPct");
+    const questRewardEl = document.getElementById("questReward");
+    const rpEl = document.getElementById("rp");
+    const rewardFeedEl = document.getElementById("rewardFeed");
+    const eventLogEl = document.getElementById("eventLog");
+    const statBuildingsEl = document.getElementById("statBuildings");
+    const statUpgradesEl = document.getElementById("statUpgrades");
+    const statAchievementsEl = document.getElementById("statAchievements");
+    const statQuestEl = document.getElementById("statQuest");
+    const statModeEl = document.getElementById("statMode");
+    const statLifetimeEl = document.getElementById("statLifetime");
+
+    const buildingViewMap = new Map();
+    const upgradeViewMap = new Map();
+    const achievementViewMap = new Map();
+    const skillViewMap = new Map();
+
+    const format = (num) => {
+      if (!Number.isFinite(num)) return "0";
+      const abs = Math.abs(num);
+      if (abs >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(2)}B`;
+      if (abs >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`;
+      if (abs >= 1_000) return `${(num / 1_000).toFixed(2)}K`;
+      return num.toLocaleString("zh-CN", { maximumFractionDigits: 2 });
+    };
+
+    const getSkillLevel = (id) => skills.find((s) => s.id === id)?.level || 0;
+    const getDiscountMultiplier = () => Math.max(0.7, 1 - getSkillLevel("bulk_discount") * 0.03);
+    const getCurrentPrice = (building, ownedOffset = 0) =>
+      Math.floor(building.basePrice * Math.pow(PRICE_GROWTH, building.owned + ownedOffset) * getDiscountMultiplier());
+
+    const getBaseGPS = () => buildings.reduce((sum, b) => sum + b.dps * b.owned, 0);
+    const getResearchMultiplier = () => 1 + state.researchPoints * 0.1;
+    const getSkillGpsMultiplier = () => 1 + getSkillLevel("line_optimizer") * 0.2;
+    const getSkillManualMultiplier = () => 1 + getSkillLevel("manual_mastery") * 0.25;
+    const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier() * getSkillGpsMultiplier();
+    const getManualGain = () => state.manualPower * getSkillManualMultiplier();
+
+    const getAffordableCount = (building, budget, mode) => {
+      if (mode === "1") return budget >= getCurrentPrice(building) ? 1 : 0;
+      if (mode === "10" || mode === "100") {
+        const target = Number(mode);
+        let totalCost = 0;
+        for (let i = 0; i < target; i += 1) {
+          totalCost += getCurrentPrice(building, i);
+          if (totalCost > budget) return i;
+        }
+        return target;
+      }
+
+      let count = 0;
+      let totalCost = 0;
+      while (count < 10000) {
+        totalCost += getCurrentPrice(building, count);
+        if (totalCost > budget) return count;
+        count += 1;
+      }
+      return count;
+    };
+
+    const getPurchaseCost = (building, count) => {
+      let cost = 0;
+      for (let i = 0; i < count; i += 1) {
+        cost += getCurrentPrice(building, i);
+      }
+      return cost;
+    };
+
+    const saveGame = () => {
+      const payload = {
+        gears: state.gears,
+        purchaseMode: state.purchaseMode,
+        gameSpeed: state.gameSpeed,
+        autoBuy: state.autoBuy,
+        questIndex: state.questIndex,
+        logs: state.logs.slice(0, 20),
+        buildings: buildings.map((b) => ({ id: b.id, owned: b.owned })),
+        upgrades: upgrades.map((u) => ({ id: u.id, purchased: u.purchased })),
+        manualPower: state.manualPower,
+        gpsMultiplier: state.gpsMultiplier,
+        totalClicks: state.totalClicks,
+        lifetimeGears: state.lifetimeGears,
+        achievements: achievements.map((a) => ({ id: a.id, done: a.done, claimed: a.claimed })),
+        skills: skills.map((s) => ({ id: s.id, level: s.level })),
+        researchPoints: state.researchPoints,
+        savedAt: Date.now()
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+    };
+
+    const loadGame = () => {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== "object") return;
+
+        state.gears = Number(data.gears) || 0;
+        if (["1", "10", "100", "max"].includes(data.purchaseMode)) {
+          state.purchaseMode = data.purchaseMode;
+        }
+        if ([1,2,4].includes(Number(data.gameSpeed))) {
+          state.gameSpeed = Number(data.gameSpeed);
+        }
+        state.autoBuy = Boolean(data.autoBuy);
+        state.questIndex = Math.max(0, Math.min(Number(data.questIndex) || 0, questChain.length));
+        if (Array.isArray(data.logs)) state.logs = data.logs.slice(0, 20);
+
+        if (Array.isArray(data.buildings)) {
+          for (const saved of data.buildings) {
+            const target = buildings.find((b) => b.id === saved.id);
+            if (!target) continue;
+            target.owned = Math.max(0, Math.floor(Number(saved.owned) || 0));
+          }
+        }
+
+        state.manualPower = Math.max(1, Number(data.manualPower) || 1);
+        state.gpsMultiplier = Math.max(1, Number(data.gpsMultiplier) || 1);
+        state.totalClicks = Math.max(0, Number(data.totalClicks) || 0);
+        state.lifetimeGears = Math.max(0, Number(data.lifetimeGears) || 0);
+        state.researchPoints = Math.max(0, Math.floor(Number(data.researchPoints) || 0));
+
+        if (Array.isArray(data.upgrades)) {
+          for (const saved of data.upgrades) {
+            const target = upgrades.find((u) => u.id === saved.id);
+            if (!target) continue;
+            target.purchased = Boolean(saved.purchased);
+          }
+        }
+
+        if (Array.isArray(data.skills)) {
+          for (const saved of data.skills) {
+            const target = skills.find((s) => s.id === saved.id);
+            if (!target) continue;
+            target.level = Math.max(0, Math.min(target.maxLevel, Math.floor(Number(saved.level) || 0)));
+          }
+        }
+
+        if (Array.isArray(data.achievements)) {
+          for (const saved of data.achievements) {
+            const target = achievements.find((a) => a.id === saved.id);
+            if (!target) continue;
+            target.done = Boolean(saved.done);
+            target.claimed = Boolean(saved.claimed);
+          }
+        }
+
+        const savedAt = Number(data.savedAt) || Date.now();
+        const offlineSeconds = Math.max(0, Math.min((Date.now() - savedAt) / 1000, OFFLINE_CAP_SECONDS));
+        const offlineGears = getTotalGPS() * offlineSeconds;
+        if (offlineGears > 0) {
+          state.pendingOfflineGears = offlineGears;
+        }
+      } catch (error) {
+        console.warn("存档读取失败，已忽略：", error);
+      }
+    };
+
+    const createBuildingRow = (building) => {
+      const row = document.createElement("div");
+      row.className = "building";
+      row.dataset.id = building.id;
+
+      row.innerHTML = `
+        <div>
+          <div class="name">${building.name}</div>
+          <div class="meta">
+            <span>产出：${building.dps} / 秒</span>
+            <span>拥有：<strong data-owned="${building.id}">0</strong></span>
+          </div>
+          <div class="hint" data-hint="${building.id}"></div>
+          <div class="locked-note" data-lock="${building.id}"></div>
+        </div>
+        <button class="btn buy-btn" data-buy="${building.id}">购买 x1（0 齿轮）</button>
+      `;
+
+      buildingList.appendChild(row);
+
+      buildingViewMap.set(building.id, {
+        ownedEl: row.querySelector(`[data-owned="${building.id}"]`),
+        buyBtn: row.querySelector(`[data-buy="${building.id}"]`),
+        hintEl: row.querySelector(`[data-hint="${building.id}"]`),
+        lockEl: row.querySelector(`[data-lock="${building.id}"]`)
+      });
+    };
+
+    const createUpgradeRow = (upgrade) => {
+      const row = document.createElement("div");
+      row.className = "upgrade";
+      row.dataset.id = upgrade.id;
+      row.innerHTML = `
+        <div>
+          <div class="name">${upgrade.name}</div>
+          <div class="meta">${upgrade.desc}</div>
+          <div class="meta" data-upgrade-lock="${upgrade.id}"></div>
+        </div>
+        <button class="btn upgrade-btn" data-upgrade="${upgrade.id}">研发（${format(upgrade.price)} 齿轮）</button>
+      `;
+      upgradeList.appendChild(row);
+      upgradeViewMap.set(upgrade.id, {
+        btn: row.querySelector(`[data-upgrade="${upgrade.id}"]`),
+        lockEl: row.querySelector(`[data-upgrade-lock="${upgrade.id}"]`)
+      });
+    };
+
+    const createSkillRow = (skill) => {
+      const row = document.createElement("div");
+      row.className = "skill";
+      row.dataset.id = skill.id;
+      row.innerHTML = `
+        <div>
+          <div class="name">${skill.name}</div>
+          <div class="meta">${skill.desc}</div>
+          <div class="meta" data-skill-meta="${skill.id}"></div>
+        </div>
+        <button class="btn skill-btn" data-skill-buy="${skill.id}">升级（1 RP）</button>
+      `;
+      skillList.appendChild(row);
+      skillViewMap.set(skill.id, {
+        btn: row.querySelector(`[data-skill-buy="${skill.id}"]`),
+        meta: row.querySelector(`[data-skill-meta="${skill.id}"]`)
+      });
+    };
+
+    const createAchievementRow = (achievement) => {
+      const row = document.createElement("div");
+      row.className = "achievement";
+      row.dataset.id = achievement.id;
+      row.innerHTML = `
+        <div>
+          <div class="name">${achievement.name}</div>
+          <div class="meta">${achievement.desc}</div>
+        </div>
+        <span class="badge" data-achievement-badge="${achievement.id}">未完成</span>
+      `;
+      achievementList.appendChild(row);
+      achievementViewMap.set(achievement.id, {
+        badge: row.querySelector(`[data-achievement-badge="${achievement.id}"]`)
+      });
+    };
+
+    
+    const claimAchievementReward = (achievement) => {
+      if (!achievement.reward || achievement.claimed) return;
+      achievement.claimed = true;
+      grantReward(achievement.reward, `成就奖励（${achievement.name}）`);
+      saveGame();
+    };
+
+    
+    const isBuildingUnlocked = (building) => state.lifetimeGears >= building.unlockLifetimeGears;
+
+    const getUpgradeLockedReason = (upgrade) => {
+      if (state.researchPoints < upgrade.unlockRP) {
+        return `需要 RP ${upgrade.unlockRP}`;
+      }
+      if (upgrade.requires) {
+        const required = upgrades.find((u) => u.id === upgrade.requires);
+        if (required && !required.purchased) return `前置：${required.name}`;
+      }
+      return "";
+    };
+
+    
+    const pushLog = (message) => {
+      const line = `[${new Date().toLocaleTimeString("zh-CN", { hour12: false })}] ${message}`;
+      state.logs.unshift(line);
+      state.logs = state.logs.slice(0, 20);
+    };
+
+    const grantReward = (reward, label) => {
+      if (!reward) return;
+      if (reward.type === "gear") {
+        state.gears += reward.value;
+        state.lifetimeGears += reward.value;
+        state.lastRewardText = `${label}：+${format(reward.value)} 齿轮`;
+        pushLog(state.lastRewardText);
+      }
+      if (reward.type === "rp") {
+        state.researchPoints += reward.value;
+        state.lastRewardText = `${label}：+${reward.value} RP`;
+        pushLog(state.lastRewardText);
+      }
+    };
+
+    const updateQuestProgress = () => {
+      if (state.questIndex >= questChain.length) {
+        goalTitleEl.textContent = "阶段任务：已全部完成";
+        goalFillEl.style.width = "100%";
+        goalHintEl.textContent = "你已完成当前任务链";
+        goalPctEl.textContent = "100%";
+        questRewardEl.textContent = "奖励：已领取完毕";
+        return;
+      }
+
+      const quest = questChain[state.questIndex];
+      const current = quest.progress();
+      const pct = Math.min(100, (current / quest.target) * 100);
+      goalTitleEl.textContent = `阶段任务：${quest.title}`;
+      goalFillEl.style.width = `${pct}%`;
+      goalHintEl.textContent = current >= quest.target ? "任务已完成，奖励已发放" : `进度 ${format(current)} / ${format(quest.target)}`;
+      goalPctEl.textContent = `${pct.toFixed(0)}%`;
+      questRewardEl.textContent = `奖励：${quest.rewardText}`;
+
+      if (current >= quest.target) {
+        grantReward(quest.reward, `任务奖励（${quest.title}）`);
+        state.questIndex += 1;
+        saveGame();
+      }
+    };
+
+    const renderMode = () => {
+      for (const btn of modeButtons) {
+        btn.classList.toggle("active", btn.dataset.mode === state.purchaseMode);
+      }
+      for (const btn of speedButtons) {
+        btn.classList.toggle("active", Number(btn.dataset.speed) === state.gameSpeed);
+      }
+      autoBuyBtn.classList.toggle("active", state.autoBuy);
+      autoBuyBtn.textContent = `自动购买: ${state.autoBuy ? "开" : "关"}`;
+    };
+
+    const render = () => {
+      gearsEl.textContent = format(state.gears);
+      gpsEl.textContent = format(getTotalGPS());
+      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}，速度 x${state.gameSpeed}）`;
+
+      for (const building of buildings) {
+        const view = buildingViewMap.get(building.id);
+        if (!view) continue;
+
+        const count = getAffordableCount(building, state.gears, state.purchaseMode);
+        const intendedCount = state.purchaseMode === "max" ? count : Math.min(count, Number(state.purchaseMode) || 1);
+        const purchaseCount = Math.max(1, intendedCount || 0);
+        const cost = getPurchaseCost(building, purchaseCount);
+
+        view.ownedEl.textContent = building.owned;
+        view.buyBtn.textContent = `购买 x${purchaseCount}（${format(cost)} 齿轮）`;
+
+        const unlocked = isBuildingUnlocked(building);
+        const affordable = count > 0 && unlocked;
+        view.buyBtn.disabled = !affordable;
+
+        if (!unlocked) {
+          view.lockEl.textContent = `解锁条件：累计齿轮 ${format(building.unlockLifetimeGears)}`;
+          view.hintEl.textContent = "";
+        } else {
+          view.lockEl.textContent = "";
+          if (affordable) {
+            view.hintEl.textContent = "";
+          } else {
+            const nextPrice = getCurrentPrice(building);
+            view.hintEl.textContent = `还差 ${format(nextPrice - state.gears)} 齿轮`;
+          }
+        }
+      }
+
+      for (const upgrade of upgrades) {
+        const view = upgradeViewMap.get(upgrade.id);
+        if (!view) continue;
+        if (upgrade.purchased) {
+          view.btn.textContent = "已研发";
+          view.btn.disabled = true;
+          view.lockEl.textContent = "";
+          continue;
+        }
+        const lockedReason = getUpgradeLockedReason(upgrade);
+        view.lockEl.textContent = lockedReason;
+        view.btn.textContent = `研发（${format(upgrade.price)} 齿轮）`;
+        view.btn.disabled = state.gears < upgrade.price || Boolean(lockedReason);
+      }
+      updateQuestProgress();
+
+      for (const skill of skills) {
+        const view = skillViewMap.get(skill.id);
+        if (!view) continue;
+        view.meta.textContent = `等级 ${skill.level}/${skill.maxLevel}`;
+        if (skill.level >= skill.maxLevel) {
+          view.btn.disabled = true;
+          view.btn.textContent = "已满级";
+        } else {
+          view.btn.disabled = state.researchPoints < skill.costRP;
+          view.btn.textContent = `升级（${skill.costRP} RP）`;
+        }
+      }
+
+      for (const achievement of achievements) {
+        if (!achievement.done && achievement.check()) {
+          achievement.done = true;
+          claimAchievementReward(achievement);
+        }
+        const view = achievementViewMap.get(achievement.id);
+        if (!view) continue;
+        view.badge.classList.toggle("done", achievement.done);
+        view.badge.textContent = achievement.done ? (achievement.claimed ? "已完成+奖励" : "已完成") : "未完成";
+      }
+
+      if (state.pendingOfflineGears > 0) {
+        offlineNoticeEl.style.display = "flex";
+        offlineTextEl.textContent = `你离开期间积累了 ${format(state.pendingOfflineGears)} 齿轮`;
+      } else {
+        offlineNoticeEl.style.display = "none";
+        offlineTextEl.textContent = "";
+      }
+
+      rewardFeedEl.textContent = state.lastRewardText || "成就奖励将显示在这里";
+
+      eventLogEl.innerHTML = "";
+      for (const line of state.logs.slice(0, 6)) {
+        const el = document.createElement("div");
+        el.className = "log-item";
+        el.textContent = line;
+        eventLogEl.appendChild(el);
+      }
+
+      const totalBuildings = buildings.reduce((sum, b) => sum + b.owned, 0);
+      const doneAchievements = achievements.filter((a) => a.done).length;
+      const doneUpgrades = upgrades.filter((u) => u.purchased).length;
+      const totalSkillLevels = skills.reduce((sum, s) => sum + s.level, 0);
+      statBuildingsEl.textContent = `建筑总数：${totalBuildings}`;
+      statUpgradesEl.textContent = `升级已研发：${doneUpgrades}/${upgrades.length} | 技能等级：${totalSkillLevels}`;
+      statAchievementsEl.textContent = `成就完成：${doneAchievements}/${achievements.length}`;
+      statQuestEl.textContent = `任务进度：${Math.min(state.questIndex, questChain.length)}/${questChain.length}`;
+      statModeEl.textContent = `自动购买：${state.autoBuy ? "开" : "关"}`;
+      statLifetimeEl.textContent = `累计齿轮：${format(state.lifetimeGears)}`;
+
+      renderMode();
+    };
+
+    const tryAutoBuy = () => {
+      // 优先购买升级，再购买建筑
+      for (const upgrade of upgrades) {
+        if (upgrade.purchased) continue;
+        if (getUpgradeLockedReason(upgrade)) continue;
+        if (state.gears >= upgrade.price) {
+          buyUpgrade(upgrade.id);
+          return;
+        }
+      }
+
+      for (const building of [...buildings].reverse()) {
+        if (!isBuildingUnlocked(building)) continue;
+        const count = getAffordableCount(building, state.gears, "1");
+        if (count > 0) {
+          const prevMode = state.purchaseMode;
+          state.purchaseMode = "1";
+          buyBuilding(building.id);
+          state.purchaseMode = prevMode;
+          return;
+        }
+      }
+    };
+
+    const buySkill = (id) => {
+      const skill = skills.find((s) => s.id === id);
+      if (!skill) return;
+      if (skill.level >= skill.maxLevel) return;
+      if (state.researchPoints < skill.costRP) return;
+      state.researchPoints -= skill.costRP;
+      skill.level += 1;
+      pushLog(`技能升级：${skill.name} Lv.${skill.level}`);
+      saveGame();
+      render();
+    };
+
+    const buyBuilding = (id) => {
+      const building = buildings.find((b) => b.id === id);
+      if (!building) return;
+      if (!isBuildingUnlocked(building)) return;
+
+      const count = getAffordableCount(building, state.gears, state.purchaseMode);
+      if (count <= 0) return;
+
+      const purchaseCount = state.purchaseMode === "max" ? count : Math.min(count, Number(state.purchaseMode) || 1);
+      const cost = getPurchaseCost(building, purchaseCount);
+
+      if (state.gears < cost) return;
+
+      state.gears -= cost;
+      building.owned += purchaseCount;
+      pushLog(`购买 ${building.name} x${purchaseCount}`);
+      saveGame();
+      render();
+    };
+
+    const buyUpgrade = (id) => {
+      const upgrade = upgrades.find((u) => u.id === id);
+      if (!upgrade || upgrade.purchased) return;
+      const lockedReason = getUpgradeLockedReason(upgrade);
+      if (lockedReason) return;
+      if (state.gears < upgrade.price) return;
+
+      state.gears -= upgrade.price;
+      upgrade.purchased = true;
+
+      if (upgrade.type === "manual") state.manualPower += upgrade.value;
+      if (upgrade.type === "gps") state.gpsMultiplier *= upgrade.value;
+      pushLog(`研发升级：${upgrade.name}`);
+
+      saveGame();
+      render();
+    };
+
+    manualBtn.addEventListener("click", () => {
+      const gain = getManualGain();
+      state.gears += gain;
+      state.lifetimeGears += gain;
+      state.totalClicks += 1;
+      if (state.totalClicks === 1) pushLog("首次手动生产");
+      saveGame();
+      render();
+    });
+
+    buildingList.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+      const id = target.dataset.buy;
+      if (!id) return;
+      buyBuilding(id);
+    });
+
+    upgradeList.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+      const id = target.dataset.upgrade;
+      if (!id) return;
+      buyUpgrade(id);
+    });
+
+    skillList.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+      const id = target.dataset.skillBuy;
+      if (!id) return;
+      buySkill(id);
+    });
+
+    document.querySelector(".controls").addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+
+      const mode = target.dataset.mode;
+      if (mode) {
+        state.purchaseMode = mode;
+        saveGame();
+        render();
+        return;
+      }
+
+      const speed = Number(target.dataset.speed);
+      if ([1, 2, 4].includes(speed)) {
+        state.gameSpeed = speed;
+        saveGame();
+        render();
+        return;
+      }
+
+      if (target.id === "autoBuyBtn") {
+        state.autoBuy = !state.autoBuy;
+        pushLog(`自动购买已${state.autoBuy ? "开启" : "关闭"}`);
+        saveGame();
+        render();
+      }
+    });
+
+    claimOfflineBtn.addEventListener("click", () => {
+      if (state.pendingOfflineGears <= 0) return;
+      state.gears += state.pendingOfflineGears;
+      state.lifetimeGears += state.pendingOfflineGears;
+      state.pendingOfflineGears = 0;
+      saveGame();
+      render();
+    });
+
+    prestigeBtn.addEventListener("click", () => {
+      const gain = Math.floor(Math.sqrt(state.lifetimeGears / 2000));
+      if (gain <= 0) {
+        window.alert("累计齿轮不足，无法获得研究点。继续扩张产线吧！");
+        return;
+      }
+      const ok = window.confirm(`执行软重置可获得 ${gain} 研究点（RP），是否继续？`);
+      if (!ok) return;
+
+      state.researchPoints += gain;
+      pushLog(`执行 Prestige，获得 RP +${gain}`);
+      state.gears = 0;
+      state.purchaseMode = "1";
+      state.pendingOfflineGears = 0;
+      state.accumulator = 0;
+      state.manualPower = 1;
+      state.gpsMultiplier = 1;
+      state.totalClicks = 0;
+      state.lifetimeGears = 0;
+      state.lastRewardText = "";
+      state.gameSpeed = 1;
+      state.questIndex = 0;
+      state.autoBuy = false;
+      state.autoBuyAccumulator = 0;
+      for (const b of buildings) b.owned = 0;
+      for (const u of upgrades) u.purchased = false;
+      for (const s of skills) s.level = 0;
+      for (const a of achievements) { a.done = false; a.claimed = false; }
+      saveGame();
+      render();
+    });
+
+    resetSaveBtn.addEventListener("click", () => {
+      const ok = window.confirm("确认重置所有进度吗？");
+      if (!ok) return;
+      localStorage.removeItem(SAVE_KEY);
+      state.logs = ["[--:--:--] 执行硬重置"];
+      state.gears = 0;
+      state.purchaseMode = "1";
+      state.pendingOfflineGears = 0;
+      state.accumulator = 0;
+      state.manualPower = 1;
+      state.gpsMultiplier = 1;
+      state.totalClicks = 0;
+      state.lifetimeGears = 0;
+      state.researchPoints = 0;
+      state.lastRewardText = "";
+      state.gameSpeed = 1;
+      state.questIndex = 0;
+      state.autoBuy = false;
+      state.autoBuyAccumulator = 0;
+      for (const b of buildings) b.owned = 0;
+      for (const u of upgrades) u.purchased = false;
+      for (const s of skills) s.level = 0;
+      for (const a of achievements) { a.done = false; a.claimed = false; }
+      render();
+    });
+
+    for (const building of buildings) createBuildingRow(building);
+    for (const upgrade of upgrades) createUpgradeRow(upgrade);
+    for (const skill of skills) createSkillRow(skill);
+    for (const achievement of achievements) createAchievementRow(achievement);
+
+    loadGame();
+
+    let lastAutoSave = performance.now();
+    const tick = (now) => {
+      const frameDelta = Math.min((now - state.lastTimestamp) / 1000, MAX_ACCUMULATED_SECONDS);
+      state.lastTimestamp = now;
+      state.accumulator += frameDelta;
+
+      const gps = getTotalGPS();
+      while (state.accumulator >= FIXED_STEP) {
+        const gain = gps * FIXED_STEP * state.gameSpeed;
+        state.gears += gain;
+        state.lifetimeGears += gain;
+        state.accumulator -= FIXED_STEP;
+
+        if (state.autoBuy) {
+          state.autoBuyAccumulator += FIXED_STEP * state.gameSpeed;
+          if (state.autoBuyAccumulator >= 0.5) {
+            state.autoBuyAccumulator = 0;
+            tryAutoBuy();
+          }
+        }
+      }
+
+      if (now - lastAutoSave > 5000) {
+        saveGame();
+        lastAutoSave = now;
+      }
+
+      render();
+      requestAnimationFrame(tick);
+    };
+
+    render();
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
