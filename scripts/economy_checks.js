@@ -18,6 +18,8 @@ const COMBO_BONUS_PER_STACK = 0.02;
 const FX_MAX_FLOATING_GAINS = 18;
 const FX_PRIORITY_SLOTS = 2;
 const FINANCE_BASE_APR = 0.06;
+const CHAIN_BONUS_PER_STAGE = 0.08;
+const CHAIN_MAX_STAGES = 10;
 
 const ORDER_TEMPLATES = [
   { key: 'clicks', minTier: 1, weight: 3 },
@@ -77,6 +79,14 @@ const getFinanceApr = (tier, totalClicks = 0) => {
 };
 const getFinanceIncomePerSecond = (capital, tier, totalClicks = 0) => capital * getFinanceApr(tier, totalClicks);
 
+const getIndustryChainMultiplier = (internOwned, conveyorOwned, assemblerOwned) => {
+  const chainStage = Math.min(internOwned / 20, conveyorOwned / 10, assemblerOwned / 5);
+  const clampedStage = Math.max(0, Math.min(CHAIN_MAX_STAGES, chainStage));
+  const imbalance = Math.max(0, (Math.max(internOwned, conveyorOwned, assemblerOwned) - Math.min(internOwned, conveyorOwned, assemblerOwned)) / 120);
+  const synergy = 1 + clampedStage * CHAIN_BONUS_PER_STAGE;
+  return Math.max(1, synergy - imbalance * 0.06);
+};
+
 const getOfflineReward = (gps, savedAtMs, nowMs) => {
   const offlineSeconds = Math.max(0, Math.min((nowMs - savedAtMs) / 1000, OFFLINE_CAP_SECONDS));
   return gps * offlineSeconds;
@@ -126,6 +136,13 @@ const safeAudio = getSafeAudioProfile({ f0: 900, f1: 1200, t: 0.1 }, true);
 assert(safeAudio.f1 <= 780, 'low-perf audio safe mode should clamp high frequency');
 assert(safeAudio.osc === 'sine', 'low-perf audio safe mode should use sine oscillator');
 
+
+
+// industrial chain
+assert(getIndustryChainMultiplier(0, 0, 0) === 1, 'chain multiplier should start at 1');
+assert(getIndustryChainMultiplier(40, 20, 10) > 1, 'balanced chain should provide bonus');
+assert(getIndustryChainMultiplier(120, 0, 0) === 1, 'single-line stacking should not gain chain bonus');
+assert(getIndustryChainMultiplier(200, 100, 50) <= 1 + CHAIN_MAX_STAGES * CHAIN_BONUS_PER_STAGE, 'chain bonus should respect cap');
 
 // finance
 assert(getFinanceApr(0, 0) >= 0.01, 'finance apr should have lower bound');

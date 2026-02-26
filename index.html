@@ -778,6 +778,7 @@
           <span id="statQuest">任务进度：0/0</span>
           <span id="statMode">自动购买：关</span>
           <span id="statLifetime">累计齿轮：0</span>
+          <span id="statChain">产业链加成：x1.00</span>
         </div>
       </div>
 
@@ -871,6 +872,8 @@
     const ORDER_REROLL_COST = 200;
     const FINANCE_UNLOCK_LIFETIME_GEARS = 1200;
     const FINANCE_BASE_APR = 0.06;
+    const CHAIN_BONUS_PER_STAGE = 0.08;
+    const CHAIN_MAX_STAGES = 10;
 
     // 手感参数：集中在这里，便于快速调“多汁感”。
     const FX_FLOAT_DURATION_MS = 850;
@@ -1012,6 +1015,7 @@
     const statQuestEl = document.getElementById("statQuest");
     const statModeEl = document.getElementById("statMode");
     const statLifetimeEl = document.getElementById("statLifetime");
+    const statChainEl = document.getElementById("statChain");
     const orderTitleEl = document.getElementById("orderTitle");
     const orderFillEl = document.getElementById("orderFill");
     const orderHintEl = document.getElementById("orderHint");
@@ -1072,7 +1076,19 @@
     const getResearchMultiplier = () => 1 + state.researchPoints * 0.1;
     const getSkillGpsMultiplier = () => 1 + getSkillLevel("line_optimizer") * 0.2;
     const getSkillManualMultiplier = () => 1 + getSkillLevel("manual_mastery") * 0.25;
-    const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier() * getSkillGpsMultiplier();
+    const getIndustryChainMultiplier = () => {
+      const internOwned = buildings.find((b) => b.id === "intern")?.owned || 0;
+      const conveyorOwned = buildings.find((b) => b.id === "conveyor")?.owned || 0;
+      const assemblerOwned = buildings.find((b) => b.id === "assembler")?.owned || 0;
+      // 工业产业链联动：只有“人力-运输-组装”都跟上时才给高效增益，鼓励平衡扩张而非单点堆叠。
+      const chainStage = Math.min(internOwned / 20, conveyorOwned / 10, assemblerOwned / 5);
+      const clampedStage = Math.max(0, Math.min(CHAIN_MAX_STAGES, chainStage));
+      const imbalance = Math.max(0, (Math.max(internOwned, conveyorOwned, assemblerOwned) - Math.min(internOwned, conveyorOwned, assemblerOwned)) / 120);
+      const synergy = 1 + clampedStage * CHAIN_BONUS_PER_STAGE;
+      return Math.max(1, synergy - imbalance * 0.06);
+    };
+
+    const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier() * getSkillGpsMultiplier() * getIndustryChainMultiplier();
     const getComboMultiplier = () => 1 + Math.min(COMBO_MAX_STREAK, state.comboStreak) * COMBO_BONUS_PER_STACK;
     const getManualGain = () => state.manualPower * getSkillManualMultiplier() * getComboMultiplier();
 
@@ -1784,7 +1800,7 @@
     const render = () => {
       gearsEl.textContent = format(state.gears);
       gpsEl.textContent = format(getTotalGPS());
-      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}，速度 x${state.gameSpeed}，金融 +${format(getFinanceIncomePerSecond())}/s）`;
+      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}，速度 x${state.gameSpeed}，金融 +${format(getFinanceIncomePerSecond())}/s，产业链 x${getIndustryChainMultiplier().toFixed(2)}）`;
 
       for (const building of buildings) {
         const view = buildingViewMap.get(building.id);
@@ -1898,6 +1914,7 @@
       statQuestEl.textContent = `任务进度：${Math.min(state.questIndex, questChain.length)}/${questChain.length}`;
       statModeEl.textContent = `自动购买：${state.autoBuy ? "开" : "关"}`;
       statLifetimeEl.textContent = `累计齿轮：${format(state.lifetimeGears)}`;
+      statChainEl.textContent = `产业链加成：x${getIndustryChainMultiplier().toFixed(2)}`;
 
       if (manualHintEl) {
         manualHintEl.textContent = `连击 x${(getComboMultiplier()).toFixed(2)}（${state.comboStreak} 连，${COMBO_DECAY_SECONDS}s 衰减）`;

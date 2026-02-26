@@ -8,6 +8,8 @@ const PRICE_CURVE_MID_START = 40;
 const PRICE_CURVE_LATE_START = 100;
 const PRICE_CURVE_MID_FACTOR = 0.82;
 const PRICE_CURVE_LATE_FACTOR = 0.68;
+const CHAIN_BONUS_PER_STAGE = 0.08;
+const CHAIN_MAX_STAGES = 10;
 
 const BUILDINGS = [
   { id: 'intern', basePrice: 15, dps: 1 },
@@ -41,7 +43,17 @@ const getPrice = (buildingId, ownedOffset = 0) => {
   return Math.floor(b.basePrice * Math.pow(PRICE_GROWTH, effectiveOwned));
 };
 
-const getGps = () => BUILDINGS.reduce((sum, b) => sum + state.owned[b.id] * b.dps, 0);
+const getIndustryChainMultiplier = () => {
+  const internOwned = state.owned.intern || 0;
+  const conveyorOwned = state.owned.conveyor || 0;
+  const assemblerOwned = state.owned.assembler || 0;
+  const chainStage = Math.min(internOwned / 20, conveyorOwned / 10, assemblerOwned / 5);
+  const clampedStage = Math.max(0, Math.min(CHAIN_MAX_STAGES, chainStage));
+  const imbalance = Math.max(0, (Math.max(internOwned, conveyorOwned, assemblerOwned) - Math.min(internOwned, conveyorOwned, assemblerOwned)) / 120);
+  return Math.max(1, 1 + clampedStage * CHAIN_BONUS_PER_STAGE - imbalance * 0.06);
+};
+
+const getGps = () => BUILDINGS.reduce((sum, b) => sum + state.owned[b.id] * b.dps, 0) * getIndustryChainMultiplier();
 
 const tryAutoBuy = () => {
   // 贪心：优先买“单位价格产出比”更高的建筑，得到一个稳定可复现的 baseline。
