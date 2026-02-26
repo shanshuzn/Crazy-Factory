@@ -845,6 +845,7 @@
     const PRESTIGE_LATE_BONUS_START = 2_000_000;
     const PRESTIGE_LATE_BONUS_STEP = 2_000_000;
     const SAVE_KEY = "crazy_factory_save_v1";
+    const SAVE_BACKUP_KEY = "crazy_factory_save_backup";
     const SAVE_VERSION = 2;
     const TICK_RATE = 60;
     const FIXED_STEP = 1 / TICK_RATE;
@@ -1376,18 +1377,36 @@
       }
     };
 
+    // 导入前做结构白名单校验，避免脏字段直写主存档；失败可自动回滚到备份。
+    const sanitizeImportPayload = (data) => {
+      if (!data || typeof data !== "object") return null;
+      if (!Array.isArray(data.buildings) || !Array.isArray(data.upgrades)) return null;
+      if (!Array.isArray(data.skills) || !Array.isArray(data.achievements)) return null;
+      return data;
+    };
+
     const importSave = () => {
       const raw = window.prompt("粘贴存档文本以导入（会覆盖当前进度）");
       if (!raw) return;
+      const previousRaw = localStorage.getItem(SAVE_KEY);
+      if (previousRaw) localStorage.setItem(SAVE_BACKUP_KEY, previousRaw);
       try {
-        const data = migrateSaveData(JSON.parse(raw));
-        if (!data || typeof data !== "object") throw new Error("invalid payload");
+        const data = sanitizeImportPayload(migrateSaveData(JSON.parse(raw)));
+        if (!data) throw new Error("invalid payload");
         localStorage.setItem(SAVE_KEY, JSON.stringify(data));
         pushLog("已导入存档，正在刷新状态");
         loadGame();
         render();
       } catch {
-        window.alert("存档格式无效，导入失败。");
+        const backupRaw = localStorage.getItem(SAVE_BACKUP_KEY);
+        if (backupRaw) {
+          localStorage.setItem(SAVE_KEY, backupRaw);
+          loadGame();
+          render();
+          window.alert("导入失败，已自动回滚到导入前存档。");
+        } else {
+          window.alert("存档格式无效，导入失败。");
+        }
       }
     };
 
@@ -1484,6 +1503,11 @@
         }
       } catch (error) {
         console.warn("存档读取失败，已忽略：", error);
+        const backupRaw = localStorage.getItem(SAVE_BACKUP_KEY);
+        if (backupRaw) {
+          localStorage.setItem(SAVE_KEY, backupRaw);
+          window.alert("当前存档读取失败，已回滚到最近一次备份。");
+        }
       }
     };
 
