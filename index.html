@@ -375,6 +375,7 @@
         <button class="chip active" data-speed="1">1x</button>
         <button class="chip" data-speed="2">2x</button>
         <button class="chip" data-speed="4">4x</button>
+        <button class="chip" id="autoBuyBtn">自动购买: 关</button>
         <button class="chip" id="prestigeBtn">软重置</button>
         <button class="chip" id="resetSaveBtn">重置存档</button>
       </div>
@@ -462,7 +463,9 @@
       lastRewardText: "",
       gameSpeed: 1,
       questIndex: 0,
-      logs: []
+      logs: [],
+      autoBuy: false,
+      autoBuyAccumulator: 0
     };
 
     const gearsEl = document.getElementById("gears");
@@ -471,6 +474,7 @@
     const buildingList = document.getElementById("buildingList");
     const modeButtons = [...document.querySelectorAll("[data-mode]")];
     const speedButtons = [...document.querySelectorAll("[data-speed]")];
+    const autoBuyBtn = document.getElementById("autoBuyBtn");
     const prestigeBtn = document.getElementById("prestigeBtn");
     const resetSaveBtn = document.getElementById("resetSaveBtn");
     const offlineNoticeEl = document.getElementById("offlineNotice");
@@ -543,6 +547,7 @@
         gears: state.gears,
         purchaseMode: state.purchaseMode,
         gameSpeed: state.gameSpeed,
+        autoBuy: state.autoBuy,
         questIndex: state.questIndex,
         logs: state.logs.slice(0, 20),
         buildings: buildings.map((b) => ({ id: b.id, owned: b.owned })),
@@ -572,6 +577,7 @@
         if ([1,2,4].includes(Number(data.gameSpeed))) {
           state.gameSpeed = Number(data.gameSpeed);
         }
+        state.autoBuy = Boolean(data.autoBuy);
         state.questIndex = Math.max(0, Math.min(Number(data.questIndex) || 0, questChain.length));
         if (Array.isArray(data.logs)) state.logs = data.logs.slice(0, 20);
 
@@ -758,6 +764,8 @@
       for (const btn of speedButtons) {
         btn.classList.toggle("active", Number(btn.dataset.speed) === state.gameSpeed);
       }
+      autoBuyBtn.classList.toggle("active", state.autoBuy);
+      autoBuyBtn.textContent = `自动购买: ${state.autoBuy ? "开" : "关"}`;
     };
 
     const render = () => {
@@ -843,6 +851,30 @@
       renderMode();
     };
 
+    const tryAutoBuy = () => {
+      // 优先购买升级，再购买建筑
+      for (const upgrade of upgrades) {
+        if (upgrade.purchased) continue;
+        if (getUpgradeLockedReason(upgrade)) continue;
+        if (state.gears >= upgrade.price) {
+          buyUpgrade(upgrade.id);
+          return;
+        }
+      }
+
+      for (const building of [...buildings].reverse()) {
+        if (!isBuildingUnlocked(building)) continue;
+        const count = getAffordableCount(building, state.gears, "1");
+        if (count > 0) {
+          const prevMode = state.purchaseMode;
+          state.purchaseMode = "1";
+          buyBuilding(building.id);
+          state.purchaseMode = prevMode;
+          return;
+        }
+      }
+    };
+
     const buyBuilding = (id) => {
       const building = buildings.find((b) => b.id === id);
       if (!building) return;
@@ -924,6 +956,14 @@
         state.gameSpeed = speed;
         saveGame();
         render();
+        return;
+      }
+
+      if (target.id === "autoBuyBtn") {
+        state.autoBuy = !state.autoBuy;
+        pushLog(`自动购买已${state.autoBuy ? "开启" : "关闭"}`);
+        saveGame();
+        render();
       }
     });
 
@@ -958,6 +998,8 @@
       state.lastRewardText = "";
       state.gameSpeed = 1;
       state.questIndex = 0;
+      state.autoBuy = false;
+      state.autoBuyAccumulator = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const a of achievements) { a.done = false; a.claimed = false; }
@@ -982,6 +1024,8 @@
       state.lastRewardText = "";
       state.gameSpeed = 1;
       state.questIndex = 0;
+      state.autoBuy = false;
+      state.autoBuyAccumulator = 0;
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const a of achievements) { a.done = false; a.claimed = false; }
@@ -1006,6 +1050,14 @@
         state.gears += gain;
         state.lifetimeGears += gain;
         state.accumulator -= FIXED_STEP;
+
+        if (state.autoBuy) {
+          state.autoBuyAccumulator += FIXED_STEP * state.gameSpeed;
+          if (state.autoBuyAccumulator >= 0.5) {
+            state.autoBuyAccumulator = 0;
+            tryAutoBuy();
+          }
+        }
       }
 
       if (now - lastAutoSave > 5000) {
