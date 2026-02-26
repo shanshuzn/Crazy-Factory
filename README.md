@@ -104,3 +104,7 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 - UI/UX 反馈
 - 性能优化
 - 模块化与自动化测试
+
+
+## 工作路线图（执行版）
+- 详见 `WORKPLAN.md`（双周冲刺节奏、验证命令、复盘模板）。
