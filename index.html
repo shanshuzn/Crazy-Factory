@@ -356,6 +356,53 @@
       flex-wrap: wrap;
     }
 
+    .progress-meta.compact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .metric-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      border-radius: 9px;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(15, 23, 42, 0.55);
+      color: #dbeafe;
+    }
+
+    .metric-pill.good {
+      border-color: rgba(34, 197, 94, 0.45);
+      background: rgba(22, 101, 52, 0.2);
+      color: #bbf7d0;
+    }
+
+    .metric-pill.warn {
+      border-color: rgba(245, 158, 11, 0.45);
+      background: rgba(120, 53, 15, 0.2);
+      color: #fde68a;
+    }
+
+    .metric-pill.danger {
+      border-color: rgba(239, 68, 68, 0.48);
+      background: rgba(127, 29, 29, 0.24);
+      color: #fecaca;
+    }
+
+    .action-group {
+      margin-top: 10px;
+    }
+
+    .action-group-title {
+      margin: 0 0 6px;
+      font-size: 0.78rem;
+      color: #93c5fd;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
     .order-actions {
       display: flex;
       flex-wrap: wrap;
@@ -853,38 +900,47 @@
       <div class="progress-wrap" id="financePanel">
         <div class="progress-title" id="financeTitle">金融系统：尚未解锁</div>
         <div class="progress-track"><div id="financeFill" class="progress-fill"></div></div>
-        <div class="progress-meta">
-          <span id="financeHint">累计齿轮达到 1200 后解锁</span>
-          <span id="financeYield">年化：0%</span>
-          <span id="financeCapital">资金池：0</span>
-          <span id="financeBreakdown">构成：基础 0% / 波动 0% / 风控 0%</span>
-          <span id="financeMarket">市场：平稳</span>
-          <span id="financeStrategy">策略：平衡</span>
-          <span id="financeSwitches">切换：0 次</span>
-          <span id="financeSeason">赛季：高通胀</span>
-          <span id="financeIntel">情报：下一步市场 -</span>
-          <span id="financeLeaderboard">赛季榜：暂无</span>
-          <span id="financeAssets">资产：债 34% / 股 33% / 衍 33%</span>
-          <span id="financeLiquidity">流动性：正常</span>
+        <div class="progress-meta compact-grid">
+          <span id="financeHint" class="metric-pill">累计齿轮达到 1200 后解锁</span>
+          <span id="financeYield" class="metric-pill">年化：0%</span>
+          <span id="financeCapital" class="metric-pill">资金池：0</span>
+          <span id="financeBreakdown" class="metric-pill">构成：基础 0% / 波动 0% / 风控 0%</span>
+          <span id="financeMarket" class="metric-pill">市场：平稳</span>
+          <span id="financeStrategy" class="metric-pill">策略：平衡</span>
+          <span id="financeSwitches" class="metric-pill">切换：0 次</span>
+          <span id="financeSeason" class="metric-pill">赛季：高通胀</span>
+          <span id="financeIntel" class="metric-pill">情报：下一步市场 -</span>
+          <span id="financeLeaderboard" class="metric-pill">赛季榜：暂无</span>
+          <span id="financeAssets" class="metric-pill">资产：债 34% / 股 33% / 衍 33%</span>
+          <span id="financeLiquidity" class="metric-pill">流动性：正常</span>
         </div>
         <div class="subtitle finance-advice info" id="financeAdvice">建议：解锁后会在这里显示下一步操作</div>
-        <div class="order-actions" id="financeStrategyActions">
+        <div class="action-group">
+          <div class="action-group-title">策略切换</div>
+          <div class="order-actions" id="financeStrategyActions">
           <button class="order-btn secondary" id="financeStrategyConservativeBtn" disabled>策略：稳健</button>
           <button class="order-btn secondary" id="financeStrategyBalancedBtn" disabled>策略：平衡</button>
           <button class="order-btn secondary" id="financeStrategyAggressiveBtn" disabled>策略：激进</button>
+          </div>
         </div>
-        <div class="order-actions">
+        <div class="action-group">
+          <div class="action-group-title">资金操作</div>
+          <div class="order-actions">
           <button class="order-btn" id="financeInvestBtn" disabled>投入 10% 齿轮</button>
           <button class="order-btn secondary" id="financeWithdrawBtn" disabled>提取 25% 资金</button>
           <button class="order-btn secondary" id="financeUpgradeBtn" disabled>风控升级（1 RP）</button>
           <button class="order-btn secondary" id="financeHedgeBtn" disabled>对冲（6%资金，12s）</button>
           <button class="order-btn secondary" id="financeSettleBtn" disabled>赛季结算</button>
           <button class="order-btn secondary" id="financeAutoBtn" disabled>半自动策略：关</button>
+          </div>
         </div>
-        <div class="order-actions">
+        <div class="action-group">
+          <div class="action-group-title">资产再平衡</div>
+          <div class="order-actions">
           <button class="order-btn secondary" id="financeAssetBondBtn" disabled>债券 +10%</button>
           <button class="order-btn secondary" id="financeAssetEquityBtn" disabled>股权 +10%</button>
           <button class="order-btn secondary" id="financeAssetDerivativeBtn" disabled>衍生 +10%</button>
+          </div>
         </div>
       </div>
 
@@ -1183,6 +1239,14 @@
     const financeSettleBtn = document.getElementById("financeSettleBtn");
     const financeAutoBtn = document.getElementById("financeAutoBtn");
     const financeAssetBondBtn = document.getElementById("financeAssetBondBtn");
+
+    const setMetricPillTone = (el, tone) => {
+      if (!el) return;
+      el.classList.remove("good", "warn", "danger");
+      if (tone && ["good", "warn", "danger"].includes(tone)) {
+        el.classList.add(tone);
+      }
+    };
     const financeAssetEquityBtn = document.getElementById("financeAssetEquityBtn");
     const financeAssetDerivativeBtn = document.getElementById("financeAssetDerivativeBtn");
     const fxLayerEl = document.getElementById("fxLayer");
@@ -2375,6 +2439,9 @@
         financeLeaderboardEl.textContent = "赛季榜：暂无";
         financeAssetsEl.textContent = "资产：债 34% / 股 33% / 衍 33%";
         financeLiquidityEl.textContent = "流动性：正常";
+        setMetricPillTone(financeMarketEl, null);
+        setMetricPillTone(financeSeasonEl, null);
+        setMetricPillTone(financeLiquidityEl, null);
         financeStrategyConservativeBtn.disabled = true;
         financeStrategyBalancedBtn.disabled = true;
         financeStrategyAggressiveBtn.disabled = true;
@@ -2422,6 +2489,9 @@
         financeLeaderboardEl.textContent = `赛季榜：${lb || "暂无"}`;
         financeAssetsEl.textContent = `资产：债 ${(state.financeAssets.bond*100).toFixed(0)}% / 股 ${(state.financeAssets.equity*100).toFixed(0)}% / 衍 ${(state.financeAssets.derivative*100).toFixed(0)}%`;
         financeLiquidityEl.textContent = comp.aiPressure > 0.6 ? "流动性：紧张" : (comp.aiPressure > 0.35 ? "流动性：偏紧" : "流动性：正常");
+        setMetricPillTone(financeMarketEl, market.factor >= 0.01 ? "good" : (market.factor <= -0.01 ? "danger" : "warn"));
+        setMetricPillTone(financeSeasonEl, comp.season.capMult >= 1 ? "good" : "warn");
+        setMetricPillTone(financeLiquidityEl, comp.aiPressure > 0.6 ? "danger" : (comp.aiPressure > 0.35 ? "warn" : "good"));
         financeStrategyConservativeBtn.classList.toggle("active", state.financeStrategy === "conservative");
         financeStrategyBalancedBtn.classList.toggle("active", state.financeStrategy === "balanced");
         financeStrategyAggressiveBtn.classList.toggle("active", state.financeStrategy === "aggressive");
