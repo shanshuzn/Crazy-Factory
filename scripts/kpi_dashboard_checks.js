@@ -1,38 +1,10 @@
 #!/usr/bin/env node
 
-const { execSync } = require('node:child_process');
-const { getBuildingPrice, getPrestigeGain, getIndustryChainMultiplier } = require('./economy_pure');
+const { execFileSync } = require('node:child_process');
+const { getPrestigeGain } = require('./economy_pure');
+const { BUILDINGS, createOwnedState, getPrice, getGps, autoBuyDescending } = require('./sim_common');
 
-const BUILDINGS = [
-  { id: 'intern', basePrice: 15, dps: 1 },
-  { id: 'conveyor', basePrice: 100, dps: 8 },
-  { id: 'assembler', basePrice: 1100, dps: 47 }
-];
-
-const state = { gears: 0, lifetime: 0, clicks: 0, owned: { intern: 0, conveyor: 0, assembler: 0 } };
-
-const getGps = () => {
-  const base = BUILDINGS.reduce((s, b) => s + state.owned[b.id] * b.dps, 0);
-  return base * getIndustryChainMultiplier(state.owned.intern, state.owned.conveyor, state.owned.assembler);
-};
-const getPrice = (id) => {
-  const b = BUILDINGS.find((x) => x.id === id);
-  return getBuildingPrice(b.basePrice, state.owned[id], 1);
-};
-const autoBuy = () => {
-  let bought = true;
-  while (bought) {
-    bought = false;
-    for (const b of [...BUILDINGS].reverse()) {
-      const p = getPrice(b.id);
-      if (state.gears >= p) {
-        state.gears -= p;
-        state.owned[b.id] += 1;
-        bought = true;
-      }
-    }
-  }
-};
+const state = { gears: 0, lifetime: 0, clicks: 0, owned: createOwnedState() };
 
 let firstTaskSec = null;
 let firstHighValueSec = null;
@@ -41,18 +13,18 @@ let longestIdle = 0;
 let currentIdle = 0;
 
 for (let sec = 1; sec <= 30 * 60; sec += 1) {
-  const gps = getGps();
+  const gps = getGps(state.owned);
   state.clicks += 1;
   const gain = gps + 1;
   state.gears += gain;
   state.lifetime += gain;
 
   const beforeOwned = BUILDINGS.reduce((s, b) => s + state.owned[b.id], 0);
-  autoBuy();
+  autoBuyDescending(state);
   const afterOwned = BUILDINGS.reduce((s, b) => s + state.owned[b.id], 0);
 
   if (firstTaskSec === null && state.clicks >= 20) firstTaskSec = sec;
-  if (firstHighValueSec === null && getGps() >= 50) firstHighValueSec = sec;
+  if (firstHighValueSec === null && getGps(state.owned) >= 50) firstHighValueSec = sec;
   if (firstPrestigeTargetSec === null && getPrestigeGain(state.lifetime) >= 28) firstPrestigeTargetSec = sec;
 
   if (afterOwned === beforeOwned) {
@@ -63,30 +35,29 @@ for (let sec = 1; sec <= 30 * 60; sec += 1) {
   }
 }
 
-const prePrestigeGps = getGps();
+const prePrestigeGps = getGps(state.owned);
 const rpGain = getPrestigeGain(state.lifetime);
-const reset = { gears: 0, lifetime: 0, owned: { intern: 0, conveyor: 0, assembler: 0 } };
+const reset = { gears: 0, lifetime: 0, owned: createOwnedState() };
 let recoverSec = 0;
 for (let sec = 1; sec <= 15 * 60; sec += 1) {
-  const base = BUILDINGS.reduce((s, b) => s + reset.owned[b.id] * b.dps, 0) * getIndustryChainMultiplier(reset.owned.intern, reset.owned.conveyor, reset.owned.assembler);
-  const gps = base * (1 + rpGain * 0.1);
+  const gps = getGps(reset.owned) * (1 + rpGain * 0.1);
   reset.gears += gps + 1;
   reset.lifetime += gps + 1;
   for (const b of [...BUILDINGS].reverse()) {
-    while (reset.gears >= getBuildingPrice(b.basePrice, reset.owned[b.id], 1)) {
-      reset.gears -= getBuildingPrice(b.basePrice, reset.owned[b.id], 1);
+    while (reset.gears >= getPrice(reset.owned, b.id)) {
+      reset.gears -= getPrice(reset.owned, b.id);
       reset.owned[b.id] += 1;
     }
   }
-  const nowGps = BUILDINGS.reduce((s, b) => s + reset.owned[b.id] * b.dps, 0) * getIndustryChainMultiplier(reset.owned.intern, reset.owned.conveyor, reset.owned.assembler) * (1 + rpGain * 0.1);
+  const nowGps = getGps(reset.owned) * (1 + rpGain * 0.1);
   if (nowGps >= prePrestigeGps) { recoverSec = sec; break; }
 }
 
-const rerollRecoverSec = Math.ceil((200 * 3) / Math.max(1, getGps()));
+const rerollRecoverSec = Math.ceil((200 * 3) / Math.max(1, getGps(state.owned)));
 
-const run = (cmd) => execSync(cmd, { encoding: 'utf8' });
-const economyOk = /economy checks passed/.test(run('node scripts/economy_checks.js'));
-const stabilityOut = run('node scripts/stability_30m.js');
+const runNodeScript = (file) => execFileSync('node', [file], { encoding: 'utf8' });
+const economyOk = /economy checks passed/.test(runNodeScript('scripts/economy_checks.js'));
+const stabilityOut = runNodeScript('scripts/stability_30m.js');
 const stabilityOk = /stability_30m/.test(stabilityOut) && !/NaN|Infinity/.test(stabilityOut);
 
 const importRecoveryOk = (() => {

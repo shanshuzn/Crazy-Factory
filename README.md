@@ -83,8 +83,12 @@ price = floor(basePrice * 1.15 ^ owned)
 │       ├── ROLLING_UPDATE_RUNBOOK.md
 │       └── SEED_ROUND_ROADMAP.md
 └── scripts/
+    ├── serve_static.js
     ├── capture_screenshot.py
-    └── serve_static.js
+    ├── economy_checks.js
+    ├── finance_checks.js
+    ├── kpi_dashboard_checks.js
+    └── sim_common.js
 ```
 
 ## 截图与调试（容器/CI）
