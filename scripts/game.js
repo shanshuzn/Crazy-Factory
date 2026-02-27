@@ -176,6 +176,8 @@
       PRICE_GROWTH,
       MARKET_BULL_BONUS,
       MARKET_BEAR_PENALTY,
+      MARKET_MOMENTUM_GPS_PER_STACK,
+      MARKET_MOMENTUM_MANUAL_PER_STACK,
       SKILL_MASTERY_BONUS,
       dirty,
       buildingViewMap,
@@ -316,8 +318,8 @@
       st.gears+=gain; st.lifetimeGears+=gain; st.totalClicks++;
       if(st.marketIsBull) {
         st.bullClicks++;
-        st.marketMomentum = Math.min(20, (st.marketMomentum || 0) + 1);
-        st.marketMomentumTimer = 6;
+        st.marketMomentum = Math.min(MARKET_MOMENTUM_CAP, (st.marketMomentum || 0) + 1);
+        st.marketMomentumTimer = MARKET_MOMENTUM_DURATION;
       }
       if(st.totalClicks===1) pushLog("完成首次撮合");
       eventBus.emit("manual:clicked", { x: e.clientX, y: e.clientY, gain });

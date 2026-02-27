@@ -17,6 +17,10 @@
     const MARKET_CYCLE_MAX  = 55;
     const MARKET_BULL_BONUS = 1.4;
     const MARKET_BEAR_PENALTY = 0.7;
+    const MARKET_MOMENTUM_CAP = 12;
+    const MARKET_MOMENTUM_DURATION = 5;
+    const MARKET_MOMENTUM_GPS_PER_STACK = 0.02;
+    const MARKET_MOMENTUM_MANUAL_PER_STACK = 0.06;
     const SKILL_MASTERY_STEP = 3;     // 每 3 级技能提升 1 个专精层级
     const SKILL_MASTERY_BONUS = 0.05; // 每层专精提供 +5% 总收益
 

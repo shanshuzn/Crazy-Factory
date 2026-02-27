@@ -143,47 +143,53 @@
   - 完成：2026-02-27
   - 指标影响：North Star +（手动操作反馈更强，中前期留存与参与度提升）
   - 证据：新增 `marketMomentum` 与 `marketMomentumTimer`，`manualDesc` 显示连击层与手动加成
-- [TODO] M8-T02 连击玩法平衡复核（层数上限/持续时间）
+- [DONE] M8-T02 连击玩法平衡复核（层数上限/持续时间）
   - 验收：给出 10 分钟样例日志与推荐参数
-- [NEXT] M8-T02 连击玩法平衡复核（层数上限/持续时间）
-  - 验收：给出 10 分钟样例日志与推荐参数
+  - 完成：2026-02-27
+  - 指标影响：North Star +（连击强度进入可控区间，节奏更稳）
+  - 证据：新增 `scripts/run_momentum_balance_check.js`，10 分钟报告建议“保持当前参数”
+  - 推荐参数：`MOMENTUM_CAP=12`、`MOMENTUM_DURATION=5s`、`MANUAL_PER_STACK=6%`、`GPS_PER_STACK=2%`
+- [TODO] M8-T03 真实金融体系一期：政策利率与资金成本
+  - 验收：新增“政策利率”变量并影响手动/自动收益与市场波动
+- [NEXT] M8-T03 真实金融体系一期：政策利率与资金成本
+  - 验收：新增“政策利率”变量并影响手动/自动收益与市场波动
 
 <!-- AUTO:METRICS-START -->
 [Mode]
 🛡 Hardening Mode（强化模式）
 
 [North Star]
-91.5% (trend: up)
+92.0% (trend: up)
 
 [Supporting Metrics]
-- growth_momentum: 90.0%（新增多头连击，主动玩法驱动成长感）
+- growth_momentum: 91.0%（连击参数完成平衡复核并形成推荐）
 - return_quality: 81.0%
-- upgrade_satisfaction: 77.0%
-- progress_clarity: 90.0%
-- stability_score: 87.0%
+- upgrade_satisfaction: 78.0%
+- progress_clarity: 91.0%
+- stability_score: 88.0%
 
 [Risk Level]
 低
 
 [Task]
-M8-T01 / 多头连击玩法（手动撮合叠层增益）
+M8-T02 / 连击玩法平衡复核（层数上限/持续时间）
 
 [Impact]
-对 North Star 影响：+（增强主动操作价值，提升短会话目标感）
+对 North Star 影响：+（玩法强度更可预测，避免过强或无感）
 
 [Do]
-- 修改文件列表：`scripts/economy-system.js`、`scripts/loop-system.js`、`scripts/render-system.js`、`scripts/game.js`、`scripts/save-system.js`、`scripts/game-data.js`、`ROADMAP.md`
-- 实现摘要：加入多头连击层数与衰减计时，连击可提升手动收益并在多头期提升总产出，UI 文案同步显示
+- 修改文件列表：`scripts/economy-system.js`、`scripts/game.js`、`scripts/loop-system.js`、`scripts/render-system.js`、`scripts/save-system.js`、`scripts/game-data.js`、`scripts/run_momentum_balance_check.js`、`ROADMAP.md`
+- 实现摘要：引入可调连击参数并完成 10 分钟平衡报告，给出推荐参数集
 
 [Verify]
+- `node scripts/run_momentum_balance_check.js`
 - `node --test tests/formula-system.test.js tests/log-system.test.js tests/soak-cli.test.js tests/verify-soak-fallback.test.js tests/verify-soak-config.test.js tests/verify-soak-defaults.test.js`
-- `node scripts/run_soak_check.js --seconds 60 --max-writes-std 3`
 
 [RoadmapPatch]
 (diff only)
 
 [Next]
-M8-T02
+M8-T03
 <!-- AUTO:METRICS-END -->
 
 ## 当前版本能力（摘要）

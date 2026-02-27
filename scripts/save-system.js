@@ -33,7 +33,7 @@
         st.lifetimeGears  = Math.max(0,Number(d.lifetimeGears)||0);
         st.researchPoints = Math.max(0,Math.floor(Number(d.researchPoints)||0));
         st.bullClicks     = Math.max(0,Number(d.bullClicks)||0);
-        st.marketMomentum  = Math.max(0,Math.min(20,Math.floor(Number(d.marketMomentum)||0)));
+        st.marketMomentum  = Math.max(0,Math.min(MARKET_MOMENTUM_CAP,Math.floor(Number(d.marketMomentum)||0)));
         st.marketMomentumTimer = Math.max(0,Number(d.marketMomentumTimer)||0);
         st.marketIsBull   = d.marketIsBull!==false;
         st.soundEnabled   = d.soundEnabled!==false;

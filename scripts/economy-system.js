@@ -9,6 +9,8 @@ const createEconomySystem = ({
   PRICE_GROWTH,
   MARKET_BULL_BONUS,
   MARKET_BEAR_PENALTY,
+  MARKET_MOMENTUM_GPS_PER_STACK,
+  MARKET_MOMENTUM_MANUAL_PER_STACK,
   SKILL_MASTERY_BONUS,
   dirty,
   buildingViewMap,
@@ -34,8 +36,8 @@ const createEconomySystem = ({
 
   const skillMasteryMult = () => 1 + (st.skillMasteryTier || 0) * SKILL_MASTERY_BONUS;
   const marketMomentumStacks = () => Math.max(0, Math.floor(st.marketMomentum || 0));
-  const marketMomentumGPSMult = () => st.marketIsBull ? 1 + marketMomentumStacks() * 0.03 : 1;
-  const marketMomentumManualMult = () => 1 + marketMomentumStacks() * 0.08;
+  const marketMomentumGPSMult = () => st.marketIsBull ? 1 + marketMomentumStacks() * MARKET_MOMENTUM_GPS_PER_STACK : 1;
+  const marketMomentumManualMult = () => 1 + marketMomentumStacks() * MARKET_MOMENTUM_MANUAL_PER_STACK;
   const getTotalGPS = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult() * marketMomentumGPSMult();
   const getManualGain = () => st.manualPower * st.manualMult * (1 + skillLv('manual_mastery') * 0.3) * marketMomentumManualMult();
 
