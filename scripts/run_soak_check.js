@@ -10,16 +10,61 @@ const FRAME_MS = 1000 / TARGET_FPS;
 const REPORT_EVERY_SEC = 5;
 const SAVE_INTERVAL_MS = 5000;
 
+function printHelp() {
+  console.log(`用法:
+  node scripts/run_soak_check.js [options]
+
+选项:
+  -s, --seconds <n>         巡检时长（秒），默认 ${DEFAULT_SECONDS}
+      --min-fps <n>         最低平均 FPS，默认 55
+      --max-heap-mb <n>     Heap 峰值上限（MB），默认 256
+      --max-writes-std <n>  writesPerMin 标准差上限，默认 1
+  -h, --help                显示帮助信息
+
+退出码:
+  0  所有阈值检查通过
+  1  任意阈值检查失败或参数非法`);
+}
+
 function parseArgs() {
   const args = process.argv.slice(2);
   let seconds = DEFAULT_SECONDS;
+  let minFps = 55;
+  let maxHeapMb = 256;
+  let maxWritesStd = 1;
+
   for (let i = 0; i < args.length; i++) {
-    if ((args[i] === '--seconds' || args[i] === '-s') && args[i + 1]) {
+    const arg = args[i];
+
+    if (arg === '--help' || arg === '-h') {
+      return { help: true };
+    }
+
+    if ((arg === '--seconds' || arg === '-s') && args[i + 1]) {
       seconds = Math.max(5, Number(args[i + 1]) || DEFAULT_SECONDS);
       i++;
+      continue;
     }
+    if (arg === '--min-fps' && args[i + 1]) {
+      minFps = Math.max(1, Number(args[i + 1]) || minFps);
+      i++;
+      continue;
+    }
+    if (arg === '--max-heap-mb' && args[i + 1]) {
+      maxHeapMb = Math.max(1, Number(args[i + 1]) || maxHeapMb);
+      i++;
+      continue;
+    }
+    if (arg === '--max-writes-std' && args[i + 1]) {
+      maxWritesStd = Math.max(0, Number(args[i + 1]) || maxWritesStd);
+      i++;
+      continue;
+    }
+
+    return { error: `未知参数: ${arg}` };
   }
-  return { seconds };
+
+  return { seconds, minFps, maxHeapMb, maxWritesStd, help: false };
 }
 
 function formatMB(bytes) {
@@ -33,7 +78,7 @@ function stddev(values) {
   return Math.sqrt(variance);
 }
 
-function runSoak({ seconds }) {
+function runSoak({ seconds, minFps, maxHeapMb, maxWritesStd }) {
   const totalFramesTarget = Math.floor(seconds * TARGET_FPS);
 
   let saveWrites = 0;
@@ -85,10 +130,16 @@ function runSoak({ seconds }) {
     : 0;
   const writesPerMinStd = stddev(writesPerMinSamples);
 
+  const checks = {
+    fpsOk: avgFps >= minFps,
+    writesStdOk: writesPerMinStd <= maxWritesStd,
+    heapOk: heapPeak <= maxHeapMb * 1024 * 1024,
+  };
+
   const conclusion = [
-    avgFps > 55 ? 'FPS稳定' : 'FPS偏低',
-    writesPerMinStd < 1 ? '写入频次稳定' : '写入频次波动偏大',
-    heapPeak < 256 * 1024 * 1024 ? 'Heap峰值正常' : 'Heap峰值偏高',
+    checks.fpsOk ? 'FPS稳定' : 'FPS偏低',
+    checks.writesStdOk ? '写入频次稳定' : '写入频次波动偏大',
+    checks.heapOk ? 'Heap峰值正常' : 'Heap峰值偏高',
   ].join(' / ');
 
   return {
@@ -100,12 +151,31 @@ function runSoak({ seconds }) {
     saveWrites,
     writesPerMinAvg,
     writesPerMinStd,
+    thresholds: {
+      minFps,
+      maxHeapMb,
+      maxWritesStd,
+    },
+    checks,
     conclusion,
   };
 }
 
 function main() {
   const cfg = parseArgs();
+
+  if (cfg.help) {
+    printHelp();
+    return;
+  }
+
+  if (cfg.error) {
+    console.error(cfg.error);
+    printHelp();
+    process.exitCode = 1;
+    return;
+  }
+
   const result = runSoak(cfg);
   console.log('SOAK_REPORT');
   console.log(JSON.stringify({
@@ -117,8 +187,14 @@ function main() {
     saveWrites: result.saveWrites,
     writesPerMinAvg: Number(result.writesPerMinAvg.toFixed(2)),
     writesPerMinStd: Number(result.writesPerMinStd.toFixed(2)),
+    thresholds: result.thresholds,
+    checks: result.checks,
     conclusion: result.conclusion,
   }, null, 2));
+
+  if (!result.checks.fpsOk || !result.checks.writesStdOk || !result.checks.heapOk) {
+    process.exitCode = 1;
+  }
 }
 
 main();

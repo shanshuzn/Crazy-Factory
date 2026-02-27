@@ -9,6 +9,8 @@ const createEconomySystem = ({
   PRICE_GROWTH,
   MARKET_BULL_BONUS,
   MARKET_BEAR_PENALTY,
+  MARKET_MOMENTUM_GPS_PER_STACK,
+  MARKET_MOMENTUM_MANUAL_PER_STACK,
   SKILL_MASTERY_BONUS,
   dirty,
   buildingViewMap,
@@ -33,8 +35,16 @@ const createEconomySystem = ({
   };
 
   const skillMasteryMult = () => 1 + (st.skillMasteryTier || 0) * SKILL_MASTERY_BONUS;
-  const getTotalGPS = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult();
-  const getManualGain = () => st.manualPower * st.manualMult * (1 + skillLv('manual_mastery') * 0.3);
+  const marketMomentumStacks = () => Math.max(0, Math.floor(st.marketMomentum || 0));
+  const marketMomentumGPSMult = () => st.marketIsBull ? 1 + marketMomentumStacks() * MARKET_MOMENTUM_GPS_PER_STACK : 1;
+  const marketMomentumManualMult = () => 1 + marketMomentumStacks() * MARKET_MOMENTUM_MANUAL_PER_STACK;
+  const policyRateDrag = () => {
+    const baseDrag = Math.max(0.72, 1 - (st.policyRate || 0) * 0.035);
+    const hedge = Math.max(0, Math.min(0.6, Number(st.policyHedge) || 0));
+    return Math.min(1, baseDrag + (1 - baseDrag) * hedge);
+  };
+  const getTotalGPS = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult() * marketMomentumGPSMult() * policyRateDrag();
+  const getManualGain = () => st.manualPower * st.manualMult * (1 + skillLv('manual_mastery') * 0.3) * marketMomentumManualMult() * policyRateDrag();
 
   const getGpsBreakdown = () => {
     const _baseGPS = baseGPS();
@@ -42,7 +52,9 @@ const createEconomySystem = ({
     const _skillGPS = skillGPS();
     const _mktMult = mktMult();
     const _mastery = skillMasteryMult();
-    const finalMult = st.gpsMultiplier * _resMult * _skillGPS * _mktMult * _mastery;
+    const _momentum = marketMomentumGPSMult();
+    const _policy = policyRateDrag();
+    const finalMult = st.gpsMultiplier * _resMult * _skillGPS * _mktMult * _mastery * _momentum * _policy;
     return {
       baseGPS: _baseGPS,
       gpsMultiplier: st.gpsMultiplier,
@@ -50,6 +62,8 @@ const createEconomySystem = ({
       skillGPS: _skillGPS,
       marketMult: _mktMult,
       masteryMult: _mastery,
+      momentumMult: _momentum,
+      policyRateMult: _policy,
       finalMult,
       totalGPS: _baseGPS * finalMult,
     };

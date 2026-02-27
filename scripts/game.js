@@ -176,6 +176,10 @@
       PRICE_GROWTH,
       MARKET_BULL_BONUS,
       MARKET_BEAR_PENALTY,
+      POLICY_RATE_MIN,
+      POLICY_RATE_MAX,
+      MARKET_MOMENTUM_GPS_PER_STACK,
+      MARKET_MOMENTUM_MANUAL_PER_STACK,
       SKILL_MASTERY_BONUS,
       dirty,
       buildingViewMap,
@@ -226,6 +230,8 @@
       MARKET_CYCLE_MAX,
       MARKET_BULL_BONUS,
       MARKET_BEAR_PENALTY,
+      POLICY_RATE_MIN,
+      POLICY_RATE_MAX,
       marketMultEl,
       marketStatusEl,
       marketDotEl,
@@ -314,7 +320,11 @@
     manualBtn.addEventListener("click",(e)=>{
       const gain=getManualGain();
       st.gears+=gain; st.lifetimeGears+=gain; st.totalClicks++;
-      if(st.marketIsBull) st.bullClicks++;
+      if(st.marketIsBull) {
+        st.bullClicks++;
+        st.marketMomentum = Math.min(MARKET_MOMENTUM_CAP, (st.marketMomentum || 0) + 1);
+        st.marketMomentumTimer = MARKET_MOMENTUM_DURATION;
+      }
       if(st.totalClicks===1) pushLog("完成首次撮合");
       eventBus.emit("manual:clicked", { x: e.clientX, y: e.clientY, gain });
       dirty.gears = dirty.stats = true;
@@ -363,7 +373,7 @@
       st.researchPoints+=gain; pushLog(`增发股权，获得 +${gain} RP`);
       Object.assign(st,{gears:0,purchaseMode:"1",pendingOfflineGears:0,accumulator:0,
         manualPower:1,manualMult:1,gpsMultiplier:1,totalClicks:0,lifetimeGears:0,
-        lastRewardText:"",gameSpeed:1,questIndex:0,autoBuy:false,autoBuyAccumulator:0,bullClicks:0,skillMasteryTier:0,logTrimNotified:false});
+        lastRewardText:"",gameSpeed:1,questIndex:0,autoBuy:false,autoBuyAccumulator:0,bullClicks:0,marketMomentum:0,marketMomentumTimer:0,policyRate:POLICY_RATE_DEFAULT,policyHedge:0,skillMasteryTier:0,logTrimNotified:false});
       buildings.forEach(b=>b.owned=0);
       upgrades.forEach(u=>u.purchased=false);
       skills.forEach(s=>s.level=0);
@@ -379,7 +389,7 @@
       Object.assign(st,{gears:0,purchaseMode:"1",pendingOfflineGears:0,accumulator:0,
         manualPower:1,manualMult:1,gpsMultiplier:1,totalClicks:0,lifetimeGears:0,researchPoints:0,
         lastRewardText:"",gameSpeed:1,questIndex:0,autoBuy:false,autoBuyAccumulator:0,
-        bullClicks:0,marketIsBull:true,marketTimer:35,marketCycleDuration:35,
+        bullClicks:0,marketMomentum:0,marketMomentumTimer:0,policyRate:POLICY_RATE_DEFAULT,policyHedge:0,marketIsBull:true,marketTimer:35,marketCycleDuration:35,
         soundEnabled:true,skillMasteryTier:0,logs:["[--:--:--] 清盘重来"],logTrimNotified:false});
       buildings.forEach(b=>b.owned=0);
       upgrades.forEach(u=>u.purchased=false);

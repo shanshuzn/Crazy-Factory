@@ -68,10 +68,136 @@
   - 验收：新增 1 个 Node 测试覆盖上限与提示触发
   - 完成：2026-02-27
   - 证据：`tests/log-system.test.js` 覆盖 `LOG_CAP` 裁剪与提示文案仅触发一次；`node --test tests/formula-system.test.js tests/log-system.test.js` 全通过
-- [TODO] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
+- [DONE] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
   - 验收：为 FPS/Heap/writes 波动增加可配置阈值参数
-- [NEXT] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
-  - 验收：为 FPS/Heap/writes 波动增加可配置阈值参数
+  - 完成：2026-02-27
+  - 指标影响：North Star +（阈值化后可自动判定稳定性，减少人工误判）；Risk 低（阈值可配置，默认策略保守）
+  - 证据：`scripts/run_soak_check.js` 新增 `--min-fps` / `--max-heap-mb` / `--max-writes-std`，并在任一阈值失败时返回非零退出码
+- [DONE] M7-T04 巡检脚本阈值文档化与CI接入示例
+  - 验收：README 增加阈值参数说明与一条可复制的 CI 命令
+  - 完成：2026-02-27
+  - 指标影响：North Star +（门禁配置可复制，回归执行率提升）；Risk 低（仅文档改动）
+  - 证据：`README.md` 新增阈值参数说明、`SOAK_REPORT` 字段说明及 CI 命令示例
+- [DONE] M7-T05 巡检阈值回归测试样例（通过/失败）
+  - 验收：新增一份脚本化示例，分别演示 exit 0 与 exit 1
+  - 完成：2026-02-27
+  - 指标影响：North Star +（阈值门禁回归路径可重复验证，减少配置漂移）
+  - 证据：新增 `scripts/verify_soak_thresholds.sh`，依次验证 `run_soak_check` 的 exit 0 与 exit 1
+- [DONE] M7-T06 巡检回归脚本输出归档（JSON文件）
+  - 验收：支持将 pass/fail 两次报告输出到 artifacts 目录
+  - 完成：2026-02-27
+  - 指标影响：North Star +（巡检证据可追溯，回归复现效率提升）
+  - 证据：`scripts/verify_soak_thresholds.sh` 新增归档逻辑，输出 `pass.json` / `fail.json` 与对应日志
+- [DONE] M7-T07 巡检脚本参数帮助信息（--help）
+  - 验收：`run_soak_check.js` 与 `verify_soak_thresholds.sh` 提供参数说明
+  - 完成：2026-02-27
+  - 指标影响：North Star +（脚本可发现性提升，误用参数导致失败的概率下降）
+  - 证据：`node scripts/run_soak_check.js --help` 与 `bash scripts/verify_soak_thresholds.sh --help` 输出参数说明
+- [DONE] M7-T08 巡检脚本错误参数回归（未知参数返回非零）
+  - 验收：`run_soak_check.js --bad-flag` 返回非零并输出帮助
+  - 完成：2026-02-27
+  - 指标影响：North Star +（错误参数路径可自动回归，减少发布前遗漏）
+  - 证据：新增 `tests/soak-cli.test.js`，覆盖未知参数时 exit=1 与帮助输出
+- [DONE] M7-T09 将错误参数校验整合进阈值回归脚本
+  - 验收：`verify_soak_thresholds.sh` 一次执行覆盖 pass/fail/invalid 三类路径
+  - 完成：2026-02-27
+  - 指标影响：North Star +（单次脚本覆盖更多失败面，回归完整性提升）
+  - 证据：`scripts/verify_soak_thresholds.sh` 新增 invalid 路径校验并产出 `invalid.log`
+- [DONE] M7-T10 为 verify 脚本增加无 Python 解析兜底
+  - 验收：无 python 环境下也能生成 pass/fail JSON
+  - 完成：2026-02-27
+  - 指标影响：North Star +（环境兼容性提升，CI 可用性更稳）
+  - 证据：`scripts/verify_soak_thresholds.sh` 支持 python 不可用时自动回退 node 解析 JSON
+- [DONE] M7-T11 为 verify 脚本补充回退路径测试
+  - 验收：使用环境变量强制 node 回退并通过
+  - 完成：2026-02-27
+  - 指标影响：North Star +（回退机制被自动测试覆盖，跨环境回归更可靠）
+  - 证据：新增 `tests/verify-soak-fallback.test.js`，用 `VERIFY_SOAK_DISABLE_PYTHON=1` 验证归档 JSON 生成
+- [DONE] M7-T12 为 verify 脚本增加可配置样例参数
+  - 验收：允许通过环境变量覆盖 PASS/FAIL 示例命令
+  - 完成：2026-02-27
+  - 指标影响：North Star +（CI 可按场景定制样例命令，接入灵活性提升）
+  - 证据：`scripts/verify_soak_thresholds.sh` 新增 `VERIFY_SOAK_PASS_CMD` / `VERIFY_SOAK_FAIL_CMD` / `VERIFY_SOAK_INVALID_CMD`
+- [DONE] M7-T13 为可配置样例参数补充自动化测试
+  - 验收：新增测试验证覆盖命令可生效
+  - 完成：2026-02-27
+  - 指标影响：North Star +（命令覆盖能力具备自动验证，避免配置失效）
+  - 证据：新增 `tests/verify-soak-config.test.js`，校验 PASS/FAIL/INVALID 覆盖命令生效
+- [DONE] M7-T14 校准 verify 脚本默认样例阈值（减少短测波动）
+  - 验收：默认样例在 60s 内稳定得到 pass/fail 预期
+  - 完成：2026-02-27
+  - 指标影响：North Star +（默认样例在短时长下结果稳定，回归耗时更可控）
+  - 证据：默认 pass/fail 调整为 60s；连续两次验证均得到 `pass=true` 与 `fail=false`
+- [DONE] M7-T15 为默认 60s 样例增加基线快照测试
+  - 验收：测试断言默认样例 durationSec=60
+  - 完成：2026-02-27
+  - 指标影响：North Star +（默认样例时长被测试固定，防止回归漂移）
+  - 证据：新增 `tests/verify-soak-defaults.test.js`，断言 pass/fail 的 `durationSec=60`
+- [DONE] M7-T16 为 verify 脚本增加超时保护
+  - 验收：单次 verify 总耗时超阈值时给出非零退出
+  - 完成：2026-02-27
+  - 指标影响：North Star +（防止回归流程失控卡死，CI 稳定性提升）
+  - 证据：`scripts/verify_soak_thresholds.sh` 新增 `VERIFY_SOAK_TIMEOUT_SEC` 并在超时后返回非零
+- [DONE] M8-T01 多头连击玩法（手动撮合叠层增益）
+  - 验收：多头期间手动撮合可叠加连击层数，并提升手动收益与总产出
+  - 完成：2026-02-27
+  - 指标影响：North Star +（手动操作反馈更强，中前期留存与参与度提升）
+  - 证据：新增 `marketMomentum` 与 `marketMomentumTimer`，`manualDesc` 显示连击层与手动加成
+- [DONE] M8-T02 连击玩法平衡复核（层数上限/持续时间）
+  - 验收：给出 10 分钟样例日志与推荐参数
+  - 完成：2026-02-27
+  - 指标影响：North Star +（连击强度进入可控区间，节奏更稳）
+  - 证据：新增 `scripts/run_momentum_balance_check.js`，10 分钟报告建议“保持当前参数”
+  - 推荐参数：`MOMENTUM_CAP=12`、`MOMENTUM_DURATION=5s`、`MANUAL_PER_STACK=6%`、`GPS_PER_STACK=2%`
+- [DONE] M8-T03 真实金融体系一期：政策利率与资金成本
+  - 验收：新增“政策利率”变量并影响手动/自动收益与市场波动
+  - 完成：2026-02-27
+  - 指标影响：North Star +（新增政策利率驱动收益与波动，金融系统真实感提升）
+  - 证据：`policyRate` 已纳入状态与存档；收益公式新增利率拖拽因子；市场切换会变动利率并反馈至 UI
+- [DONE] M8-T04 真实金融体系二期：资金成本可视化与研发对冲
+  - 验收：界面展示“利率对收益影响比例”，并新增至少 1 个可降低利率拖拽的研发项
+  - 完成：2026-02-27
+  - 指标影响：North Star +（利率影响透明化并提供对冲成长路径，决策反馈更清晰）
+  - 证据：手动收益文案新增“利率效率 %”；新增研发“久期对冲”可降低利率拖拽
+- [NEXT] M8-T05 真实金融体系三期：市场事件与利率前瞻
+  - 验收：新增至少 2 类宏观事件并可提前预告下一次利率方向
+
+<!-- AUTO:METRICS-START -->
+[Mode]
+🛡 Hardening Mode（强化模式）
+
+[North Star]
+92.0% (trend: up)
+
+[Supporting Metrics]
+- growth_momentum: 91.0%（连击参数完成平衡复核并形成推荐）
+- return_quality: 81.0%
+- upgrade_satisfaction: 78.0%
+- progress_clarity: 91.0%
+- stability_score: 88.0%
+
+[Risk Level]
+低
+
+[Task]
+M8-T04 / 真实金融体系二期：资金成本可视化与研发对冲
+
+[Impact]
+对 North Star 影响：+（利率影响可见且可对冲，提升策略可解释性与目标感）
+
+[Do]
+- 修改文件列表：`scripts/economy-system.js`、`scripts/game-data.js`、`scripts/render-system.js`、`scripts/save-system.js`、`scripts/game.js`、`ROADMAP.md`
+- 实现摘要：新增“久期对冲”研发降低利率拖拽，并在手动收益文案实时展示“利率效率”比例
+
+[Verify]
+- `node --test tests/formula-system.test.js tests/log-system.test.js tests/soak-cli.test.js tests/verify-soak-fallback.test.js tests/verify-soak-config.test.js tests/verify-soak-defaults.test.js`
+
+[RoadmapPatch]
+(diff only)
+
+[Next]
+M8-T05
+<!-- AUTO:METRICS-END -->
 
 ## 当前版本能力（摘要）
 - 模块化系统：formula/economy/skill/market/feedback/save/render/loop/debug

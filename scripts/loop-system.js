@@ -30,6 +30,14 @@ const createLoopSystem = ({
       st.accumulator -= FIXED_STEP;
       tickMarket(FIXED_STEP);
 
+      if (st.marketMomentumTimer > 0) {
+        st.marketMomentumTimer = Math.max(0, st.marketMomentumTimer - FIXED_STEP * st.gameSpeed);
+        if (st.marketMomentumTimer <= 0 && st.marketMomentum > 0) {
+          st.marketMomentum = 0;
+          dirty.market = true;
+        }
+      }
+
       if (st.autoBuy) {
         st.autoBuyAccumulator += FIXED_STEP * st.gameSpeed;
         if (st.autoBuyAccumulator >= 0.5) {
