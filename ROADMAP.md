@@ -62,12 +62,14 @@
 ### M7：可观测与回归加固（进行中）
 - [TODO] M7-T01 调试面板内存字段兼容说明补齐（浏览器限制提示统一）
   - 验收：README 增加 `Heap n/a` 场景说明与排查建议
-- [TODO] M7-T02 事件日志裁剪单测（日志上限与提示文案）
+- [DONE] M7-T02 事件日志裁剪单测（日志上限与提示文案）
   - 验收：新增 1 个 Node 测试覆盖上限与提示触发
+  - 完成：2026-02-27
+  - 证据：`tests/log-system.test.js` 覆盖 `LOG_CAP` 裁剪与提示文案仅触发一次；`node --test tests/formula-system.test.js tests/log-system.test.js` 全通过
 - [TODO] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
   - 验收：为 FPS/Heap/writes 波动增加可配置阈值参数
-- [NEXT] M7-T02 事件日志裁剪单测（日志上限与提示文案）
-  - 验收：同 M7-T02
+- [NEXT] M7-T01 调试面板内存字段兼容说明补齐（浏览器限制提示统一）
+  - 验收：README 增加 `Heap n/a` 场景说明与排查建议
 
 ## 当前版本能力（摘要）
 - 模块化系统：formula/economy/skill/market/feedback/save/render/loop/debug
