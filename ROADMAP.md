@@ -113,47 +113,53 @@
   - 完成：2026-02-27
   - 指标影响：North Star +（回退机制被自动测试覆盖，跨环境回归更可靠）
   - 证据：新增 `tests/verify-soak-fallback.test.js`，用 `VERIFY_SOAK_DISABLE_PYTHON=1` 验证归档 JSON 生成
-- [TODO] M7-T12 为 verify 脚本增加可配置样例参数
+- [DONE] M7-T12 为 verify 脚本增加可配置样例参数
   - 验收：允许通过环境变量覆盖 PASS/FAIL 示例命令
-- [NEXT] M7-T12 为 verify 脚本增加可配置样例参数
-  - 验收：允许通过环境变量覆盖 PASS/FAIL 示例命令
+  - 完成：2026-02-27
+  - 指标影响：North Star +（CI 可按场景定制样例命令，接入灵活性提升）
+  - 证据：`scripts/verify_soak_thresholds.sh` 新增 `VERIFY_SOAK_PASS_CMD` / `VERIFY_SOAK_FAIL_CMD` / `VERIFY_SOAK_INVALID_CMD`
+- [TODO] M7-T13 为可配置样例参数补充自动化测试
+  - 验收：新增测试验证覆盖命令可生效
+- [NEXT] M7-T13 为可配置样例参数补充自动化测试
+  - 验收：新增测试验证覆盖命令可生效
 
 <!-- AUTO:METRICS-START -->
 [Mode]
 🛡 Hardening Mode（强化模式）
 
 [North Star]
-86.0% (trend: up)
+87.0% (trend: up)
 
 [Supporting Metrics]
-- growth_momentum: 84.0%（node 回退路径测试补齐，稳定性覆盖提升）
+- growth_momentum: 85.0%（样例命令可配置，CI 适配性增强）
 - return_quality: 80.0%
 - upgrade_satisfaction: 77.0%
-- progress_clarity: 86.0%
+- progress_clarity: 87.0%
 - stability_score: 84.0%
 
 [Risk Level]
 低
 
 [Task]
-M7-T11 / 补充 verify 脚本 node 回退路径自动化测试
+M7-T12 / 通过环境变量覆盖 verify 脚本 PASS/FAIL 样例命令
 
 [Impact]
-对 North Star 影响：+（减少环境差异导致的回归盲区）
+对 North Star 影响：+（减少不同 CI 资源约束下的接入阻力）
 
 [Do]
-- 修改文件列表：`tests/verify-soak-fallback.test.js`、`ROADMAP.md`
-- 实现摘要：新增测试强制禁用 python，并断言 pass/fail JSON 及 invalid 日志生成
+- 修改文件列表：`scripts/verify_soak_thresholds.sh`、`README.md`、`ROADMAP.md`
+- 实现摘要：新增命令覆盖环境变量并补充文档示例
 
 [Verify]
-- `node --test tests/verify-soak-fallback.test.js`
+- `bash scripts/verify_soak_thresholds.sh`
+- `VERIFY_SOAK_PASS_CMD='node scripts/run_soak_check.js --seconds 30 --max-writes-std 3' VERIFY_SOAK_FAIL_CMD='node scripts/run_soak_check.js --seconds 10 --max-writes-std 1' VERIFY_SOAK_INVALID_CMD='node scripts/run_soak_check.js --bad-flag' bash scripts/verify_soak_thresholds.sh artifacts/soak-thresholds-custom`
 - `node --test tests/formula-system.test.js tests/log-system.test.js tests/soak-cli.test.js tests/verify-soak-fallback.test.js`
 
 [RoadmapPatch]
 (diff only)
 
 [Next]
-M7-T12
+M7-T13
 <!-- AUTO:METRICS-END -->
 
 ## 当前版本能力（摘要）

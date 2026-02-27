@@ -137,6 +137,12 @@ JSON 解析优先使用 `python3/python`，若不可用会自动回退到 `node`
 bash scripts/verify_soak_thresholds.sh artifacts/my-soak-reports
 ```
 
+如需覆盖回归样例命令（例如在更短时长下跑 CI），可通过环境变量传入：
+
+```bash
+VERIFY_SOAK_PASS_CMD='node scripts/run_soak_check.js --seconds 30 --max-writes-std 3' VERIFY_SOAK_FAIL_CMD='node scripts/run_soak_check.js --seconds 10 --max-writes-std 1' VERIFY_SOAK_INVALID_CMD='node scripts/run_soak_check.js --bad-flag' bash scripts/verify_soak_thresholds.sh
+```
+
 参数帮助：
 
 ```bash

@@ -16,6 +16,12 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   - 归档每次执行的原始日志与 SOAK_REPORT JSON（非法参数仅归档日志）
   - JSON 解析优先使用 python（python3/python），不可用时自动回退到 node
 
+可选环境变量:
+  VERIFY_SOAK_PASS_CMD     覆盖 pass 示例命令
+  VERIFY_SOAK_FAIL_CMD     覆盖 fail 示例命令
+  VERIFY_SOAK_INVALID_CMD  覆盖 invalid 示例命令
+  VERIFY_SOAK_DISABLE_PYTHON=1 强制使用 node 解析 JSON
+
 输出:
   <OUT_DIR>/pass.log
   <OUT_DIR>/fail.log
@@ -27,9 +33,9 @@ USAGE
 fi
 
 OUT_DIR="${1:-artifacts/soak-thresholds}"
-PASS_CMD=(node scripts/run_soak_check.js --seconds 120 --max-writes-std 2)
-FAIL_CMD=(node scripts/run_soak_check.js --seconds 10)
-INVALID_CMD=(node scripts/run_soak_check.js --bad-flag)
+PASS_CMD="${VERIFY_SOAK_PASS_CMD:-node scripts/run_soak_check.js --seconds 120 --max-writes-std 2}"
+FAIL_CMD="${VERIFY_SOAK_FAIL_CMD:-node scripts/run_soak_check.js --seconds 10}"
+INVALID_CMD="${VERIFY_SOAK_INVALID_CMD:-node scripts/run_soak_check.js --bad-flag}"
 mkdir -p "$OUT_DIR"
 
 extract_report_json_with_python() {
@@ -79,13 +85,12 @@ extract_report_json() {
 run_case() {
   local label="$1"
   local expect_exit="$2"
-  shift 2
-  local -a cmd=("$@")
+  local cmd="$3"
 
-  echo "[soak-threshold] ${label}: expecting exit ${expect_exit}: ${cmd[*]}"
+  echo "[soak-threshold] ${label}: expecting exit ${expect_exit}: ${cmd}"
   set +e
   local output
-  output="$(${cmd[@]} 2>&1)"
+  output="$(bash -lc "$cmd" 2>&1)"
   local status=$?
   set -e
 
@@ -100,16 +105,16 @@ run_case() {
   echo "[soak-threshold] ${label}: wrote $OUT_DIR/${label}.json"
 }
 
-run_case pass 0 "${PASS_CMD[@]}"
-run_case fail 1 "${FAIL_CMD[@]}"
+run_case pass 0 "$PASS_CMD"
+run_case fail 1 "$FAIL_CMD"
 
 run_invalid_case() {
   local label=invalid
 
-  echo "[soak-threshold] ${label}: expecting exit 1 and invalid-arg hint: ${INVALID_CMD[*]}"
+  echo "[soak-threshold] ${label}: expecting exit 1 and invalid-arg hint: ${INVALID_CMD}"
   set +e
   local output
-  output="$(${INVALID_CMD[@]} 2>&1)"
+  output="$(bash -lc "$INVALID_CMD" 2>&1)"
   local status=$?
   set -e
 
