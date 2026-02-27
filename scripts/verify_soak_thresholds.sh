@@ -1,6 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  cat <<'USAGE'
+用法:
+  bash scripts/verify_soak_thresholds.sh [OUT_DIR]
+
+参数:
+  OUT_DIR  归档目录（可选），默认 artifacts/soak-thresholds
+
+说明:
+  - 执行一个预期通过的 run_soak_check（exit 0）
+  - 执行一个预期失败的 run_soak_check（exit 1）
+  - 归档每次执行的原始日志与 SOAK_REPORT JSON
+
+输出:
+  <OUT_DIR>/pass.log
+  <OUT_DIR>/fail.log
+  <OUT_DIR>/pass.json
+  <OUT_DIR>/fail.json
+USAGE
+  exit 0
+fi
+
 OUT_DIR="${1:-artifacts/soak-thresholds}"
 PASS_CMD=(node scripts/run_soak_check.js --seconds 120 --max-writes-std 2)
 FAIL_CMD=(node scripts/run_soak_check.js --seconds 10)

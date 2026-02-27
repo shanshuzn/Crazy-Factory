@@ -136,6 +136,13 @@ bash scripts/verify_soak_thresholds.sh
 bash scripts/verify_soak_thresholds.sh artifacts/my-soak-reports
 ```
 
+参数帮助：
+
+```bash
+node scripts/run_soak_check.js --help
+bash scripts/verify_soak_thresholds.sh --help
+```
+
 ## 路线图
 
 后续迭代见 `ROADMAP.md`（已精简为可执行清单）。
