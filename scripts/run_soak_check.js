@@ -13,6 +13,7 @@ const SAVE_INTERVAL_MS = 5000;
 function parseArgs() {
   const args = process.argv.slice(2);
   let seconds = DEFAULT_SECONDS;
+  let showHelp = false;
   let minFps = 55;
   let maxHeapMB = 256;
   let maxWritesStd = 1;
@@ -29,9 +30,28 @@ function parseArgs() {
     } else if (args[i] === '--max-writes-std' && args[i + 1]) {
       maxWritesStd = Math.max(0, Number(args[i + 1]) || maxWritesStd);
       i++;
+    } else if (args[i] === '--help' || args[i] === '-h') {
+      showHelp = true;
     }
   }
-  return { seconds, minFps, maxHeapMB, maxWritesStd };
+  return { seconds, minFps, maxHeapMB, maxWritesStd, showHelp };
+}
+
+
+function printHelp() {
+  console.log(`Usage: node scripts/run_soak_check.js [options]
+
+Options:
+  -s, --seconds <n>         Soak duration in seconds (default: ${DEFAULT_SECONDS})
+      --min-fps <n>         Minimum avg FPS threshold (default: 55)
+      --max-heap-mb <n>     Maximum heap peak in MB (default: 256)
+      --max-writes-std <n>  Maximum writes/min stddev (default: 1)
+  -h, --help                Show this help
+
+Exit code:
+  0: all thresholds passed
+  1: any threshold failed
+`);
 }
 
 function formatMB(bytes) {
@@ -130,6 +150,11 @@ function runSoak({ seconds, minFps, maxHeapMB, maxWritesStd }) {
 
 function main() {
   const cfg = parseArgs();
+  if (cfg.showHelp) {
+    printHelp();
+    return;
+  }
+
   const result = runSoak(cfg);
   console.log('SOAK_REPORT');
   console.log(JSON.stringify({

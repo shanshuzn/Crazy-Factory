@@ -29,3 +29,15 @@ test('soak check exits non-zero when threshold check fails', () => {
   assert.equal(status, 1);
   assert.equal(report.checks.heapOk, false);
 });
+
+
+test('soak check help prints threshold options and exits 0', () => {
+  const ret = spawnSync(process.execPath, ['scripts/run_soak_check.js', '--help'], {
+    encoding: 'utf8',
+  });
+
+  assert.equal(ret.status, 0);
+  assert.match(ret.stdout, /--min-fps/);
+  assert.match(ret.stdout, /--max-heap-mb/);
+  assert.match(ret.stdout, /--max-writes-std/);
+});

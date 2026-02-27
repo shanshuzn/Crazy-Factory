@@ -72,10 +72,14 @@
   - 验收：为 FPS/Heap/writes 波动增加可配置阈值参数
   - 完成：2026-02-27
   - 证据：`scripts/run_soak_check.js` 新增 `--min-fps/--max-heap-mb/--max-writes-std`，并在任一阈值失败时返回退出码 1；`node --test tests/run-soak-check.test.js` 覆盖通过与失败两条路径
-- [TODO] M7-T04 巡检脚本阈值参数文档与示例命令
+- [DONE] M7-T04 巡检脚本阈值参数文档与示例命令
   - 验收：README 增加参数表与 1 条成功/1 条失败示例命令
-- [NEXT] M7-T04 巡检脚本阈值参数文档与示例命令
-  - 验收：README 增加参数表与 1 条成功/1 条失败示例命令
+  - 完成：2026-02-27
+  - 证据：`README.md` 新增阈值参数表、成功/失败示例；`scripts/run_soak_check.js --help` 可见阈值参数与退出码说明；`node --test tests/run-soak-check.test.js` 覆盖 help 输出
+- [TODO] M7-T05 巡检脚本支持 JSON-only 输出（便于机器解析）
+  - 验收：新增 `--json` 参数仅输出 JSON 报告并保持阈值退出码语义
+- [NEXT] M7-T05 巡检脚本支持 JSON-only 输出（便于机器解析）
+  - 验收：新增 `--json` 参数仅输出 JSON 报告并保持阈值退出码语义
 
 ## 当前版本能力（摘要）
 - 模块化系统：formula/economy/skill/market/feedback/save/render/loop/debug
