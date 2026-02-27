@@ -159,19 +159,7 @@
     // ════════════════════════════════════════════════
     // ⑮ 奖励/日志
     // ════════════════════════════════════════════════
-    const pushLog = (msg) => {
-      const nowTag = `[${new Date().toLocaleTimeString("zh-CN",{hour12:false})}]`;
-      st.logs.unshift(`${nowTag} ${msg}`);
-      if(st.logs.length > LOG_CAP){
-        st.logs = st.logs.slice(0,LOG_CAP);
-        if(!st.logTrimNotified){
-          st.logs.unshift(`${nowTag} （系统）日志已达上限 ${LOG_CAP} 条，较早记录已裁剪`);
-          st.logs = st.logs.slice(0,LOG_CAP);
-          st.logTrimNotified = true;
-        }
-      }
-      dirty.logs = true;
-    };
+    const { pushLog } = createLogSystem({ st, dirty, LOG_CAP });
     const grantReward = (rw,label) => {
       if(!rw) return;
       if(rw.type==="gear"){ st.gears+=rw.value; st.lifetimeGears+=rw.value; st.lastRewardText=`${label}：+${fmt(rw.value)}`; pushLog(st.lastRewardText); }

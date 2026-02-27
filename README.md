@@ -46,6 +46,10 @@ price = floor(basePrice * 1.15 ^ owned)
 - 事件日志：记录关键操作与奖励发放，便于调试平衡
 - 统计摘要面板：集中展示建筑/升级/成就/任务与累计进度
 - 调试面板：`?debug=1` 可查看 GPS 分解 / 市场状态 / 存档大小 / FPS / RAF速率 / Heap / 写入频次
+- Heap `n/a` 说明（`?debug=1`）：
+  - 常见场景：浏览器未开放 `performance.memory`（Firefox / Safari / iOS WebView / 部分隐私模式）
+  - 预期表现：调试面板显示 `Heap n/a (browser restricted)`，不影响游戏主循环
+  - 排查建议：优先在 Chromium 桌面版复测；关闭严格隐私扩展后重开页面；对比 FPS/RAF 与 `run_soak_check` 输出判断是否存在真实性能问题
 - 版本日志：首页展示版本号与最近两版变更
 - 内容解锁：
   - 建筑按累计齿轮解锁
@@ -64,10 +68,12 @@ price = floor(basePrice * 1.15 ^ owned)
 ├── README.md
 ├── ROADMAP.md
 ├── tests/
-│   └── formula-system.test.js
+│   ├── formula-system.test.js
+│   └── log-system.test.js
 └── scripts/
     ├── game-data.js
     ├── formula-system.js
+    ├── log-system.js
     ├── skill-system.js
     ├── economy-system.js
     ├── market-system.js
