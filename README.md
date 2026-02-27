@@ -76,6 +76,7 @@ price = floor(basePrice * 1.15 ^ owned)
     ├── render-system.js
     ├── debug-system.js
     ├── game.js
+    ├── run_soak_check.js
     └── capture_screenshot.py
 ```
 
@@ -94,6 +95,12 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 ```
 
 > 在容器中若 Chromium 不稳定（SIGSEGV），建议保持 Firefox 优先。
+
+长时巡检可用：
+
+```bash
+node scripts/run_soak_check.js --seconds 1800
+```
 
 ## 路线图
 

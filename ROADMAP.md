@@ -15,12 +15,13 @@
 - [DONE] M4-T03 RAF 速率巡检指标（泄漏前置监控）
   - 验收：`/?debug=1` 显示 `RAF xx/s | OK/WARN`
   - 完成：2026-02-27
-- [TODO] M4-T04 长时间运行巡检脚本（30 分钟）
-  - 验收：输出平均 FPS、峰值 Heap、writes/min 波动与结论
+- [DONE] M4-T04 长时间运行巡检脚本（30 分钟）
+  - 验收：`node scripts/run_soak_check.js --seconds 1800` 输出平均 FPS、峰值 Heap、writes/min 波动与结论
+  - 完成：2026-02-27
 - [TODO] M4-T05 发布页与版本日志（changelog）
-  - 验收：新增发布说明区块 + 版本记录条目
-- [NEXT] M4-T04 长时间运行巡检脚本（30 分钟）
-  - 验收：同 M4-T04
+  - 验收：新增发布说明区块 + 版本记录条目 + 首页可见版本号
+- [NEXT] M4-T05 发布页与版本日志（changelog）
+  - 验收：同 M4-T05
 
 ### M5：平衡与体验抛光（规划）
 - [TODO] M5-T01 市场波动平衡回归（牛/熊周期与收益体感）
@@ -34,6 +35,7 @@
 - 模块化系统：formula/economy/skill/market/feedback/save/render/loop/debug
 - 经济核心公式已抽离为纯函数并具备 Node 单测
 - `?debug=1` 支持 GPS 分解、市场状态、存档大小、writes/min、FPS、RAF/s、Heap
+- 支持 `scripts/run_soak_check.js` 进行 30 分钟巡检报告导出
 
 ## 历史完成摘要（归档）
 - M1~M3 核心循环、进度系统、中期内容扩展均已完成（建筑层级、升级链、成就任务、Prestige、离线收益、音效反馈）
