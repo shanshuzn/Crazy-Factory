@@ -40,12 +40,27 @@
     const statQstEl     = $("statQuest");
     const statModeEl    = $("statMode");
     const statLifeEl    = $("statLifetime");
+    const gameShellEl   = document.querySelector(".game");
 
     // View 缓存（渲染解耦核心，避免每帧 querySelector）
     const buildingViewMap   = new Map();
     const upgradeViewMap    = new Map();
     const skillViewMap      = new Map();
     const achievViewMap     = new Map();
+
+    // 轻量事件总线（为什么：把反馈层与业务层解耦，后续可独立替换成更复杂 VFX 系统）
+    const eventBus = (() => {
+      const listeners = new Map();
+      const on = (event, handler) => {
+        const bucket = listeners.get(event) || [];
+        bucket.push(handler);
+        listeners.set(event, bucket);
+      };
+      const emit = (event, payload) => {
+        (listeners.get(event) || []).forEach((fn) => fn(payload));
+      };
+      return { on, emit };
+    })();
 
     // ════════════════════════════════════════════════
     // ⑨ 工具函数（生产层，独立于 DOM）
@@ -135,10 +150,7 @@
       pushLog(label); st.lastRewardText = label;
       sfxMarket(st.marketIsBull);
       dirty.market = true; dirty.logs = true;
-      // 屏闪
-      marketFlashEl.style.background = st.marketIsBull ? "#10b981" : "#ef4444";
-      marketFlashEl.classList.add("on");
-      setTimeout(()=>marketFlashEl.classList.remove("on"), 250);
+      eventBus.emit("market:switched", { isBull: st.marketIsBull });
     };
 
     const tickMarket = (dt) => {
@@ -379,6 +391,33 @@
       for(const b of [...buildings].reverse()){ if(!isBldUnlocked(b))continue; if(affordableCount(b,st.gears,"1")>0){const p=st.purchaseMode;st.purchaseMode="1";buyBuilding(b.id);st.purchaseMode=p;return;} }
     };
 
+    // 反馈事件（为什么：避免在业务代码里散落动效细节）
+    eventBus.on("manual:clicked", ({ x, y, gain }) => {
+      sfxClick();
+      spawnFloat(x + (Math.random() * JUICE.manualFloatJitter * 2 - JUICE.manualFloatJitter), y - 10, `+${fmt(gain)}`);
+      manualBtn.classList.remove("clicked");
+      if (JUICE.clickPulseResetReflow) void manualBtn.offsetWidth;
+      manualBtn.classList.add("clicked");
+      const rect = manualZone.getBoundingClientRect();
+      manualZone.style.setProperty("--rx", `${((x - rect.left) / rect.width) * 100}%`);
+      manualZone.style.setProperty("--ry", `${((y - rect.top) / rect.height) * 100}%`);
+      manualZone.classList.add("ripple");
+      setTimeout(() => manualZone.classList.remove("ripple"), JUICE.rippleDurationMs);
+    });
+
+    eventBus.on("market:switched", ({ isBull }) => {
+      marketFlashEl.style.background = isBull ? "#10b981" : "#ef4444";
+      marketFlashEl.classList.add("on");
+      setTimeout(() => marketFlashEl.classList.remove("on"), JUICE.marketFlashDurationMs);
+
+      if (!gameShellEl) return;
+      gameShellEl.style.setProperty("--shake-x", `${JUICE.marketShakePx}px`);
+      gameShellEl.classList.remove("screen-shake");
+      void gameShellEl.offsetWidth;
+      gameShellEl.classList.add("screen-shake");
+      setTimeout(() => gameShellEl.classList.remove("screen-shake"), JUICE.marketShakeMs);
+    });
+
     // ════════════════════════════════════════════════
     // ⑱ 渲染层（与生产层解耦，M1 重构核心）
     // ════════════════════════════════════════════════
@@ -539,13 +578,7 @@
       st.gears+=gain; st.lifetimeGears+=gain; st.totalClicks++;
       if(st.marketIsBull) st.bullClicks++;
       if(st.totalClicks===1) pushLog("完成首次撮合");
-      sfxClick();
-      spawnFloat(e.clientX+(Math.random()*20-10), e.clientY-10, `+${fmt(gain)}`);
-      manualBtn.classList.remove("clicked"); void manualBtn.offsetWidth; manualBtn.classList.add("clicked");
-      const rect=manualZone.getBoundingClientRect();
-      manualZone.style.setProperty("--rx",`${((e.clientX-rect.left)/rect.width)*100}%`);
-      manualZone.style.setProperty("--ry",`${((e.clientY-rect.top)/rect.height)*100}%`);
-      manualZone.classList.add("ripple"); setTimeout(()=>manualZone.classList.remove("ripple"),400);
+      eventBus.emit("manual:clicked", { x: e.clientX, y: e.clientY, gain });
       dirty.gears = dirty.stats = true;
       saveGame();
     });

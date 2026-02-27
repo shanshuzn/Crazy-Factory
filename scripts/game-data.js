@@ -117,4 +117,14 @@
     };
     let lastRender = 0;
 
+    // 反馈参数（为什么单独抽离：调“手感”时不需要翻业务逻辑）
+    const JUICE = {
+      manualFloatJitter: 10,       // 点击飘字横向随机幅度(px)
+      rippleDurationMs: 400,       // 手动点击涟漪持续时间
+      marketFlashDurationMs: 250,  // 市场切换屏闪时长
+      marketShakePx: 6,            // 市场切换屏幕抖动强度
+      marketShakeMs: 220,          // 市场切换屏幕抖动时间
+      clickPulseResetReflow: true, // 允许强制 reflow 来稳定触发点击 pulse
+    };
+
     // ════════════════════════════════════════════════
