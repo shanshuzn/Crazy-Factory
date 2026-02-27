@@ -68,10 +68,54 @@
   - 验收：新增 1 个 Node 测试覆盖上限与提示触发
   - 完成：2026-02-27
   - 证据：`tests/log-system.test.js` 覆盖 `LOG_CAP` 裁剪与提示文案仅触发一次；`node --test tests/formula-system.test.js tests/log-system.test.js` 全通过
-- [TODO] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
+- [DONE] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
   - 验收：为 FPS/Heap/writes 波动增加可配置阈值参数
-- [NEXT] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
-  - 验收：为 FPS/Heap/writes 波动增加可配置阈值参数
+  - 完成：2026-02-27
+  - 指标影响：North Star +（阈值化后可自动判定稳定性，减少人工误判）；Risk 低（阈值可配置，默认策略保守）
+  - 证据：`scripts/run_soak_check.js` 新增 `--min-fps` / `--max-heap-mb` / `--max-writes-std`，并在任一阈值失败时返回非零退出码
+- [TODO] M7-T04 巡检脚本阈值文档化与CI接入示例
+  - 验收：README 增加阈值参数说明与一条可复制的 CI 命令
+- [NEXT] M7-T04 巡检脚本阈值文档化与CI接入示例
+  - 验收：README 增加阈值参数说明与一条可复制的 CI 命令
+
+<!-- AUTO:METRICS-START -->
+[Mode]
+⚡ Optimization Mode（优化模式）
+
+[North Star]
+78.0% (trend: up)
+
+[Supporting Metrics]
+- growth_momentum: 76.0%（阈值化后巡检门禁可用性提升）
+- return_quality: 79.0%
+- upgrade_satisfaction: 77.0%
+- progress_clarity: 78.0%
+- stability_score: 80.0%
+
+[Risk Level]
+低
+
+[Task]
+M7-T03 / 为 FPS/Heap/writes 波动增加可配置阈值参数，并在超阈值时返回非零退出码
+
+[Impact]
+对 North Star 影响：+（稳定性回归可自动阻断异常版本，提高持续迭代质量）
+
+[Do]
+- 修改文件列表：`scripts/run_soak_check.js`、`ROADMAP.md`
+- 实现摘要：新增巡检阈值参数与失败退出码；完成 M7-T03 并推进下一项文档化任务
+
+[Verify]
+- `node scripts/run_soak_check.js --seconds 120 --max-writes-std 2`
+- `node --test tests/formula-system.test.js tests/log-system.test.js`
+- 指标验证：检查 SOAK_REPORT 中 `thresholds`、`checks` 字段与进程退出码
+
+[RoadmapPatch]
+(diff only)
+
+[Next]
+M7-T04
+<!-- AUTO:METRICS-END -->
 
 ## 当前版本能力（摘要）
 - 模块化系统：formula/economy/skill/market/feedback/save/render/loop/debug

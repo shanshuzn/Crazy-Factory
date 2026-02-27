@@ -13,13 +13,31 @@ const SAVE_INTERVAL_MS = 5000;
 function parseArgs() {
   const args = process.argv.slice(2);
   let seconds = DEFAULT_SECONDS;
+  let minFps = 55;
+  let maxHeapMb = 256;
+  let maxWritesStd = 1;
   for (let i = 0; i < args.length; i++) {
     if ((args[i] === '--seconds' || args[i] === '-s') && args[i + 1]) {
       seconds = Math.max(5, Number(args[i + 1]) || DEFAULT_SECONDS);
       i++;
+      continue;
+    }
+    if (args[i] === '--min-fps' && args[i + 1]) {
+      minFps = Math.max(1, Number(args[i + 1]) || minFps);
+      i++;
+      continue;
+    }
+    if (args[i] === '--max-heap-mb' && args[i + 1]) {
+      maxHeapMb = Math.max(1, Number(args[i + 1]) || maxHeapMb);
+      i++;
+      continue;
+    }
+    if (args[i] === '--max-writes-std' && args[i + 1]) {
+      maxWritesStd = Math.max(0, Number(args[i + 1]) || maxWritesStd);
+      i++;
     }
   }
-  return { seconds };
+  return { seconds, minFps, maxHeapMb, maxWritesStd };
 }
 
 function formatMB(bytes) {
@@ -33,7 +51,7 @@ function stddev(values) {
   return Math.sqrt(variance);
 }
 
-function runSoak({ seconds }) {
+function runSoak({ seconds, minFps, maxHeapMb, maxWritesStd }) {
   const totalFramesTarget = Math.floor(seconds * TARGET_FPS);
 
   let saveWrites = 0;
@@ -85,10 +103,16 @@ function runSoak({ seconds }) {
     : 0;
   const writesPerMinStd = stddev(writesPerMinSamples);
 
+  const checks = {
+    fpsOk: avgFps >= minFps,
+    writesStdOk: writesPerMinStd <= maxWritesStd,
+    heapOk: heapPeak <= maxHeapMb * 1024 * 1024,
+  };
+
   const conclusion = [
-    avgFps > 55 ? 'FPS稳定' : 'FPS偏低',
-    writesPerMinStd < 1 ? '写入频次稳定' : '写入频次波动偏大',
-    heapPeak < 256 * 1024 * 1024 ? 'Heap峰值正常' : 'Heap峰值偏高',
+    checks.fpsOk ? 'FPS稳定' : 'FPS偏低',
+    checks.writesStdOk ? '写入频次稳定' : '写入频次波动偏大',
+    checks.heapOk ? 'Heap峰值正常' : 'Heap峰值偏高',
   ].join(' / ');
 
   return {
@@ -100,6 +124,12 @@ function runSoak({ seconds }) {
     saveWrites,
     writesPerMinAvg,
     writesPerMinStd,
+    thresholds: {
+      minFps,
+      maxHeapMb,
+      maxWritesStd,
+    },
+    checks,
     conclusion,
   };
 }
@@ -117,8 +147,14 @@ function main() {
     saveWrites: result.saveWrites,
     writesPerMinAvg: Number(result.writesPerMinAvg.toFixed(2)),
     writesPerMinStd: Number(result.writesPerMinStd.toFixed(2)),
+    thresholds: result.thresholds,
+    checks: result.checks,
     conclusion: result.conclusion,
   }, null, 2));
+
+  if (!result.checks.fpsOk || !result.checks.writesStdOk || !result.checks.heapOk) {
+    process.exitCode = 1;
+  }
 }
 
 main();
