@@ -1,0 +1,2125 @@
+{
+  "meta": {
+    "runs_budget": 2000,
+    "generations": 15,
+    "population": 40,
+    "topk": 5,
+    "seed": 20260227,
+    "runs_per_candidate": 50
+  },
+  "evolution": [
+    {
+      "generation": 0,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85570.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85290.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85439.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85600.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85862.0,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 1,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85833.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85426.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85703.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85255.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85391.5,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 2,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85409.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85214.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85647.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85448.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85239.5,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 3,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85833.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85287.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85389.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85495.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85266.0,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 4,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85595.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85370.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85438.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85206.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 86057.0,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 5,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85715.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85626.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85611.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85585.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85668.0,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 6,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85448.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85496.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85398.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85414.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85781.5,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 7,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85553.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85251.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85248.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85430.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85129.5,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 8,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85158.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85568.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85719.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85632.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85051.5,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 9,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85759.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85354.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85322.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85488.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85598.5,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 10,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85766.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85653.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85561.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85438.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85281.5,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 11,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85405.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85702.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85316.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85687.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85478.0,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 12,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85367.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85985.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85785.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85314.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85160.5,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 13,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85795.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85415.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85566.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85205.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85616.0,
+            "V_total": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "generation": 14,
+      "runs_per_candidate": 50,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.0,
+            "price_exp": 1.12,
+            "reward_scale": 1.0,
+            "reward_exp": 1.08,
+            "softcap_start": 0.65,
+            "softcap_strength": 0.25,
+            "offline_rate": 0.7,
+            "offline_cap_hours": 8,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 24,
+            "prestige_gain_scale": 0.15
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85909.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 1.1248405902792977,
+            "price_exp": 1.2051370479541985,
+            "reward_scale": 1.2080873468890454,
+            "reward_exp": 1.0893980214001102,
+            "softcap_start": 0.4059487696209371,
+            "softcap_strength": 0.5750408564922098,
+            "offline_rate": 0.7030881274255927,
+            "offline_cap_hours": 10,
+            "prestige_enabled": false,
+            "prestige_unlock_hours": 14.0,
+            "prestige_gain_scale": 0.35868927160621694
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85608.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.7010747022430287,
+            "price_exp": 1.1893445865785883,
+            "reward_scale": 1.149948723231744,
+            "reward_exp": 1.1651261245616766,
+            "softcap_start": 0.5874773521002772,
+            "softcap_strength": 0.18495679567261977,
+            "offline_rate": 1.1657876493968626,
+            "offline_cap_hours": 11,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 37,
+            "prestige_gain_scale": 0.2065348063793217
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85598.0,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.8917465634763836,
+            "price_exp": 1.2293323612677718,
+            "reward_scale": 1.018906092959223,
+            "reward_exp": 1.0813517437107283,
+            "softcap_start": 0.6794549533469586,
+            "softcap_strength": 0.21703805181614996,
+            "offline_rate": 0.7082348663455809,
+            "offline_cap_hours": 13,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 38,
+            "prestige_gain_scale": 0.2632694794480668
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85160.5,
+            "V_total": 0.0
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.0,
+          "accepted": false,
+          "constraint_failed": "long_bottleneck",
+          "params": {
+            "price_scale": 0.9710382675697512,
+            "price_exp": 1.118343329262844,
+            "reward_scale": 0.7089535822717676,
+            "reward_exp": 1.1552665413206318,
+            "softcap_start": 0.4692188728607183,
+            "softcap_strength": 0.34938994816080426,
+            "offline_rate": 0.4357233231620171,
+            "offline_cap_hours": 5,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 33,
+            "prestige_gain_scale": 0.07570404175126942
+          },
+          "score": {
+            "accepted": false,
+            "constraint_failed": "long_bottleneck",
+            "longest_stall_median_seconds": 85418.0,
+            "V_total": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "final_ranking": [
+    {
+      "rank": 1,
+      "V_total": 0.0,
+      "accepted": false,
+      "constraint_failed": "long_bottleneck",
+      "params": {
+        "price_scale": 1.0,
+        "price_exp": 1.12,
+        "reward_scale": 1.0,
+        "reward_exp": 1.08,
+        "softcap_start": 0.65,
+        "softcap_strength": 0.25,
+        "offline_rate": 0.7,
+        "offline_cap_hours": 8,
+        "prestige_enabled": false,
+        "prestige_unlock_hours": 24,
+        "prestige_gain_scale": 0.15
+      },
+      "score": {
+        "accepted": false,
+        "constraint_failed": "long_bottleneck",
+        "longest_stall_median_seconds": 85506.5,
+        "V_total": 0.0
+      }
+    },
+    {
+      "rank": 2,
+      "V_total": 0.0,
+      "accepted": false,
+      "constraint_failed": "long_bottleneck",
+      "params": {
+        "price_scale": 1.1248405902792977,
+        "price_exp": 1.2051370479541985,
+        "reward_scale": 1.2080873468890454,
+        "reward_exp": 1.0893980214001102,
+        "softcap_start": 0.4059487696209371,
+        "softcap_strength": 0.5750408564922098,
+        "offline_rate": 0.7030881274255927,
+        "offline_cap_hours": 10,
+        "prestige_enabled": false,
+        "prestige_unlock_hours": 14.0,
+        "prestige_gain_scale": 0.35868927160621694
+      },
+      "score": {
+        "accepted": false,
+        "constraint_failed": "long_bottleneck",
+        "longest_stall_median_seconds": 85516.0,
+        "V_total": 0.0
+      }
+    },
+    {
+      "rank": 3,
+      "V_total": 0.0,
+      "accepted": false,
+      "constraint_failed": "long_bottleneck",
+      "params": {
+        "price_scale": 0.7010747022430287,
+        "price_exp": 1.1893445865785883,
+        "reward_scale": 1.149948723231744,
+        "reward_exp": 1.1651261245616766,
+        "softcap_start": 0.5874773521002772,
+        "softcap_strength": 0.18495679567261977,
+        "offline_rate": 1.1657876493968626,
+        "offline_cap_hours": 11,
+        "prestige_enabled": true,
+        "prestige_unlock_hours": 37,
+        "prestige_gain_scale": 0.2065348063793217
+      },
+      "score": {
+        "accepted": false,
+        "constraint_failed": "long_bottleneck",
+        "longest_stall_median_seconds": 85468.5,
+        "V_total": 0.0
+      }
+    },
+    {
+      "rank": 4,
+      "V_total": 0.0,
+      "accepted": false,
+      "constraint_failed": "long_bottleneck",
+      "params": {
+        "price_scale": 0.8917465634763836,
+        "price_exp": 1.2293323612677718,
+        "reward_scale": 1.018906092959223,
+        "reward_exp": 1.0813517437107283,
+        "softcap_start": 0.6794549533469586,
+        "softcap_strength": 0.21703805181614996,
+        "offline_rate": 0.7082348663455809,
+        "offline_cap_hours": 13,
+        "prestige_enabled": true,
+        "prestige_unlock_hours": 38,
+        "prestige_gain_scale": 0.2632694794480668
+      },
+      "score": {
+        "accepted": false,
+        "constraint_failed": "long_bottleneck",
+        "longest_stall_median_seconds": 85504.0,
+        "V_total": 0.0
+      }
+    },
+    {
+      "rank": 5,
+      "V_total": 0.0,
+      "accepted": false,
+      "constraint_failed": "long_bottleneck",
+      "params": {
+        "price_scale": 0.9710382675697512,
+        "price_exp": 1.118343329262844,
+        "reward_scale": 0.7089535822717676,
+        "reward_exp": 1.1552665413206318,
+        "softcap_start": 0.4692188728607183,
+        "softcap_strength": 0.34938994816080426,
+        "offline_rate": 0.4357233231620171,
+        "offline_cap_hours": 5,
+        "prestige_enabled": true,
+        "prestige_unlock_hours": 33,
+        "prestige_gain_scale": 0.07570404175126942
+      },
+      "score": {
+        "accepted": false,
+        "constraint_failed": "long_bottleneck",
+        "longest_stall_median_seconds": 85487.5,
+        "V_total": 0.0
+      }
+    }
+  ],
+  "top1": {
+    "params": {
+      "price_scale": 1.0,
+      "price_exp": 1.12,
+      "reward_scale": 1.0,
+      "reward_exp": 1.08,
+      "softcap_start": 0.65,
+      "softcap_strength": 0.25,
+      "offline_rate": 0.7,
+      "offline_cap_hours": 8,
+      "prestige_enabled": false,
+      "prestige_unlock_hours": 24,
+      "prestige_gain_scale": 0.15
+    },
+    "score": {
+      "accepted": false,
+      "constraint_failed": "long_bottleneck",
+      "longest_stall_median_seconds": 85506.5,
+      "V_total": 0.0
+    }
+  }
+}
