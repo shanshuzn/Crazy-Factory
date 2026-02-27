@@ -68,6 +68,7 @@ price = floor(basePrice * 1.15 ^ owned)
     ├── market-system.js
     ├── feedback-system.js
     ├── save-system.js
+    ├── loop-system.js
     ├── game.js
     └── capture_screenshot.py
 ```
