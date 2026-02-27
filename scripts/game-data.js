@@ -10,6 +10,7 @@
     const SAVE_INTERVAL        = 5000;    // 自动存档间隔(ms)
     const SMOOTH_SPEED         = 0.15;   // 数字滚动平滑速度
     const RENDER_THROTTLE      = 100;     // 渲染节流间隔(ms)
+    const LOG_CAP              = 20;      // 事件日志上限（超出后裁剪旧记录）
 
     // 市场参数
     const MARKET_CYCLE_MIN  = 25;
@@ -119,6 +120,7 @@
       saveWriteCount:0,
       saveWriteWindowStart:Date.now(),
       lastSaveAt:0,
+      logTrimNotified:false,
       rafTickCount:0,
       rafWindowStart:Date.now(),
     };

@@ -6,7 +6,7 @@
       st.lastSaveAt = Date.now();
       localStorage.setItem(SAVE_KEY, JSON.stringify({
         gears:st.gears, purchaseMode:st.purchaseMode, gameSpeed:st.gameSpeed,
-        autoBuy:st.autoBuy, questIndex:st.questIndex, logs:st.logs.slice(0,20),
+        autoBuy:st.autoBuy, questIndex:st.questIndex, logs:st.logs.slice(0,LOG_CAP),
         manualPower:st.manualPower, manualMult:st.manualMult, gpsMultiplier:st.gpsMultiplier,
         totalClicks:st.totalClicks, lifetimeGears:st.lifetimeGears, researchPoints:st.researchPoints,
         bullClicks:st.bullClicks, marketIsBull:st.marketIsBull, soundEnabled:st.soundEnabled,
@@ -43,7 +43,7 @@
         if([1,2,4].includes(Number(d.gameSpeed))) st.gameSpeed=Number(d.gameSpeed);
         st.autoBuy    = Boolean(d.autoBuy);
         st.questIndex = Math.max(0,Math.min(Number(d.questIndex)||0,questChain.length));
-        if(Array.isArray(d.logs)) st.logs=d.logs.slice(0,20);
+        if(Array.isArray(d.logs)) st.logs=d.logs.slice(0,LOG_CAP);
 
         (d.buildings||[]).forEach(s=>{const t=bld(s.id);if(t)t.owned=Math.max(0,Math.floor(Number(s.owned)||0));});
         (d.upgrades||[]).forEach(s=>{const t=upgrades.find(u=>u.id===s.id);if(t){t.purchased=Boolean(s.purchased);if(t.purchased)applyUpgradeEffect(t,true);}});

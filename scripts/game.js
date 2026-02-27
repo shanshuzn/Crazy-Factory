@@ -160,8 +160,16 @@
     // ⑮ 奖励/日志
     // ════════════════════════════════════════════════
     const pushLog = (msg) => {
-      st.logs.unshift(`[${new Date().toLocaleTimeString("zh-CN",{hour12:false})}] ${msg}`);
-      st.logs=st.logs.slice(0,20);
+      const nowTag = `[${new Date().toLocaleTimeString("zh-CN",{hour12:false})}]`;
+      st.logs.unshift(`${nowTag} ${msg}`);
+      if(st.logs.length > LOG_CAP){
+        st.logs = st.logs.slice(0,LOG_CAP);
+        if(!st.logTrimNotified){
+          st.logs.unshift(`${nowTag} （系统）日志已达上限 ${LOG_CAP} 条，较早记录已裁剪`);
+          st.logs = st.logs.slice(0,LOG_CAP);
+          st.logTrimNotified = true;
+        }
+      }
       dirty.logs = true;
     };
     const grantReward = (rw,label) => {
@@ -367,7 +375,7 @@
       st.researchPoints+=gain; pushLog(`增发股权，获得 +${gain} RP`);
       Object.assign(st,{gears:0,purchaseMode:"1",pendingOfflineGears:0,accumulator:0,
         manualPower:1,manualMult:1,gpsMultiplier:1,totalClicks:0,lifetimeGears:0,
-        lastRewardText:"",gameSpeed:1,questIndex:0,autoBuy:false,autoBuyAccumulator:0,bullClicks:0,skillMasteryTier:0});
+        lastRewardText:"",gameSpeed:1,questIndex:0,autoBuy:false,autoBuyAccumulator:0,bullClicks:0,skillMasteryTier:0,logTrimNotified:false});
       buildings.forEach(b=>b.owned=0);
       upgrades.forEach(u=>u.purchased=false);
       skills.forEach(s=>s.level=0);
@@ -384,7 +392,7 @@
         manualPower:1,manualMult:1,gpsMultiplier:1,totalClicks:0,lifetimeGears:0,researchPoints:0,
         lastRewardText:"",gameSpeed:1,questIndex:0,autoBuy:false,autoBuyAccumulator:0,
         bullClicks:0,marketIsBull:true,marketTimer:35,marketCycleDuration:35,
-        soundEnabled:true,skillMasteryTier:0,logs:["[--:--:--] 清盘重来"]});
+        soundEnabled:true,skillMasteryTier:0,logs:["[--:--:--] 清盘重来"],logTrimNotified:false});
       buildings.forEach(b=>b.owned=0);
       upgrades.forEach(u=>u.purchased=false);
       skills.forEach(s=>s.level=0);

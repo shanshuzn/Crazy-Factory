@@ -40,7 +40,7 @@
   - 参数：购买 `sfxBuy(330/440Hz, square, 0.12/0.10s, gain 0.08/0.06)`；研发 `sfxUpgrade(660/880Hz, sine, 0.15/0.20s, gain 0.10/0.08)`；市场切换 `marketFlashDurationMs=250`、`marketShakePx=6`、`marketShakeMs=220`
   - 截图：`browser:/tmp/codex_browser_invocations/471049d103f3fb5d/artifacts/artifacts/m5-t03-feedback-proof.png`
 
-### M6：稳定性与可维护性（进行中）
+### M6：稳定性与可维护性（完成）
 - [DONE] M6-T01 存档导入鲁棒性校验（非法 JSON/缺字段回退）
   - 验收：提供最少 3 组异常输入与结果日志
   - 完成：2026-02-27
@@ -53,10 +53,21 @@
   - 字段说明：`debugGps`=base/mul/total/bld；`debugMarket`=BULL/BEAR+timer+cycle；`debugSave`=size+writes/min+last；`debugPerf`=FPS+speed+auto；`debugRaf`=RAF/s+OK/WARN；`debugMem`=Heap MB/n-a
   - 来源行：`scripts/debug-system.js` L11-16(字段容器), L36-37(GPS/Market), L43(Save), L47(RAF), L53(FPS), L59(Heap), L44-46(RAF窗口判定), L49-56(FPS采样窗口)
   - 运行证据：`/?debug=1` 实测文本含 `GPS base...`, `Market BULL...`, `Save key...writes/min...`, `FPS ...`, `RAF ...`, `Heap ...`
-- [TODO] M6-T03 事件日志容量策略（上限与裁剪提示）
+- [DONE] M6-T03 事件日志容量策略（上限与裁剪提示）
   - 验收：日志上限值 + 裁剪后用户可见提示
-- [NEXT] M6-T03 事件日志容量策略（上限与裁剪提示）
-  - 验收：同 M6-T03
+  - 完成：2026-02-27
+  - 上限值：`LOG_CAP=20`，`pushLog` 超限裁剪至 20 条，存档读写同口径 `slice(0, LOG_CAP)`
+  - 提示：首次触顶写入 `（系统）日志已达上限 20 条，较早记录已裁剪`，可在交易日志区可见
+
+### M7：可观测与回归加固（进行中）
+- [TODO] M7-T01 调试面板内存字段兼容说明补齐（浏览器限制提示统一）
+  - 验收：README 增加 `Heap n/a` 场景说明与排查建议
+- [TODO] M7-T02 事件日志裁剪单测（日志上限与提示文案）
+  - 验收：新增 1 个 Node 测试覆盖上限与提示触发
+- [TODO] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
+  - 验收：为 FPS/Heap/writes 波动增加可配置阈值参数
+- [NEXT] M7-T02 事件日志裁剪单测（日志上限与提示文案）
+  - 验收：同 M7-T02
 
 ## 当前版本能力（摘要）
 - 模块化系统：formula/economy/skill/market/feedback/save/render/loop/debug
