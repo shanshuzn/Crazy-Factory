@@ -11,6 +11,7 @@ const createLoopSystem = ({
   tryAutoBuy,
   saveGame,
   render,
+  onAfterFrame = null,
 }) => {
   let lastSave = performance.now();
 
@@ -43,6 +44,7 @@ const createLoopSystem = ({
     }
 
     render();
+    if (onAfterFrame) onAfterFrame(dt);
     requestAnimationFrame(tick);
   };
 

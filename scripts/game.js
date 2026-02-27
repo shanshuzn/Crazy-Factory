@@ -181,6 +181,7 @@
       mktMult,
       getTotalGPS,
       getManualGain,
+      getGpsBreakdown,
       affordableCount,
       purchaseCost,
       upgradeLockedReason,
@@ -270,6 +271,7 @@
       mktMult,
       getTotalGPS,
       getManualGain,
+      getGpsBreakdown,
       affordableCount,
       purchaseCost,
       isBldUnlocked,
@@ -285,6 +287,14 @@
       RENDER_THROTTLE,
     });
     const { render } = renderSystem;
+
+    const debugSystem = createDebugSystem({
+      st,
+      buildings,
+      getGpsBreakdown,
+      SAVE_KEY,
+      fmt,
+    });
 
     // ════════════════════════════════════════════════
     // ⑲ 事件绑定
@@ -391,6 +401,7 @@
       tryAutoBuy,
       saveGame,
       render,
+      onAfterFrame: debugSystem.update,
     });
 
     loopSystem.startLoop();

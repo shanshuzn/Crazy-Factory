@@ -36,6 +36,25 @@ const createEconomySystem = ({
   const getTotalGPS = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult();
   const getManualGain = () => st.manualPower * st.manualMult * (1 + skillLv('manual_mastery') * 0.3);
 
+  const getGpsBreakdown = () => {
+    const _baseGPS = baseGPS();
+    const _resMult = resMult();
+    const _skillGPS = skillGPS();
+    const _mktMult = mktMult();
+    const _mastery = skillMasteryMult();
+    const finalMult = st.gpsMultiplier * _resMult * _skillGPS * _mktMult * _mastery;
+    return {
+      baseGPS: _baseGPS,
+      gpsMultiplier: st.gpsMultiplier,
+      resMult: _resMult,
+      skillGPS: _skillGPS,
+      marketMult: _mktMult,
+      masteryMult: _mastery,
+      finalMult,
+      totalGPS: _baseGPS * finalMult,
+    };
+  };
+
   const affordableCount = (b, budget, mode) => {
     if (mode === '1') return budget >= price(b) ? 1 : 0;
     if (mode === '10' || mode === '100') {
@@ -145,6 +164,7 @@ const createEconomySystem = ({
     mktMult,
     getTotalGPS,
     getManualGain,
+    getGpsBreakdown,
     affordableCount,
     purchaseCost,
     upgradeLockedReason,
