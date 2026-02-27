@@ -6,10 +6,10 @@
       st.lastSaveAt = Date.now();
       localStorage.setItem(SAVE_KEY, JSON.stringify({
         gears:st.gears, purchaseMode:st.purchaseMode, gameSpeed:st.gameSpeed,
-        autoBuy:st.autoBuy, questIndex:st.questIndex, logs:st.logs.slice(0,LOG_CAP),
+        autoBuy:st.autoBuy, questIndex:st.questIndex, lastAutoPlanTarget:st.lastAutoPlanTarget, logs:st.logs.slice(0,LOG_CAP),
         manualPower:st.manualPower, manualMult:st.manualMult, gpsMultiplier:st.gpsMultiplier,
         totalClicks:st.totalClicks, lifetimeGears:st.lifetimeGears, researchPoints:st.researchPoints,
-        bullClicks:st.bullClicks, marketMomentum:st.marketMomentum, marketMomentumTimer:st.marketMomentumTimer, policyRate:st.policyRate, policyHedge:st.policyHedge, marketIsBull:st.marketIsBull, soundEnabled:st.soundEnabled,
+        bullClicks:st.bullClicks, marketMomentum:st.marketMomentum, marketMomentumTimer:st.marketMomentumTimer, policyRate:st.policyRate, policyHedge:st.policyHedge, macroEventId:st.macroEventId, macroEventTimer:st.macroEventTimer, macroPreferredBuildingId:st.macroPreferredBuildingId, lastMacroEventId:st.lastMacroEventId, macroChainCount:st.macroChainCount, rateOutlookDirection:st.rateOutlookDirection, rateOutlookBiasUp:st.rateOutlookBiasUp, rateOutlookConfidence:st.rateOutlookConfidence, rateOutlookHits:st.rateOutlookHits, rateOutlookMisses:st.rateOutlookMisses, marketIsBull:st.marketIsBull, soundEnabled:st.soundEnabled,
         skillMasteryTier:st.skillMasteryTier,
         buildings: buildings.map(b=>({id:b.id,owned:b.owned})),
         upgrades:  upgrades.map(u=>({id:u.id,purchased:u.purchased})),
@@ -37,6 +37,16 @@
         st.marketMomentumTimer = Math.max(0,Number(d.marketMomentumTimer)||0);
         st.policyRate = Math.max(POLICY_RATE_MIN, Math.min(POLICY_RATE_MAX, Number(d.policyRate) || POLICY_RATE_DEFAULT));
         st.policyHedge = Math.max(0, Math.min(0.6, Number(d.policyHedge) || 0));
+        st.macroEventId = typeof d.macroEventId === "string" ? d.macroEventId : "";
+        st.macroEventTimer = Math.max(0, Math.floor(Number(d.macroEventTimer) || 0));
+        st.macroPreferredBuildingId = typeof d.macroPreferredBuildingId === "string" ? d.macroPreferredBuildingId : "";
+        st.lastMacroEventId = typeof d.lastMacroEventId === "string" ? d.lastMacroEventId : "";
+        st.macroChainCount = Math.max(0, Math.floor(Number(d.macroChainCount) || 0));
+        st.rateOutlookDirection = d.rateOutlookDirection === "下调" ? "下调" : "上调";
+        st.rateOutlookBiasUp = Math.max(0.05, Math.min(0.95, Number(d.rateOutlookBiasUp) || 0.5));
+        st.rateOutlookConfidence = Math.max(0, Math.min(100, Math.floor(Number(d.rateOutlookConfidence) || 0)));
+        st.rateOutlookHits = Math.max(0, Math.floor(Number(d.rateOutlookHits) || 0));
+        st.rateOutlookMisses = Math.max(0, Math.floor(Number(d.rateOutlookMisses) || 0));
         st.marketIsBull   = d.marketIsBull!==false;
         st.soundEnabled   = d.soundEnabled!==false;
         st.skillMasteryTier = Math.max(0,Math.floor(Number(d.skillMasteryTier)||0));
@@ -46,6 +56,7 @@
         if(["1","10","100","max"].includes(d.purchaseMode)) st.purchaseMode=d.purchaseMode;
         if([1,2,4].includes(Number(d.gameSpeed))) st.gameSpeed=Number(d.gameSpeed);
         st.autoBuy    = Boolean(d.autoBuy);
+        st.lastAutoPlanTarget = typeof d.lastAutoPlanTarget === "string" ? d.lastAutoPlanTarget : "";
         st.questIndex = Math.max(0,Math.min(Number(d.questIndex)||0,questChain.length));
         if(Array.isArray(d.logs)) st.logs=d.logs.slice(0,LOG_CAP);
 

@@ -24,13 +24,29 @@
     const POLICY_RATE_DEFAULT = 2.5;
     const POLICY_RATE_MIN = 0;
     const POLICY_RATE_MAX = 8;
+    const OUTLOOK_REWARD_BASE = 100;
+    const OUTLOOK_REWARD_RATE_SCALE = 35;
+    const OUTLOOK_PENALTY_BASE = 80;
+    const OUTLOOK_PENALTY_RATE_SCALE = 24;
+    const OUTLOOK_PENALTY_GEAR_RATIO = 0.03;
+    const MACRO_PREFERRED_BONUS = 0.15;
     const SKILL_MASTERY_STEP = 3;     // 每 3 级技能提升 1 个专精层级
     const SKILL_MASTERY_BONUS = 0.05; // 每层专精提供 +5% 总收益
 
-    const APP_VERSION = "v2.1.0";
+    const POLICY_GUIDANCE_BASE_BIAS = 0.5;
+    const MACRO_EVENTS = [
+      { id:"inflation_hot", name:"通胀升温", guidanceBiasUp:0.8, rateShock:0.25, durationSwitches:3, preferredBuildingId:"bank", nextEventId:"growth_cool" },
+      { id:"growth_cool", name:"增长放缓", guidanceBiasUp:0.2, rateShock:-0.25, durationSwitches:3, preferredBuildingId:"logistics", nextEventId:"inflation_hot" },
+    ];
+
+    const APP_VERSION = "v2.6.0";
     const CHANGELOG = [
+      { version:"v2.6.0", date:"2026-02-27", notes:["新增宏观事件自动投资预案", "自动投资会按事件偏好产业切换并记录日志", "市场栏展示当前自动预案目标"] },
+      { version:"v2.5.0", date:"2026-02-27", notes:["宏观事件新增连锁触发逻辑", "事件绑定偏好产业并影响对应产出", "市场栏展示偏好产业与连锁提示"] },
+      { version:"v2.4.0", date:"2026-02-27", notes:["前瞻奖惩系数改为可配置常量", "宏观平衡 CLI 增加净收益波动与奖惩参数输出", "完成 M8-T08 并推进到下一轮"] },
+      { version:"v2.3.0", date:"2026-02-27", notes:["新增利率前瞻命中/误判结算（奖励与回撤）", "市场栏显示前瞻命中率统计", "为宏观事件平衡复核新增 CLI 与测试"] },
+      { version:"v2.2.0", date:"2026-02-27", notes:["新增宏观事件（通胀升温/增长放缓）", "市场栏增加利率前瞻与事件剩余提示", "利率切换由前瞻概率驱动并写入交易日志"] },
       { version:"v2.1.0", date:"2026-02-27", notes:["新增公式单测与长时巡检脚本", "调试面板支持 RAF/Heap/写入频次诊断", "系统模块拆分至 formula/economy/market/render/loop"] },
-      { version:"v2.0.0", date:"2026-02-26", notes:["中期内容扩展：中央银行、金融集团", "技能专精与事件反馈增强", "Prestige、离线收益与自动投资完善"] },
     ];
 
 
@@ -120,10 +136,14 @@
       pendingOfflineGears:0, manualPower:1, manualMult:1, gpsMultiplier:1,
       totalClicks:0, lifetimeGears:0, researchPoints:0,
       lastRewardText:"", gameSpeed:1, questIndex:0, logs:[],
-      autoBuy:false, autoBuyAccumulator:0,
+      autoBuy:false, autoBuyAccumulator:0, lastAutoPlanTarget:"",
       bullClicks:0,
       marketMomentum:0, marketMomentumTimer:0,
       policyRate:POLICY_RATE_DEFAULT, policyHedge:0,
+      macroEventId:"", macroEventTimer:0,
+      macroPreferredBuildingId:"", lastMacroEventId:"", macroChainCount:0,
+      rateOutlookDirection:"上调", rateOutlookBiasUp:POLICY_GUIDANCE_BASE_BIAS, rateOutlookConfidence:0,
+      rateOutlookHits:0, rateOutlookMisses:0,
       marketIsBull:true, marketTimer:35, marketCycleDuration:35,
       soundEnabled:true,
       skillMasteryTier:0,
