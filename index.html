@@ -3,19 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>自动化工厂 - 放置游戏原型</title>
+  <title>金融帝国 - 产业链放置游戏</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --panel: #111827;
-      --panel-2: #1f2937;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --ok: #34d399;
-      --warn: #f59e0b;
-      --disabled: #4b5563;
-      --border: #374151;
-      --chip: #243044;
+      --bg:       #080f1a;
+      --panel:    #0d1726;
+      --panel-2:  #111f33;
+      --text:     #e2e8f0;
+      --muted:    #64748b;
+      --ok:       #10b981;
+      --warn:     #f59e0b;
+      --danger:   #ef4444;
+      --accent:   #3b82f6;
+      --gold:     #fbbf24;
+      --border:   #1e3a5f;
+      --chip:     #0f2035;
+      /* 市场颜色 */
+      --bull: #10b981;
+      --bear: #ef4444;
     }
 
     * { box-sizing: border-box; }
@@ -24,100 +29,214 @@
       margin: 0;
       min-height: 100vh;
       font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-      background: radial-gradient(1200px 800px at 20% -20%, #1d4ed8 0%, var(--bg) 45%);
+      background:
+        radial-gradient(ellipse 900px 500px at 15% -10%, #0c2340 0%, transparent 60%),
+        radial-gradient(ellipse 600px 400px at 85% 110%, #0a1f0e 0%, transparent 60%),
+        var(--bg);
       color: var(--text);
       display: grid;
-      place-items: center;
-      padding: 24px;
+      place-items: start center;
+      padding: 24px 16px 48px;
     }
 
     .game {
-      width: min(960px, 100%);
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)) , var(--panel);
+      width: min(1000px, 100%);
+      background: linear-gradient(180deg, rgba(59,130,246,0.04), rgba(255,255,255,0)) , var(--panel);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.08);
     }
 
+    /* ── HEADER ── */
     .header {
-      padding: 20px;
+      padding: 20px 24px;
       border-bottom: 1px solid var(--border);
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 16px;
       align-items: center;
+      background: linear-gradient(135deg, rgba(59,130,246,0.06) 0%, transparent 60%);
     }
 
-    .title { margin: 0; font-size: 1.5rem; }
-    .subtitle { margin: 6px 0 0; color: var(--muted); font-size: 0.95rem; }
+    .title { margin: 0; font-size: 1.5rem; letter-spacing: -0.02em; }
+    .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 0.9rem; }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(2, minmax(140px, 1fr));
-      gap: 12px;
-      width: min(360px, 100%);
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      gap: 10px;
     }
 
     .stat-card {
       background: var(--panel-2);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 10px 12px;
+      padding: 10px 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, transparent 60%);
+      pointer-events: none;
     }
 
     .stat-card .label {
       color: var(--muted);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
       margin-bottom: 4px;
     }
 
     .stat-card .value {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      /* 资金数字闪动动画 */
+      transition: color 0.2s ease;
     }
 
+    .stat-card .value.pulse-up { color: var(--bull); }
+    .stat-card .value.pulse-down { color: var(--bear); }
+
+    .stat-card .sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* 市场状态条 */
+    .market-bar {
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .market-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .market-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--bull);
+      /* 呼吸灯效果 */
+      animation: breathe 2s ease-in-out infinite;
+    }
+
+    .market-dot.bear { background: var(--bear); animation-duration: 1.2s; }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* 市场波动进度条 */
+    .market-wave-track {
+      flex: 1;
+      min-width: 80px;
+      height: 4px;
+      border-radius: 999px;
+      background: #0b1220;
+      overflow: hidden;
+    }
+
+    .market-wave-fill {
+      height: 100%;
+      width: 50%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--bear), var(--warn), var(--bull));
+      transition: width 0.3s ease;
+    }
+
+    /* ── CONTENT ── */
     .content {
-      padding: 20px;
+      padding: 20px 24px;
       display: grid;
-      grid-template-columns: 1fr;
       gap: 16px;
     }
 
+    /* 手动操作区 */
     .manual {
       background: var(--panel-2);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
+      border-radius: 14px;
+      padding: 16px 20px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
     }
+
+    /* 点击时涟漪背景 */
+    .manual::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--rx,50%) var(--ry,50%), rgba(59,130,246,0.15) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+
+    .manual.ripple::after { opacity: 1; }
 
     .btn {
       border: 1px solid transparent;
-      background: #0ea5e9;
-      color: #082f49;
       border-radius: 10px;
-      padding: 10px 14px;
+      padding: 10px 16px;
       font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.08s ease, filter 0.2s ease;
+      transition: transform 0.08s ease, filter 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    .btn:hover:enabled { filter: brightness(1.07); }
-    .btn:active:enabled { transform: translateY(1px); }
+    .btn:hover:enabled { filter: brightness(1.1); }
+    .btn:active:enabled { transform: scale(0.96); }
 
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #e0f2fe;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+    }
+
+    .btn-primary:hover:enabled {
+      box-shadow: 0 6px 20px rgba(37,99,235,0.5);
+    }
+
+    /* 脉冲动画：点击成功时 */
+    @keyframes btnPulse {
+      0% { box-shadow: 0 4px 14px rgba(37,99,235,0.35); }
+      40% { box-shadow: 0 0 0 8px rgba(37,99,235,0.2); }
+      100% { box-shadow: 0 4px 14px rgba(37,99,235,0.35); }
+    }
+
+    .btn-primary.clicked { animation: btnPulse 0.35s ease; }
+
+    /* 控制栏 */
     .controls {
       display: flex;
-      gap: 8px;
-      align-items: center;
+      gap: 6px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .chip {
@@ -126,190 +245,77 @@
       border-radius: 8px;
       color: var(--text);
       padding: 6px 10px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
     }
 
+    .chip:hover { background: #162840; }
+
     .chip.active {
-      background: #0891b2;
-      color: #ecfeff;
-      border-color: #22d3ee;
+      background: #1e40af;
+      color: #bfdbfe;
+      border-color: #3b82f6;
     }
 
     .chip.small {
-      font-size: 0.76rem;
+      font-size: 0.72rem;
       color: var(--muted);
       font-weight: 500;
+      cursor: default;
       pointer-events: none;
     }
 
-    .buildings {
-      display: grid;
-      gap: 10px;
-    }
-
-    .section-title {
-      margin: 6px 0 2px;
-      font-size: 0.95rem;
-      color: var(--muted);
-    }
-
-    .upgrade {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 10px;
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-    }
-
-    .upgrade .name {
+    /* 浮动数字 */
+    .float-num {
+      position: fixed;
+      pointer-events: none;
+      font-weight: 700;
       font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 4px;
+      color: var(--gold);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      animation: floatUp 1.1s ease forwards;
+      z-index: 9999;
+      user-select: none;
     }
 
-    .upgrade .meta {
-      color: var(--muted);
-      font-size: 0.85rem;
+    @keyframes floatUp {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      60%  { opacity: 0.9; transform: translateY(-40px) scale(1.15); }
+      100% { opacity: 0; transform: translateY(-80px) scale(0.85); }
     }
 
-    .upgrade-btn {
-      min-width: 220px;
-      text-align: center;
-      background: #f59e0b;
-      color: #3b2300;
-    }
-
-    .upgrade-btn:disabled {
-      cursor: not-allowed;
-      background: var(--disabled);
-      color: #d1d5db;
-      opacity: 0.8;
-    }
-
-    .skill {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-    }
-
-    .skill .name {
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
-
-    .skill .meta {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .skill-btn {
-      min-width: 180px;
-      text-align: center;
-      background: #a78bfa;
-      color: #1f1147;
-    }
-
-    .skill-btn:disabled {
-      cursor: not-allowed;
-      background: var(--disabled);
-      color: #d1d5db;
-      opacity: 0.8;
-    }
-
-    .building {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 10px;
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-    }
-
-    .building .name {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .building .meta {
-      color: var(--muted);
-      font-size: 0.88rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .buy-btn {
-      min-width: 220px;
-      text-align: center;
-      background: var(--ok);
-      color: #052e22;
-    }
-
-    .buy-btn:disabled {
-      cursor: not-allowed;
-      background: var(--disabled);
-      color: #d1d5db;
-      opacity: 0.8;
-    }
-
-    .hint {
-      margin-top: 4px;
-      color: var(--warn);
-      font-size: 0.82rem;
-      min-height: 1.2em;
-    }
-
-    .locked-note {
-      color: #fca5a5;
-      font-size: 0.8rem;
-      margin-top: 4px;
-    }
-
+    /* 进度条 */
     .progress-wrap {
       background: var(--panel-2);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: 14px;
+      padding: 14px 16px;
     }
 
-    .progress-title {
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
+    .progress-title { font-size: 0.88rem; color: var(--muted); margin-bottom: 8px; }
 
     .progress-track {
       width: 100%;
-      height: 10px;
+      height: 8px;
       border-radius: 999px;
-      background: #0b1220;
-      border: 1px solid #243244;
+      background: #060e1a;
+      border: 1px solid #1a3050;
       overflow: hidden;
     }
 
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #22d3ee, #34d399);
-      transition: width 0.2s ease;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      transition: width 0.25s ease;
+      border-radius: 999px;
     }
 
     .progress-meta {
       margin-top: 8px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: var(--muted);
       display: flex;
       justify-content: space-between;
@@ -317,207 +323,392 @@
       flex-wrap: wrap;
     }
 
-    .achievement {
+    /* 产业链区域 */
+    .section-title {
+      margin: 4px 0 2px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .buildings { display: grid; gap: 8px; }
+
+    /* 建筑卡片 */
+    .building {
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 10px;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .building:hover { border-color: #2d5a8e; background: #13243d; }
+
+    .building .name { font-size: 1rem; font-weight: 700; margin-bottom: 3px; }
+
+    .building .meta {
+      color: var(--muted);
+      font-size: 0.84rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .building .hint { margin-top: 4px; color: var(--warn); font-size: 0.8rem; min-height: 1.2em; }
+    .building .locked-note { color: #f87171; font-size: 0.78rem; margin-top: 3px; }
+
+    .buy-btn {
+      min-width: 200px;
+      text-align: center;
+      background: linear-gradient(135deg, #059669, #047857);
+      color: #d1fae5;
+      box-shadow: 0 3px 10px rgba(5,150,105,0.25);
+    }
+
+    .buy-btn:hover:enabled { box-shadow: 0 5px 16px rgba(5,150,105,0.4); }
+    .buy-btn:disabled { cursor: not-allowed; background: #1e3a5f; color: #475569; box-shadow: none; }
+
+    /* 升级卡片 */
+    .upgrade {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+
+    .upgrade .name { font-size: 0.95rem; font-weight: 700; margin-bottom: 3px; }
+    .upgrade .meta { color: var(--muted); font-size: 0.83rem; }
+
+    .upgrade-btn {
+      min-width: 200px;
+      text-align: center;
+      background: linear-gradient(135deg, #d97706, #b45309);
+      color: #fef3c7;
+      box-shadow: 0 3px 10px rgba(217,119,6,0.25);
+    }
+
+    .upgrade-btn:disabled { cursor: not-allowed; background: #1e3a5f; color: #475569; box-shadow: none; }
+
+    /* 技能卡片 */
+    .skill {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
       align-items: center;
       background: var(--panel-2);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 10px 12px;
+      padding: 10px 16px;
     }
 
-    .achievement .name {
-      font-size: 0.95rem;
-      font-weight: 700;
+    .skill .name { font-size: 0.92rem; font-weight: 700; }
+    .skill .meta { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
+
+    .skill-btn {
+      min-width: 160px;
+      text-align: center;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      color: #ede9fe;
+      box-shadow: 0 3px 10px rgba(124,58,237,0.25);
     }
 
-    .achievement .meta {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-top: 4px;
+    .skill-btn:disabled { cursor: not-allowed; background: #1e3a5f; color: #475569; box-shadow: none; }
+
+    /* 成就卡片 */
+    .achievement {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 16px;
     }
+
+    .achievement .name { font-size: 0.92rem; font-weight: 700; }
+    .achievement .meta { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
 
     .badge {
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       font-weight: 700;
       border-radius: 999px;
-      padding: 4px 9px;
+      padding: 4px 10px;
       border: 1px solid var(--border);
-      background: #263244;
-      color: #9ca3af;
+      background: #0f2035;
+      color: var(--muted);
+      white-space: nowrap;
     }
 
     .badge.done {
-      background: #14532d;
-      color: #dcfce7;
-      border-color: #22c55e;
+      background: #064e3b;
+      color: #6ee7b7;
+      border-color: #10b981;
     }
 
+    /* 事件日志 */
     .log-item {
       background: var(--panel-2);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 0.82rem;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 0.8rem;
       color: var(--muted);
+      font-variant-numeric: tabular-nums;
     }
 
-    @media (max-width: 760px) {
+    /* 离线收益横幅 */
+    .offline-banner {
+      background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.04));
+      border: 1px solid rgba(251,191,36,0.3);
+      border-radius: 14px;
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #d97706, #92400e);
+      color: #fef3c7;
+      box-shadow: 0 3px 10px rgba(217,119,6,0.3);
+    }
+
+    /* 响应式 */
+    @media (max-width: 700px) {
       .header { grid-template-columns: 1fr; }
-      .stats { width: 100%; }
-      .building { grid-template-columns: 1fr; }
-      .buy-btn { width: 100%; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .building, .upgrade, .skill, .achievement { grid-template-columns: 1fr; }
+      .buy-btn, .upgrade-btn, .skill-btn { width: 100%; }
+    }
+
+    @media (max-width: 460px) {
+      .stats { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
   <main class="game">
+
+    <!-- ── HEADER ── -->
     <section class="header">
       <div>
-        <h1 class="title">⚙️ 自动化工厂</h1>
-        <p class="subtitle">点击 + 自动化并行，持续扩张你的齿轮产线。</p>
+        <h1 class="title">💹 金融帝国</h1>
+        <p class="subtitle">从原材料起步，构建横跨实体与金融的产业链帝国。</p>
       </div>
       <div class="stats">
         <div class="stat-card">
-          <div class="label">齿轮总数</div>
-          <div class="value" id="gears">0</div>
+          <div class="label">💰 资本</div>
+          <div class="value" id="gears">¥0</div>
+          <div class="sub" id="gps">收益率 ¥0/s</div>
         </div>
         <div class="stat-card">
-          <div class="label">GPS（每秒产出）</div>
-          <div class="value" id="gps">0</div>
-          <div class="subtitle" id="rp">研究点 RP：0</div>
+          <div class="label">📊 研究点</div>
+          <div class="value" id="rpDisplay">0 RP</div>
+          <div class="sub" id="rpMeta">研究加成 ×1.0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">📈 市场乘数</div>
+          <div class="value" id="marketMult">×1.00</div>
+          <div class="sub" id="marketStatus">多头市场</div>
         </div>
       </div>
     </section>
 
+    <!-- ── 市场状态条 ── -->
+    <div class="market-bar">
+      <div class="market-indicator">
+        <div class="market-dot" id="marketDot"></div>
+        <span id="marketLabel" style="font-weight:600">多头市场</span>
+      </div>
+      <span style="color:var(--muted)">市场周期：</span>
+      <div class="market-wave-track">
+        <div class="market-wave-fill" id="marketWave"></div>
+      </div>
+      <span id="marketCountdown" style="color:var(--muted);min-width:60px">切换：--s</span>
+      <span id="marketEffect" style="color:var(--warn)">波动加成：--</span>
+    </div>
+
     <section class="content">
-      <div class="manual">
+
+      <!-- 手动操作 -->
+      <div class="manual" id="manualZone">
         <div>
-          <strong>手动生产</strong>
-          <div class="subtitle" style="margin-top:4px">每次点击 +1 齿轮</div>
+          <strong>撮合交易</strong>
+          <div class="subtitle" style="margin-top:4px" id="manualDesc">每次手动撮合 +¥1</div>
         </div>
-        <button id="manualBtn" class="btn">+1 齿轮</button>
+        <button id="manualBtn" class="btn btn-primary">撮合交易</button>
       </div>
 
+      <!-- 控制栏 -->
       <div class="controls">
         <span class="chip small">购买倍率</span>
-        <button class="chip active" data-mode="1">x1</button>
-        <button class="chip" data-mode="10">x10</button>
-        <button class="chip" data-mode="100">x100</button>
+        <button class="chip active" data-mode="1">×1</button>
+        <button class="chip" data-mode="10">×10</button>
+        <button class="chip" data-mode="100">×100</button>
         <button class="chip" data-mode="max">Max</button>
         <span class="chip small">仿真速度</span>
-        <button class="chip active" data-speed="1">1x</button>
-        <button class="chip" data-speed="2">2x</button>
-        <button class="chip" data-speed="4">4x</button>
-        <button class="chip" id="autoBuyBtn">自动购买: 关</button>
-        <button class="chip" id="exportSaveBtn">导出存档</button>
-        <button class="chip" id="importSaveBtn">导入存档</button>
-        <button class="chip" id="prestigeBtn">软重置</button>
-        <button class="chip" id="resetSaveBtn">重置存档</button>
+        <button class="chip active" data-speed="1">1×</button>
+        <button class="chip" data-speed="2">2×</button>
+        <button class="chip" data-speed="4">4×</button>
+        <button class="chip" id="autoBuyBtn">自动投资: 关</button>
+        <button class="chip" id="exportSaveBtn">导出</button>
+        <button class="chip" id="importSaveBtn">导入</button>
+        <button class="chip" id="prestigeBtn">增发股权</button>
+        <button class="chip" id="resetSaveBtn">清盘重来</button>
       </div>
 
-      <div id="offlineNotice" class="manual" style="display:none">
+      <!-- 离线收益 -->
+      <div id="offlineNotice" class="offline-banner" style="display:none">
         <div>
-          <strong>离线收益</strong>
+          <strong>💤 离线收益</strong>
           <div class="subtitle" id="offlineText" style="margin-top:4px"></div>
         </div>
-        <button id="claimOfflineBtn" class="btn">领取</button>
+        <button id="claimOfflineBtn" class="btn btn-gold">领取收益</button>
       </div>
 
+      <!-- 阶段任务 -->
       <div class="progress-wrap">
-        <div class="progress-title" id="goalTitle">阶段任务：完成引导目标</div>
+        <div class="progress-title" id="goalTitle">产业目标：正在加载...</div>
         <div class="progress-track"><div id="goalFill" class="progress-fill"></div></div>
         <div class="progress-meta">
-          <span id="goalHint">还差 1 台实习生</span>
+          <span id="goalHint">–</span>
           <span id="goalPct">0%</span>
-          <span id="questReward">奖励：-</span>
+          <span id="questReward">奖励：–</span>
         </div>
-        <div class="subtitle" id="rewardFeed" style="margin-top:8px">成就奖励将显示在这里</div>
+        <div class="subtitle" id="rewardFeed" style="margin-top:8px;color:var(--gold)"></div>
       </div>
 
+      <!-- 统计摘要 -->
       <div class="progress-wrap">
-        <div class="progress-title">统计摘要</div>
+        <div class="progress-title">资产摘要</div>
         <div class="progress-meta" style="margin-top:0">
-          <span id="statBuildings">建筑总数：0</span>
-          <span id="statUpgrades">升级已研发：0</span>
-          <span id="statAchievements">成就完成：0/0</span>
+          <span id="statBuildings">产业数：0</span>
+          <span id="statUpgrades">已研发：0</span>
+          <span id="statAchievements">成就：0/0</span>
         </div>
         <div class="progress-meta">
-          <span id="statQuest">任务进度：0/0</span>
-          <span id="statMode">自动购买：关</span>
-          <span id="statLifetime">累计齿轮：0</span>
+          <span id="statQuest">任务：0/0</span>
+          <span id="statMode">自动投资：关</span>
+          <span id="statLifetime">历史资本：¥0</span>
         </div>
       </div>
 
-      <h2 class="section-title">自动化建筑</h2>
+      <!-- 产业链 -->
+      <h2 class="section-title">产业链</h2>
       <div class="buildings" id="buildingList"></div>
 
-      <h2 class="section-title">工厂升级</h2>
+      <!-- 研发升级 -->
+      <h2 class="section-title">战略研发</h2>
       <div class="buildings" id="upgradeList"></div>
 
-      <h2 class="section-title">技能</h2>
+      <!-- 技能树 -->
+      <h2 class="section-title">技能树</h2>
       <div class="buildings" id="skillList"></div>
 
-      <h2 class="section-title">成就</h2>
+      <!-- 成就 -->
+      <h2 class="section-title">里程碑</h2>
       <div class="buildings" id="achievementList"></div>
 
-      <h2 class="section-title">事件日志</h2>
+      <!-- 事件日志 -->
+      <h2 class="section-title">交易日志</h2>
       <div class="buildings" id="eventLog"></div>
+
     </section>
   </main>
 
   <script>
-    const PRICE_GROWTH = 1.15;
-    const SAVE_KEY = "crazy_factory_save_v1";
-    const TICK_RATE = 60;
-    const FIXED_STEP = 1 / TICK_RATE;
-    const MAX_ACCUMULATED_SECONDS = 0.25;
-    const OFFLINE_CAP_SECONDS = 8 * 60 * 60;
+    // ── 全局常量（调整手感的关键数值都在这里）──
+    const PRICE_GROWTH          = 1.15;   // 建筑价格增长指数，越高后期越贵
+    const SAVE_KEY              = "finance_empire_v1";
+    const TICK_RATE             = 60;
+    const FIXED_STEP            = 1 / TICK_RATE;
+    const MAX_ACCUMULATED_SECS  = 0.25;
+    const OFFLINE_CAP_SECONDS   = 8 * 60 * 60;
 
-    const upgrades = [
-      { id: "training", name: "员工培训", price: 250, desc: "手动生产 +1", type: "manual", value: 1, purchased: false, unlockRP: 0, requires: null },
-      { id: "lubricant", name: "润滑油优化", price: 800, desc: "总 GPS x1.5", type: "gps", value: 1.5, purchased: false, unlockRP: 0, requires: "training" },
-      { id: "ai", name: "调度 AI", price: 5000, desc: "总 GPS x2", type: "gps", value: 2, purchased: false, unlockRP: 1, requires: "lubricant" }
-    ];
+    // 市场波动参数（调整这里改变市场节奏感）
+    const MARKET_CYCLE_MIN      = 25;   // 最短切换秒数
+    const MARKET_CYCLE_MAX      = 55;   // 最长切换秒数
+    const MARKET_BULL_BONUS     = 1.4;  // 多头乘数
+    const MARKET_BEAR_PENALTY   = 0.7;  // 空头乘数
 
-    const skills = [
-      { id: "manual_mastery", name: "手动精通", desc: "手动产出每级 +25%", maxLevel: 5, level: 0, costRP: 1 },
-      { id: "line_optimizer", name: "产线优化", desc: "总 GPS 每级 +20%", maxLevel: 5, level: 0, costRP: 1 },
-      { id: "bulk_discount", name: "采购折扣", desc: "建筑价格每级 -3%", maxLevel: 5, level: 0, costRP: 1 }
-    ];
-
-    const achievements = [
-      { id: "first_click", name: "开工！", desc: "首次手动生产", reward: { type: "gear", value: 10 }, check: () => state.totalClicks >= 1, done: false, claimed: false },
-      { id: "intern", name: "第一位员工", desc: "拥有 1 台实习生", reward: { type: "gear", value: 50 }, check: () => (buildings.find((b) => b.id === "intern")?.owned || 0) >= 1, done: false, claimed: false },
-      { id: "hundred_gears", name: "齿轮仓储", desc: "累计获得 100 齿轮", reward: { type: "gear", value: 120 }, check: () => state.lifetimeGears >= 100, done: false, claimed: false },
-      { id: "gps_50", name: "产线启动", desc: "总 GPS 达到 50", reward: { type: "rp", value: 1 }, check: () => getTotalGPS() >= 50, done: false, claimed: false }
-    ];
-
-    const questChain = [
-      { id: "q_click", title: "任务 1：手动点击 20 次", rewardText: "奖励 +120 齿轮", reward: { type: "gear", value: 120 },
-        progress: () => Math.min(state.totalClicks, 20), target: 20 },
-      { id: "q_intern", title: "任务 2：拥有 10 台实习生", rewardText: "奖励 +300 齿轮", reward: { type: "gear", value: 300 },
-        progress: () => Math.min((buildings.find((b) => b.id === "intern")?.owned || 0), 10), target: 10 },
-      { id: "q_gps", title: "任务 3：总 GPS 达到 100", rewardText: "奖励 +1 RP", reward: { type: "rp", value: 1 },
-        progress: () => Math.min(getTotalGPS(), 100), target: 100 }
-    ];
-
+    // ── 产业链数据：从初级产业 → 金融衍生品 ──
+    // dps = 基础每秒资本产出（未乘任何倍率）
     const buildings = [
-      { id: "intern", name: "实习生", basePrice: 15, dps: 1, owned: 0, unlockLifetimeGears: 0 },
-      { id: "conveyor", name: "传送带", basePrice: 100, dps: 8, owned: 0, unlockLifetimeGears: 200 },
-      { id: "assembler", name: "组装机", basePrice: 1100, dps: 47, owned: 0, unlockLifetimeGears: 1500 }
+      { id: "workshop",   name: "手工作坊",   basePrice: 15,      dps: 1,      owned: 0, unlockLifetimeGears: 0,       emoji: "🔧" },
+      { id: "factory",    name: "轻工厂",     basePrice: 100,     dps: 8,      owned: 0, unlockLifetimeGears: 200,     emoji: "🏭" },
+      { id: "logistics",  name: "物流公司",   basePrice: 1100,    dps: 47,     owned: 0, unlockLifetimeGears: 1500,    emoji: "🚛" },
+      { id: "realestate", name: "房地产",     basePrice: 12000,   dps: 260,    owned: 0, unlockLifetimeGears: 10000,   emoji: "🏢" },
+      { id: "bank",       name: "商业银行",   basePrice: 130000,  dps: 1400,   owned: 0, unlockLifetimeGears: 80000,   emoji: "🏦" },
+      { id: "fund",       name: "量化基金",   basePrice: 1400000, dps: 7800,   owned: 0, unlockLifetimeGears: 600000,  emoji: "📊" },
     ];
 
+    // 研发升级
+    const upgrades = [
+      { id: "training",   name: "员工培训",   price: 300,      desc: "手动撮合 +1",      type: "manual", value: 1,   purchased: false, unlockRP: 0, requires: null },
+      { id: "automation", name: "流程自动化", price: 1200,     desc: "总产出 ×1.5",      type: "gps",    value: 1.5, purchased: false, unlockRP: 0, requires: "training" },
+      { id: "fintech",    name: "金融科技",   price: 8000,     desc: "总产出 ×2",        type: "gps",    value: 2,   purchased: false, unlockRP: 1, requires: "automation" },
+      { id: "algo",       name: "算法交易",   price: 60000,    desc: "手动撮合 ×3",      type: "manualMult", value: 3, purchased: false, unlockRP: 2, requires: "fintech" },
+      { id: "derivatives",name: "衍生品套利", price: 500000,   desc: "总产出 ×3",        type: "gps",    value: 3,   purchased: false, unlockRP: 3, requires: "algo" },
+    ];
+
+    // 技能树
+    const skills = [
+      { id: "manual_mastery",  name: "交易直觉",  desc: "手动收益每级 +30%",   maxLevel: 5, level: 0, costRP: 1 },
+      { id: "line_optimizer",  name: "产线优化",  desc: "总产出每级 +25%",     maxLevel: 5, level: 0, costRP: 1 },
+      { id: "bulk_discount",   name: "采购折扣",  desc: "建筑价格每级 -4%",    maxLevel: 5, level: 0, costRP: 1 },
+      { id: "market_sense",    name: "市场嗅觉",  desc: "市场乘数每级 +10%",   maxLevel: 3, level: 0, costRP: 2 },
+    ];
+
+    // 成就
+    const achievements = [
+      { id: "first_click",   name: "初入江湖",   desc: "完成首次撮合",              reward: { type: "gear", value: 20 },   check: () => state.totalClicks >= 1,                                    done: false, claimed: false },
+      { id: "workshop_1",    name: "小作坊主",   desc: "拥有 1 个手工作坊",         reward: { type: "gear", value: 60 },   check: () => (buildings.find(b=>b.id==="workshop")?.owned||0) >= 1,     done: false, claimed: false },
+      { id: "hundred",       name: "百万起步",   desc: "历史资本达到 ¥100",         reward: { type: "gear", value: 150 },  check: () => state.lifetimeGears >= 100,                                 done: false, claimed: false },
+      { id: "gps_50",        name: "产能初成",   desc: "总产出 ≥ ¥50/s",           reward: { type: "rp",   value: 1 },    check: () => getTotalGPS() >= 50,                                        done: false, claimed: false },
+      { id: "bank_owner",    name: "银行家",     desc: "拥有 1 家商业银行",         reward: { type: "rp",   value: 2 },    check: () => (buildings.find(b=>b.id==="bank")?.owned||0) >= 1,         done: false, claimed: false },
+      { id: "bull_market",   name: "牛市猎手",   desc: "在多头市场中完成 50 次撮合", reward: { type: "gear", value: 2000 }, check: () => state.bullClicks >= 50,                                     done: false, claimed: false },
+    ];
+
+    // 任务链
+    const questChain = [
+      { id: "q1", title: "任务一：手动撮合 20 次",        rewardText: "奖励 +¥200",    reward: { type: "gear", value: 200  }, progress: () => Math.min(state.totalClicks, 20), target: 20  },
+      { id: "q2", title: "任务二：拥有 10 家手工作坊",    rewardText: "奖励 +¥500",    reward: { type: "gear", value: 500  }, progress: () => Math.min(buildings.find(b=>b.id==="workshop")?.owned||0, 10), target: 10 },
+      { id: "q3", title: "任务三：总产出 ≥ ¥100/s",      rewardText: "奖励 +1 RP",    reward: { type: "rp",   value: 1    }, progress: () => Math.min(getTotalGPS(), 100), target: 100 },
+      { id: "q4", title: "任务四：拥有 1 家商业银行",     rewardText: "奖励 +¥50000",  reward: { type: "gear", value: 50000 }, progress: () => Math.min(buildings.find(b=>b.id==="bank")?.owned||0, 1), target: 1 },
+    ];
+
+    // ── 游戏状态 ──
     const state = {
       gears: 0,
       purchaseMode: "1",
       lastTimestamp: performance.now(),
       accumulator: 0,
       pendingOfflineGears: 0,
-      manualPower: 1,
-      gpsMultiplier: 1,
+      manualPower: 1,         // 手动基础值
+      manualMult: 1,          // 手动倍率（算法交易升级）
+      gpsMultiplier: 1,       // 全局 GPS 倍率
       totalClicks: 0,
       lifetimeGears: 0,
       researchPoints: 0,
@@ -526,327 +717,308 @@
       questIndex: 0,
       logs: [],
       autoBuy: false,
-      autoBuyAccumulator: 0
+      autoBuyAccumulator: 0,
+      bullClicks: 0,          // 多头市场中的点击次数（成就追踪）
+      // 市场状态
+      marketIsBull: true,
+      marketTimer: 35,        // 距下次切换剩余秒数
+      marketCycleDuration: 35,
     };
 
-    const gearsEl = document.getElementById("gears");
-    const gpsEl = document.getElementById("gps");
-    const manualBtn = document.getElementById("manualBtn");
-    const buildingList = document.getElementById("buildingList");
-    const modeButtons = [...document.querySelectorAll("[data-mode]")];
-    const speedButtons = [...document.querySelectorAll("[data-speed]")];
-    const autoBuyBtn = document.getElementById("autoBuyBtn");
-    const exportSaveBtn = document.getElementById("exportSaveBtn");
-    const importSaveBtn = document.getElementById("importSaveBtn");
-    const prestigeBtn = document.getElementById("prestigeBtn");
-    const resetSaveBtn = document.getElementById("resetSaveBtn");
-    const offlineNoticeEl = document.getElementById("offlineNotice");
-    const offlineTextEl = document.getElementById("offlineText");
-    const claimOfflineBtn = document.getElementById("claimOfflineBtn");
-    const upgradeList = document.getElementById("upgradeList");
-    const achievementList = document.getElementById("achievementList");
-    const skillList = document.getElementById("skillList");
-    const goalTitleEl = document.getElementById("goalTitle");
-    const goalFillEl = document.getElementById("goalFill");
-    const goalHintEl = document.getElementById("goalHint");
-    const goalPctEl = document.getElementById("goalPct");
-    const questRewardEl = document.getElementById("questReward");
-    const rpEl = document.getElementById("rp");
-    const rewardFeedEl = document.getElementById("rewardFeed");
-    const eventLogEl = document.getElementById("eventLog");
-    const statBuildingsEl = document.getElementById("statBuildings");
-    const statUpgradesEl = document.getElementById("statUpgrades");
-    const statAchievementsEl = document.getElementById("statAchievements");
-    const statQuestEl = document.getElementById("statQuest");
-    const statModeEl = document.getElementById("statMode");
-    const statLifetimeEl = document.getElementById("statLifetime");
+    // ── DOM 引用 ──
+    const gearsEl          = document.getElementById("gears");
+    const gpsEl            = document.getElementById("gps");
+    const rpDisplayEl      = document.getElementById("rpDisplay");
+    const rpMetaEl         = document.getElementById("rpMeta");
+    const marketMultEl     = document.getElementById("marketMult");
+    const marketStatusEl   = document.getElementById("marketStatus");
+    const marketDotEl      = document.getElementById("marketDot");
+    const marketLabelEl    = document.getElementById("marketLabel");
+    const marketWaveEl     = document.getElementById("marketWave");
+    const marketCountdownEl= document.getElementById("marketCountdown");
+    const marketEffectEl   = document.getElementById("marketEffect");
+    const manualBtn        = document.getElementById("manualBtn");
+    const manualDesc       = document.getElementById("manualDesc");
+    const manualZone       = document.getElementById("manualZone");
+    const buildingList     = document.getElementById("buildingList");
+    const upgradeList      = document.getElementById("upgradeList");
+    const skillList        = document.getElementById("skillList");
+    const achievementList  = document.getElementById("achievementList");
+    const modeButtons      = [...document.querySelectorAll("[data-mode]")];
+    const speedButtons     = [...document.querySelectorAll("[data-speed]")];
+    const autoBuyBtn       = document.getElementById("autoBuyBtn");
+    const exportSaveBtn    = document.getElementById("exportSaveBtn");
+    const importSaveBtn    = document.getElementById("importSaveBtn");
+    const prestigeBtn      = document.getElementById("prestigeBtn");
+    const resetSaveBtn     = document.getElementById("resetSaveBtn");
+    const offlineNoticeEl  = document.getElementById("offlineNotice");
+    const offlineTextEl    = document.getElementById("offlineText");
+    const claimOfflineBtn  = document.getElementById("claimOfflineBtn");
+    const goalTitleEl      = document.getElementById("goalTitle");
+    const goalFillEl       = document.getElementById("goalFill");
+    const goalHintEl       = document.getElementById("goalHint");
+    const goalPctEl        = document.getElementById("goalPct");
+    const questRewardEl    = document.getElementById("questReward");
+    const rewardFeedEl     = document.getElementById("rewardFeed");
+    const eventLogEl       = document.getElementById("eventLog");
+    const statBuildingsEl  = document.getElementById("statBuildings");
+    const statUpgradesEl   = document.getElementById("statUpgrades");
+    const statAchievementsEl=document.getElementById("statAchievements");
+    const statQuestEl      = document.getElementById("statQuest");
+    const statModeEl       = document.getElementById("statMode");
+    const statLifetimeEl   = document.getElementById("statLifetime");
 
-    const buildingViewMap = new Map();
-    const upgradeViewMap = new Map();
-    const achievementViewMap = new Map();
-    const skillViewMap = new Map();
+    const buildingViewMap  = new Map();
+    const upgradeViewMap   = new Map();
+    const achievementViewMap=new Map();
+    const skillViewMap     = new Map();
 
-    const format = (num) => {
-      if (!Number.isFinite(num)) return "0";
+    // ── 格式化 ──
+    const fmt = (num) => {
+      if (!Number.isFinite(num)) return "¥0";
       const abs = Math.abs(num);
-      if (abs >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(2)}B`;
-      if (abs >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`;
-      if (abs >= 1_000) return `${(num / 1_000).toFixed(2)}K`;
-      return num.toLocaleString("zh-CN", { maximumFractionDigits: 2 });
+      const sign = num < 0 ? "-" : "";
+      if (abs >= 1e12) return `${sign}¥${(abs/1e12).toFixed(2)}T`;
+      if (abs >= 1e9)  return `${sign}¥${(abs/1e9).toFixed(2)}B`;
+      if (abs >= 1e6)  return `${sign}¥${(abs/1e6).toFixed(2)}M`;
+      if (abs >= 1e3)  return `${sign}¥${(abs/1e3).toFixed(2)}K`;
+      return `${sign}¥${abs.toLocaleString("zh-CN", { maximumFractionDigits: 1 })}`;
     };
 
-    const getSkillLevel = (id) => skills.find((s) => s.id === id)?.level || 0;
-    const getDiscountMultiplier = () => Math.max(0.7, 1 - getSkillLevel("bulk_discount") * 0.03);
-    const getCurrentPrice = (building, ownedOffset = 0) =>
-      Math.floor(building.basePrice * Math.pow(PRICE_GROWTH, building.owned + ownedOffset) * getDiscountMultiplier());
+    // ── 市场系统 ──
+    const getMarketMultiplier = () => {
+      const skillBonus = 1 + (skills.find(s=>s.id==="market_sense")?.level||0) * 0.1;
+      const baseMulti = state.marketIsBull ? MARKET_BULL_BONUS : MARKET_BEAR_PENALTY;
+      // 技能只在多头时额外加成，让技能有更明显的感知
+      return state.marketIsBull ? baseMulti * skillBonus : baseMulti;
+    };
 
-    const getBaseGPS = () => buildings.reduce((sum, b) => sum + b.dps * b.owned, 0);
-    const getResearchMultiplier = () => 1 + state.researchPoints * 0.1;
-    const getSkillGpsMultiplier = () => 1 + getSkillLevel("line_optimizer") * 0.2;
-    const getSkillManualMultiplier = () => 1 + getSkillLevel("manual_mastery") * 0.25;
-    const getTotalGPS = () => getBaseGPS() * state.gpsMultiplier * getResearchMultiplier() * getSkillGpsMultiplier();
-    const getManualGain = () => state.manualPower * getSkillManualMultiplier();
+    const tickMarket = (dt) => {
+      state.marketTimer -= dt * state.gameSpeed;
+      if (state.marketTimer <= 0) {
+        state.marketIsBull = !state.marketIsBull;
+        // 切换时随机下个周期时长，增加不确定感
+        state.marketCycleDuration = MARKET_CYCLE_MIN + Math.random() * (MARKET_CYCLE_MAX - MARKET_CYCLE_MIN);
+        state.marketTimer = state.marketCycleDuration;
+        const label = state.marketIsBull ? "多头行情爆发！" : "空头来袭，注意风控";
+        pushLog(label);
+        state.lastRewardText = label;
+      }
+    };
 
+    // ── 收益公式 ──
+    const getSkillLevel   = (id) => skills.find(s=>s.id===id)?.level || 0;
+    const getDiscount     = () => Math.max(0.6, 1 - getSkillLevel("bulk_discount") * 0.04);
+    const getCurrentPrice = (b, offset=0) =>
+      Math.floor(b.basePrice * Math.pow(PRICE_GROWTH, b.owned + offset) * getDiscount());
+
+    const getBaseGPS      = () => buildings.reduce((s,b) => s + b.dps * b.owned, 0);
+    const getResearchMult = () => 1 + state.researchPoints * 0.1;
+    const getSkillGpsMult = () => 1 + getSkillLevel("line_optimizer") * 0.25;
+    const getTotalGPS     = () =>
+      getBaseGPS() * state.gpsMultiplier * getResearchMult() * getSkillGpsMult() * getMarketMultiplier();
+
+    const getManualGain   = () =>
+      (state.manualPower + upgrades.find(u=>u.id==="training")?.purchased ? 0 : 0) // manualPower 已在购买时更新
+      * state.manualMult
+      * (1 + getSkillLevel("manual_mastery") * 0.3);
+
+    // ── 价格批量计算 ──
     const getAffordableCount = (building, budget, mode) => {
       if (mode === "1") return budget >= getCurrentPrice(building) ? 1 : 0;
       if (mode === "10" || mode === "100") {
         const target = Number(mode);
-        let totalCost = 0;
-        for (let i = 0; i < target; i += 1) {
-          totalCost += getCurrentPrice(building, i);
-          if (totalCost > budget) return i;
+        let total = 0;
+        for (let i = 0; i < target; i++) {
+          total += getCurrentPrice(building, i);
+          if (total > budget) return i;
         }
         return target;
       }
-
-      let count = 0;
-      let totalCost = 0;
+      let count = 0, total = 0;
       while (count < 10000) {
-        totalCost += getCurrentPrice(building, count);
-        if (totalCost > budget) return count;
-        count += 1;
+        total += getCurrentPrice(building, count);
+        if (total > budget) return count;
+        count++;
       }
       return count;
     };
 
     const getPurchaseCost = (building, count) => {
       let cost = 0;
-      for (let i = 0; i < count; i += 1) {
-        cost += getCurrentPrice(building, i);
-      }
+      for (let i = 0; i < count; i++) cost += getCurrentPrice(building, i);
       return cost;
     };
 
+    // ── 存档 ──
     const saveGame = () => {
       const payload = {
-        gears: state.gears,
-        purchaseMode: state.purchaseMode,
-        gameSpeed: state.gameSpeed,
-        autoBuy: state.autoBuy,
-        questIndex: state.questIndex,
-        logs: state.logs.slice(0, 20),
-        buildings: buildings.map((b) => ({ id: b.id, owned: b.owned })),
-        upgrades: upgrades.map((u) => ({ id: u.id, purchased: u.purchased })),
-        manualPower: state.manualPower,
+        gears: state.gears, purchaseMode: state.purchaseMode,
+        gameSpeed: state.gameSpeed, autoBuy: state.autoBuy,
+        questIndex: state.questIndex, logs: state.logs.slice(0,20),
+        buildings: buildings.map(b => ({ id: b.id, owned: b.owned })),
+        upgrades: upgrades.map(u => ({ id: u.id, purchased: u.purchased })),
+        skills: skills.map(s => ({ id: s.id, level: s.level })),
+        achievements: achievements.map(a => ({ id: a.id, done: a.done, claimed: a.claimed })),
+        manualPower: state.manualPower, manualMult: state.manualMult,
         gpsMultiplier: state.gpsMultiplier,
-        totalClicks: state.totalClicks,
-        lifetimeGears: state.lifetimeGears,
-        achievements: achievements.map((a) => ({ id: a.id, done: a.done, claimed: a.claimed })),
-        skills: skills.map((s) => ({ id: s.id, level: s.level })),
+        totalClicks: state.totalClicks, lifetimeGears: state.lifetimeGears,
         researchPoints: state.researchPoints,
-        savedAt: Date.now()
+        bullClicks: state.bullClicks,
+        marketIsBull: state.marketIsBull,
+        savedAt: Date.now(),
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
-    };
-
-
-    const exportSave = async () => {
-      const raw = localStorage.getItem(SAVE_KEY) || "";
-      if (!raw) {
-        window.alert("当前没有可导出的存档。");
-        return;
-      }
-      try {
-        await navigator.clipboard.writeText(raw);
-        pushLog("已导出存档到剪贴板");
-      } catch {
-        window.prompt("复制以下存档文本", raw);
-      }
-    };
-
-    const importSave = () => {
-      const raw = window.prompt("粘贴存档文本以导入（会覆盖当前进度）");
-      if (!raw) return;
-      try {
-        const data = JSON.parse(raw);
-        if (!data || typeof data !== "object") throw new Error("invalid payload");
-        localStorage.setItem(SAVE_KEY, raw);
-        pushLog("已导入存档，正在刷新状态");
-        loadGame();
-        render();
-      } catch {
-        window.alert("存档格式无效，导入失败。");
-      }
     };
 
     const loadGame = () => {
       try {
         const raw = localStorage.getItem(SAVE_KEY);
         if (!raw) return;
-        const data = JSON.parse(raw);
-        if (!data || typeof data !== "object") return;
+        const d = JSON.parse(raw);
+        if (!d || typeof d !== "object") return;
 
-        state.gears = Number(data.gears) || 0;
-        if (["1", "10", "100", "max"].includes(data.purchaseMode)) {
-          state.purchaseMode = data.purchaseMode;
-        }
-        if ([1,2,4].includes(Number(data.gameSpeed))) {
-          state.gameSpeed = Number(data.gameSpeed);
-        }
-        state.autoBuy = Boolean(data.autoBuy);
-        state.questIndex = Math.max(0, Math.min(Number(data.questIndex) || 0, questChain.length));
-        if (Array.isArray(data.logs)) state.logs = data.logs.slice(0, 20);
+        state.gears          = Number(d.gears) || 0;
+        state.manualPower    = Math.max(1, Number(d.manualPower) || 1);
+        state.manualMult     = Math.max(1, Number(d.manualMult)  || 1);
+        state.gpsMultiplier  = Math.max(1, Number(d.gpsMultiplier) || 1);
+        state.totalClicks    = Math.max(0, Number(d.totalClicks) || 0);
+        state.lifetimeGears  = Math.max(0, Number(d.lifetimeGears) || 0);
+        state.researchPoints = Math.max(0, Math.floor(Number(d.researchPoints) || 0));
+        state.bullClicks     = Math.max(0, Number(d.bullClicks) || 0);
+        state.marketIsBull   = d.marketIsBull !== false;
 
-        if (Array.isArray(data.buildings)) {
-          for (const saved of data.buildings) {
-            const target = buildings.find((b) => b.id === saved.id);
-            if (!target) continue;
-            target.owned = Math.max(0, Math.floor(Number(saved.owned) || 0));
-          }
-        }
+        if (["1","10","100","max"].includes(d.purchaseMode)) state.purchaseMode = d.purchaseMode;
+        if ([1,2,4].includes(Number(d.gameSpeed))) state.gameSpeed = Number(d.gameSpeed);
+        state.autoBuy     = Boolean(d.autoBuy);
+        state.questIndex  = Math.max(0, Math.min(Number(d.questIndex)||0, questChain.length));
+        if (Array.isArray(d.logs)) state.logs = d.logs.slice(0,20);
 
-        state.manualPower = Math.max(1, Number(data.manualPower) || 1);
-        state.gpsMultiplier = Math.max(1, Number(data.gpsMultiplier) || 1);
-        state.totalClicks = Math.max(0, Number(data.totalClicks) || 0);
-        state.lifetimeGears = Math.max(0, Number(data.lifetimeGears) || 0);
-        state.researchPoints = Math.max(0, Math.floor(Number(data.researchPoints) || 0));
+        for (const s of (d.buildings||[]))   { const t=buildings.find(b=>b.id===s.id);   if(t) t.owned     = Math.max(0,Math.floor(Number(s.owned)||0)); }
+        for (const s of (d.upgrades||[]))    { const t=upgrades.find(u=>u.id===s.id);    if(t) t.purchased = Boolean(s.purchased); }
+        for (const s of (d.skills||[]))      { const t=skills.find(sk=>sk.id===s.id);    if(t) t.level     = Math.max(0,Math.min(t.maxLevel,Math.floor(Number(s.level)||0))); }
+        for (const s of (d.achievements||[])){ const t=achievements.find(a=>a.id===s.id); if(t){ t.done=Boolean(s.done); t.claimed=Boolean(s.claimed); } }
 
-        if (Array.isArray(data.upgrades)) {
-          for (const saved of data.upgrades) {
-            const target = upgrades.find((u) => u.id === saved.id);
-            if (!target) continue;
-            target.purchased = Boolean(saved.purchased);
-          }
-        }
-
-        if (Array.isArray(data.skills)) {
-          for (const saved of data.skills) {
-            const target = skills.find((s) => s.id === saved.id);
-            if (!target) continue;
-            target.level = Math.max(0, Math.min(target.maxLevel, Math.floor(Number(saved.level) || 0)));
-          }
-        }
-
-        if (Array.isArray(data.achievements)) {
-          for (const saved of data.achievements) {
-            const target = achievements.find((a) => a.id === saved.id);
-            if (!target) continue;
-            target.done = Boolean(saved.done);
-            target.claimed = Boolean(saved.claimed);
-          }
-        }
-
-        const savedAt = Number(data.savedAt) || Date.now();
-        const offlineSeconds = Math.max(0, Math.min((Date.now() - savedAt) / 1000, OFFLINE_CAP_SECONDS));
-        const offlineGears = getTotalGPS() * offlineSeconds;
-        if (offlineGears > 0) {
-          state.pendingOfflineGears = offlineGears;
-        }
-      } catch (error) {
-        console.warn("存档读取失败，已忽略：", error);
+        const offlineSecs  = Math.max(0, Math.min((Date.now()-(Number(d.savedAt)||Date.now()))/1000, OFFLINE_CAP_SECONDS));
+        const offlineGears = getTotalGPS() * offlineSecs;
+        if (offlineGears > 0) state.pendingOfflineGears = offlineGears;
+      } catch(e) {
+        console.warn("存档读取失败：", e);
       }
     };
 
-    const createBuildingRow = (building) => {
+    const exportSave = async () => {
+      const raw = localStorage.getItem(SAVE_KEY)||"";
+      if (!raw) { alert("暂无存档"); return; }
+      try { await navigator.clipboard.writeText(raw); pushLog("存档已复制到剪贴板"); }
+      catch { prompt("复制以下存档：", raw); }
+    };
+
+    const importSave = () => {
+      const raw = prompt("粘贴存档文本（覆盖当前进度）");
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== "object") throw new Error();
+        localStorage.setItem(SAVE_KEY, raw);
+        loadGame(); render(); pushLog("存档导入成功");
+      } catch { alert("存档格式无效"); }
+    };
+
+    // ── 浮动数字特效 ──
+    // 在点击位置生成飘起的金额数字，提供即时满足感
+    const spawnFloatNum = (x, y, text, color="#fbbf24") => {
+      const el = document.createElement("div");
+      el.className = "float-num";
+      el.textContent = text;
+      el.style.left = `${x}px`;
+      el.style.top  = `${y}px`;
+      el.style.color = color;
+      document.body.appendChild(el);
+      // 动画结束后自动销毁，避免 DOM 堆积
+      el.addEventListener("animationend", () => el.remove());
+    };
+
+    // ── DOM 构建 ──
+    const createBuildingRow = (b) => {
       const row = document.createElement("div");
       row.className = "building";
-      row.dataset.id = building.id;
-
       row.innerHTML = `
         <div>
-          <div class="name">${building.name}</div>
+          <div class="name">${b.emoji} ${b.name}</div>
           <div class="meta">
-            <span>产出：${building.dps} / 秒</span>
-            <span>拥有：<strong data-owned="${building.id}">0</strong></span>
+            <span>产出：${b.dps}/s</span>
+            <span>持有：<strong data-owned="${b.id}">0</strong></span>
           </div>
-          <div class="hint" data-hint="${building.id}"></div>
-          <div class="locked-note" data-lock="${building.id}"></div>
+          <div class="hint" data-hint="${b.id}"></div>
+          <div class="locked-note" data-lock="${b.id}"></div>
         </div>
-        <button class="btn buy-btn" data-buy="${building.id}">购买 x1（0 齿轮）</button>
+        <button class="btn buy-btn" data-buy="${b.id}">购买 ×1（¥0）</button>
       `;
-
       buildingList.appendChild(row);
-
-      buildingViewMap.set(building.id, {
-        ownedEl: row.querySelector(`[data-owned="${building.id}"]`),
-        buyBtn: row.querySelector(`[data-buy="${building.id}"]`),
-        hintEl: row.querySelector(`[data-hint="${building.id}"]`),
-        lockEl: row.querySelector(`[data-lock="${building.id}"]`)
+      buildingViewMap.set(b.id, {
+        ownedEl: row.querySelector(`[data-owned="${b.id}"]`),
+        buyBtn:  row.querySelector(`[data-buy="${b.id}"]`),
+        hintEl:  row.querySelector(`[data-hint="${b.id}"]`),
+        lockEl:  row.querySelector(`[data-lock="${b.id}"]`),
       });
     };
 
-    const createUpgradeRow = (upgrade) => {
+    const createUpgradeRow = (u) => {
       const row = document.createElement("div");
       row.className = "upgrade";
-      row.dataset.id = upgrade.id;
       row.innerHTML = `
         <div>
-          <div class="name">${upgrade.name}</div>
-          <div class="meta">${upgrade.desc}</div>
-          <div class="meta" data-upgrade-lock="${upgrade.id}"></div>
+          <div class="name">${u.name}</div>
+          <div class="meta">${u.desc}</div>
+          <div class="meta" data-upgrade-lock="${u.id}" style="color:#f87171;margin-top:3px"></div>
         </div>
-        <button class="btn upgrade-btn" data-upgrade="${upgrade.id}">研发（${format(upgrade.price)} 齿轮）</button>
+        <button class="btn upgrade-btn" data-upgrade="${u.id}">研发（${fmt(u.price)}）</button>
       `;
       upgradeList.appendChild(row);
-      upgradeViewMap.set(upgrade.id, {
-        btn: row.querySelector(`[data-upgrade="${upgrade.id}"]`),
-        lockEl: row.querySelector(`[data-upgrade-lock="${upgrade.id}"]`)
+      upgradeViewMap.set(u.id, {
+        btn:    row.querySelector(`[data-upgrade="${u.id}"]`),
+        lockEl: row.querySelector(`[data-upgrade-lock="${u.id}"]`),
       });
     };
 
-    const createSkillRow = (skill) => {
+    const createSkillRow = (sk) => {
       const row = document.createElement("div");
       row.className = "skill";
-      row.dataset.id = skill.id;
       row.innerHTML = `
         <div>
-          <div class="name">${skill.name}</div>
-          <div class="meta">${skill.desc}</div>
-          <div class="meta" data-skill-meta="${skill.id}"></div>
+          <div class="name">${sk.name}</div>
+          <div class="meta">${sk.desc}</div>
+          <div class="meta" data-skill-meta="${sk.id}"></div>
         </div>
-        <button class="btn skill-btn" data-skill-buy="${skill.id}">升级（1 RP）</button>
+        <button class="btn skill-btn" data-skill-buy="${sk.id}">升级（${sk.costRP} RP）</button>
       `;
       skillList.appendChild(row);
-      skillViewMap.set(skill.id, {
-        btn: row.querySelector(`[data-skill-buy="${skill.id}"]`),
-        meta: row.querySelector(`[data-skill-meta="${skill.id}"]`)
+      skillViewMap.set(sk.id, {
+        btn:  row.querySelector(`[data-skill-buy="${sk.id}"]`),
+        meta: row.querySelector(`[data-skill-meta="${sk.id}"]`),
       });
     };
 
-    const createAchievementRow = (achievement) => {
+    const createAchievementRow = (a) => {
       const row = document.createElement("div");
       row.className = "achievement";
-      row.dataset.id = achievement.id;
       row.innerHTML = `
         <div>
-          <div class="name">${achievement.name}</div>
-          <div class="meta">${achievement.desc}</div>
+          <div class="name">${a.name}</div>
+          <div class="meta">${a.desc}</div>
         </div>
-        <span class="badge" data-achievement-badge="${achievement.id}">未完成</span>
+        <span class="badge" data-achievement-badge="${a.id}">未完成</span>
       `;
       achievementList.appendChild(row);
-      achievementViewMap.set(achievement.id, {
-        badge: row.querySelector(`[data-achievement-badge="${achievement.id}"]`)
-      });
+      achievementViewMap.set(a.id, { badge: row.querySelector(`[data-achievement-badge="${a.id}"]`) });
     };
 
-    
-    const claimAchievementReward = (achievement) => {
-      if (!achievement.reward || achievement.claimed) return;
-      achievement.claimed = true;
-      grantReward(achievement.reward, `成就奖励（${achievement.name}）`);
-      saveGame();
-    };
-
-    
-    const isBuildingUnlocked = (building) => state.lifetimeGears >= building.unlockLifetimeGears;
-
-    const getUpgradeLockedReason = (upgrade) => {
-      if (state.researchPoints < upgrade.unlockRP) {
-        return `需要 RP ${upgrade.unlockRP}`;
-      }
-      if (upgrade.requires) {
-        const required = upgrades.find((u) => u.id === upgrade.requires);
-        if (required && !required.purchased) return `前置：${required.name}`;
-      }
-      return "";
-    };
-
-    
-    const pushLog = (message) => {
-      const line = `[${new Date().toLocaleTimeString("zh-CN", { hour12: false })}] ${message}`;
+    // ── 奖励系统 ──
+    const pushLog = (msg) => {
+      const line = `[${new Date().toLocaleTimeString("zh-CN",{hour12:false})}] ${msg}`;
       state.logs.unshift(line);
-      state.logs = state.logs.slice(0, 20);
+      state.logs = state.logs.slice(0,20);
     };
 
     const grantReward = (reward, label) => {
@@ -854,7 +1026,7 @@
       if (reward.type === "gear") {
         state.gears += reward.value;
         state.lifetimeGears += reward.value;
-        state.lastRewardText = `${label}：+${format(reward.value)} 齿轮`;
+        state.lastRewardText = `${label}：+${fmt(reward.value)}`;
         pushLog(state.lastRewardText);
       }
       if (reward.type === "rp") {
@@ -864,397 +1036,359 @@
       }
     };
 
+    const claimAchievementReward = (a) => {
+      if (!a.reward || a.claimed) return;
+      a.claimed = true;
+      grantReward(a.reward, `成就「${a.name}」`);
+      saveGame();
+    };
+
+    // ── 升级限制检查 ──
+    const getUpgradeLockReason = (u) => {
+      if (state.researchPoints < u.unlockRP) return `需要 ${u.unlockRP} RP`;
+      if (u.requires) {
+        const req = upgrades.find(x => x.id === u.requires);
+        if (req && !req.purchased) return `前置：${req.name}`;
+      }
+      return "";
+    };
+
+    const isBuildingUnlocked = (b) => state.lifetimeGears >= b.unlockLifetimeGears;
+
+    // ── 购买操作 ──
+    const buyBuilding = (id) => {
+      const b = buildings.find(x=>x.id===id);
+      if (!b || !isBuildingUnlocked(b)) return;
+      const count = getAffordableCount(b, state.gears, state.purchaseMode);
+      if (count <= 0) return;
+      const purchaseCount = state.purchaseMode === "max" ? count : Math.min(count, Number(state.purchaseMode)||1);
+      const cost = getPurchaseCost(b, purchaseCount);
+      if (state.gears < cost) return;
+      state.gears -= cost;
+      b.owned += purchaseCount;
+      pushLog(`收购 ${b.emoji}${b.name} ×${purchaseCount}（-${fmt(cost)}）`);
+      saveGame(); render();
+    };
+
+    const buyUpgrade = (id) => {
+      const u = upgrades.find(x=>x.id===id);
+      if (!u || u.purchased) return;
+      const locked = getUpgradeLockReason(u);
+      if (locked || state.gears < u.price) return;
+      state.gears -= u.price;
+      u.purchased = true;
+      if (u.type === "manual")     state.manualPower += u.value;
+      if (u.type === "gps")        state.gpsMultiplier *= u.value;
+      if (u.type === "manualMult") state.manualMult *= u.value;
+      pushLog(`研发完成：${u.name}`);
+      saveGame(); render();
+    };
+
+    const buySkill = (id) => {
+      const sk = skills.find(s=>s.id===id);
+      if (!sk || sk.level >= sk.maxLevel || state.researchPoints < sk.costRP) return;
+      state.researchPoints -= sk.costRP;
+      sk.level++;
+      pushLog(`技能升级：${sk.name} Lv.${sk.level}`);
+      saveGame(); render();
+    };
+
+    const tryAutoBuy = () => {
+      for (const u of upgrades) {
+        if (u.purchased || getUpgradeLockReason(u)) continue;
+        if (state.gears >= u.price) { buyUpgrade(u.id); return; }
+      }
+      for (const b of [...buildings].reverse()) {
+        if (!isBuildingUnlocked(b)) continue;
+        if (getAffordableCount(b, state.gears, "1") > 0) {
+          const prev = state.purchaseMode;
+          state.purchaseMode = "1";
+          buyBuilding(b.id);
+          state.purchaseMode = prev;
+          return;
+        }
+      }
+    };
+
+    // ── 渲染 ──
     const updateQuestProgress = () => {
       if (state.questIndex >= questChain.length) {
-        goalTitleEl.textContent = "阶段任务：已全部完成";
+        goalTitleEl.textContent = "产业目标：全部完成！";
         goalFillEl.style.width = "100%";
-        goalHintEl.textContent = "你已完成当前任务链";
-        goalPctEl.textContent = "100%";
-        questRewardEl.textContent = "奖励：已领取完毕";
+        goalHintEl.textContent = "恭喜！你已构建金融帝国"; goalPctEl.textContent = "100%";
+        questRewardEl.textContent = "全部奖励已领取";
         return;
       }
-
-      const quest = questChain[state.questIndex];
-      const current = quest.progress();
-      const pct = Math.min(100, (current / quest.target) * 100);
-      goalTitleEl.textContent = `阶段任务：${quest.title}`;
+      const q = questChain[state.questIndex];
+      const cur = q.progress(), pct = Math.min(100, (cur/q.target)*100);
+      goalTitleEl.textContent = q.title;
       goalFillEl.style.width = `${pct}%`;
-      goalHintEl.textContent = current >= quest.target ? "任务已完成，奖励已发放" : `进度 ${format(current)} / ${format(quest.target)}`;
-      goalPctEl.textContent = `${pct.toFixed(0)}%`;
-      questRewardEl.textContent = `奖励：${quest.rewardText}`;
-
-      if (current >= quest.target) {
-        grantReward(quest.reward, `任务奖励（${quest.title}）`);
-        state.questIndex += 1;
+      goalHintEl.textContent = cur >= q.target ? "目标已达成，奖励已发放" : `进度 ${fmt(cur).replace("¥","")} / ${fmt(q.target).replace("¥","")}`;
+      goalPctEl.textContent  = `${pct.toFixed(0)}%`;
+      questRewardEl.textContent = `奖励：${q.rewardText}`;
+      if (cur >= q.target) {
+        grantReward(q.reward, `任务「${q.title}」`);
+        state.questIndex++;
         saveGame();
       }
     };
 
     const renderMode = () => {
-      for (const btn of modeButtons) {
-        btn.classList.toggle("active", btn.dataset.mode === state.purchaseMode);
-      }
-      for (const btn of speedButtons) {
-        btn.classList.toggle("active", Number(btn.dataset.speed) === state.gameSpeed);
-      }
+      modeButtons.forEach(b  => b.classList.toggle("active", b.dataset.mode === state.purchaseMode));
+      speedButtons.forEach(b => b.classList.toggle("active", Number(b.dataset.speed) === state.gameSpeed));
       autoBuyBtn.classList.toggle("active", state.autoBuy);
-      autoBuyBtn.textContent = `自动购买: ${state.autoBuy ? "开" : "关"}`;
+      autoBuyBtn.textContent = `自动投资: ${state.autoBuy?"开":"关"}`;
+    };
+
+    // 市场 UI 更新
+    const renderMarket = () => {
+      const isBull = state.marketIsBull;
+      const mult = getMarketMultiplier();
+      marketMultEl.textContent = `×${mult.toFixed(2)}`;
+      marketMultEl.style.color = isBull ? "var(--bull)" : "var(--bear)";
+      marketStatusEl.textContent = isBull ? "多头市场" : "空头市场";
+      marketStatusEl.style.color = isBull ? "var(--bull)" : "var(--bear)";
+      marketDotEl.classList.toggle("bear", !isBull);
+      marketLabelEl.textContent = isBull ? "多头市场" : "空头市场";
+      marketLabelEl.style.color = isBull ? "var(--bull)" : "var(--bear)";
+      // 进度条位置表示当前市场强度（多头偏右，空头偏左）
+      const pct = isBull ? 50 + (1 - state.marketTimer/state.marketCycleDuration)*50
+                         : (state.marketTimer/state.marketCycleDuration)*50;
+      marketWaveEl.style.width = `${Math.max(5,Math.min(95,pct))}%`;
+      const secs = Math.ceil(state.marketTimer);
+      marketCountdownEl.textContent = `切换：${secs}s`;
+      marketEffectEl.textContent = isBull
+        ? `多头加成 ×${MARKET_BULL_BONUS.toFixed(1)}`
+        : `空头折损 ×${MARKET_BEAR_PENALTY.toFixed(1)}`;
+      marketEffectEl.style.color = isBull ? "var(--bull)" : "var(--bear)";
     };
 
     const render = () => {
-      gearsEl.textContent = format(state.gears);
-      gpsEl.textContent = format(getTotalGPS());
-      rpEl.textContent = `研究点 RP：${state.researchPoints}（总产出 x${getResearchMultiplier().toFixed(1)}，速度 x${state.gameSpeed}）`;
+      gearsEl.textContent    = fmt(state.gears);
+      gpsEl.textContent      = `收益率 ${fmt(getTotalGPS())}/s`;
+      rpDisplayEl.textContent= `${state.researchPoints} RP`;
+      rpMetaEl.textContent   = `研究加成 ×${getResearchMult().toFixed(1)}`;
+      manualDesc.textContent = `每次撮合 +${fmt(getManualGain())}`;
 
-      for (const building of buildings) {
-        const view = buildingViewMap.get(building.id);
-        if (!view) continue;
+      renderMarket();
 
-        const count = getAffordableCount(building, state.gears, state.purchaseMode);
-        const intendedCount = state.purchaseMode === "max" ? count : Math.min(count, Number(state.purchaseMode) || 1);
-        const purchaseCount = Math.max(1, intendedCount || 0);
-        const cost = getPurchaseCost(building, purchaseCount);
-
-        view.ownedEl.textContent = building.owned;
-        view.buyBtn.textContent = `购买 x${purchaseCount}（${format(cost)} 齿轮）`;
-
-        const unlocked = isBuildingUnlocked(building);
-        const affordable = count > 0 && unlocked;
-        view.buyBtn.disabled = !affordable;
-
-        if (!unlocked) {
-          view.lockEl.textContent = `解锁条件：累计齿轮 ${format(building.unlockLifetimeGears)}`;
-          view.hintEl.textContent = "";
-        } else {
-          view.lockEl.textContent = "";
-          if (affordable) {
-            view.hintEl.textContent = "";
-          } else {
-            const nextPrice = getCurrentPrice(building);
-            view.hintEl.textContent = `还差 ${format(nextPrice - state.gears)} 齿轮`;
-          }
-        }
+      // 建筑
+      for (const b of buildings) {
+        const v = buildingViewMap.get(b.id); if (!v) continue;
+        const count = getAffordableCount(b, state.gears, state.purchaseMode);
+        const pc    = state.purchaseMode === "max" ? count : Math.min(count, Number(state.purchaseMode)||1);
+        const safepc = Math.max(1, pc||0);
+        const cost  = getPurchaseCost(b, safepc);
+        const unlocked = isBuildingUnlocked(b);
+        v.ownedEl.textContent = b.owned;
+        v.buyBtn.textContent  = `购买 ×${safepc}（${fmt(cost)}）`;
+        v.buyBtn.disabled     = !(count > 0 && unlocked);
+        v.lockEl.textContent  = !unlocked ? `解锁：历史资本 ${fmt(b.unlockLifetimeGears)}` : "";
+        v.hintEl.textContent  = unlocked && count <= 0 ? `还差 ${fmt(getCurrentPrice(b)-state.gears)}` : "";
       }
 
-      for (const upgrade of upgrades) {
-        const view = upgradeViewMap.get(upgrade.id);
-        if (!view) continue;
-        if (upgrade.purchased) {
-          view.btn.textContent = "已研发";
-          view.btn.disabled = true;
-          view.lockEl.textContent = "";
-          continue;
-        }
-        const lockedReason = getUpgradeLockedReason(upgrade);
-        view.lockEl.textContent = lockedReason;
-        view.btn.textContent = `研发（${format(upgrade.price)} 齿轮）`;
-        view.btn.disabled = state.gears < upgrade.price || Boolean(lockedReason);
+      // 升级
+      for (const u of upgrades) {
+        const v = upgradeViewMap.get(u.id); if (!v) continue;
+        if (u.purchased) { v.btn.textContent = "已研发"; v.btn.disabled = true; v.lockEl.textContent = ""; continue; }
+        const locked = getUpgradeLockReason(u);
+        v.lockEl.textContent = locked;
+        v.btn.textContent    = `研发（${fmt(u.price)}）`;
+        v.btn.disabled       = state.gears < u.price || Boolean(locked);
       }
+
+      // 任务
       updateQuestProgress();
 
-      for (const skill of skills) {
-        const view = skillViewMap.get(skill.id);
-        if (!view) continue;
-        view.meta.textContent = `等级 ${skill.level}/${skill.maxLevel}`;
-        if (skill.level >= skill.maxLevel) {
-          view.btn.disabled = true;
-          view.btn.textContent = "已满级";
-        } else {
-          view.btn.disabled = state.researchPoints < skill.costRP;
-          view.btn.textContent = `升级（${skill.costRP} RP）`;
-        }
+      // 技能
+      for (const sk of skills) {
+        const v = skillViewMap.get(sk.id); if (!v) continue;
+        v.meta.textContent = `等级 ${sk.level}/${sk.maxLevel}`;
+        if (sk.level >= sk.maxLevel) { v.btn.disabled=true; v.btn.textContent="已满级"; }
+        else { v.btn.disabled = state.researchPoints < sk.costRP; v.btn.textContent=`升级（${sk.costRP} RP）`; }
       }
 
-      for (const achievement of achievements) {
-        if (!achievement.done && achievement.check()) {
-          achievement.done = true;
-          claimAchievementReward(achievement);
-        }
-        const view = achievementViewMap.get(achievement.id);
-        if (!view) continue;
-        view.badge.classList.toggle("done", achievement.done);
-        view.badge.textContent = achievement.done ? (achievement.claimed ? "已完成+奖励" : "已完成") : "未完成";
+      // 成就
+      for (const a of achievements) {
+        if (!a.done && a.check()) { a.done=true; claimAchievementReward(a); }
+        const v = achievementViewMap.get(a.id); if (!v) continue;
+        v.badge.classList.toggle("done", a.done);
+        v.badge.textContent = a.done ? (a.claimed?"已完成✓":"已完成") : "未完成";
       }
 
+      // 离线收益
       if (state.pendingOfflineGears > 0) {
         offlineNoticeEl.style.display = "flex";
-        offlineTextEl.textContent = `你离开期间积累了 ${format(state.pendingOfflineGears)} 齿轮`;
+        offlineTextEl.textContent = `离线期间产生收益 ${fmt(state.pendingOfflineGears)}`;
       } else {
         offlineNoticeEl.style.display = "none";
-        offlineTextEl.textContent = "";
       }
 
-      rewardFeedEl.textContent = state.lastRewardText || "成就奖励将显示在这里";
+      // 奖励公告
+      rewardFeedEl.textContent = state.lastRewardText || "";
 
+      // 日志
       eventLogEl.innerHTML = "";
-      for (const line of state.logs.slice(0, 6)) {
+      for (const line of state.logs.slice(0,8)) {
         const el = document.createElement("div");
-        el.className = "log-item";
-        el.textContent = line;
+        el.className = "log-item"; el.textContent = line;
         eventLogEl.appendChild(el);
       }
 
-      const totalBuildings = buildings.reduce((sum, b) => sum + b.owned, 0);
-      const doneAchievements = achievements.filter((a) => a.done).length;
-      const doneUpgrades = upgrades.filter((u) => u.purchased).length;
-      const totalSkillLevels = skills.reduce((sum, s) => sum + s.level, 0);
-      statBuildingsEl.textContent = `建筑总数：${totalBuildings}`;
-      statUpgradesEl.textContent = `升级已研发：${doneUpgrades}/${upgrades.length} | 技能等级：${totalSkillLevels}`;
-      statAchievementsEl.textContent = `成就完成：${doneAchievements}/${achievements.length}`;
-      statQuestEl.textContent = `任务进度：${Math.min(state.questIndex, questChain.length)}/${questChain.length}`;
-      statModeEl.textContent = `自动购买：${state.autoBuy ? "开" : "关"}`;
-      statLifetimeEl.textContent = `累计齿轮：${format(state.lifetimeGears)}`;
+      // 统计
+      const totalBuildings = buildings.reduce((s,b)=>s+b.owned,0);
+      const doneUpgrades   = upgrades.filter(u=>u.purchased).length;
+      const doneAch        = achievements.filter(a=>a.done).length;
+      statBuildingsEl.textContent  = `产业数：${totalBuildings}`;
+      statUpgradesEl.textContent   = `已研发：${doneUpgrades}/${upgrades.length}`;
+      statAchievementsEl.textContent=`成就：${doneAch}/${achievements.length}`;
+      statQuestEl.textContent      = `任务：${Math.min(state.questIndex,questChain.length)}/${questChain.length}`;
+      statModeEl.textContent       = `自动投资：${state.autoBuy?"开":"关"}`;
+      statLifetimeEl.textContent   = `历史资本：${fmt(state.lifetimeGears)}`;
 
       renderMode();
     };
 
-    const tryAutoBuy = () => {
-      // 优先购买升级，再购买建筑
-      for (const upgrade of upgrades) {
-        if (upgrade.purchased) continue;
-        if (getUpgradeLockedReason(upgrade)) continue;
-        if (state.gears >= upgrade.price) {
-          buyUpgrade(upgrade.id);
-          return;
-        }
-      }
+    // ── 事件绑定 ──
 
-      for (const building of [...buildings].reverse()) {
-        if (!isBuildingUnlocked(building)) continue;
-        const count = getAffordableCount(building, state.gears, "1");
-        if (count > 0) {
-          const prevMode = state.purchaseMode;
-          state.purchaseMode = "1";
-          buyBuilding(building.id);
-          state.purchaseMode = prevMode;
-          return;
-        }
-      }
-    };
-
-    const buySkill = (id) => {
-      const skill = skills.find((s) => s.id === id);
-      if (!skill) return;
-      if (skill.level >= skill.maxLevel) return;
-      if (state.researchPoints < skill.costRP) return;
-      state.researchPoints -= skill.costRP;
-      skill.level += 1;
-      pushLog(`技能升级：${skill.name} Lv.${skill.level}`);
-      saveGame();
-      render();
-    };
-
-    const buyBuilding = (id) => {
-      const building = buildings.find((b) => b.id === id);
-      if (!building) return;
-      if (!isBuildingUnlocked(building)) return;
-
-      const count = getAffordableCount(building, state.gears, state.purchaseMode);
-      if (count <= 0) return;
-
-      const purchaseCount = state.purchaseMode === "max" ? count : Math.min(count, Number(state.purchaseMode) || 1);
-      const cost = getPurchaseCost(building, purchaseCount);
-
-      if (state.gears < cost) return;
-
-      state.gears -= cost;
-      building.owned += purchaseCount;
-      pushLog(`购买 ${building.name} x${purchaseCount}`);
-      saveGame();
-      render();
-    };
-
-    const buyUpgrade = (id) => {
-      const upgrade = upgrades.find((u) => u.id === id);
-      if (!upgrade || upgrade.purchased) return;
-      const lockedReason = getUpgradeLockedReason(upgrade);
-      if (lockedReason) return;
-      if (state.gears < upgrade.price) return;
-
-      state.gears -= upgrade.price;
-      upgrade.purchased = true;
-
-      if (upgrade.type === "manual") state.manualPower += upgrade.value;
-      if (upgrade.type === "gps") state.gpsMultiplier *= upgrade.value;
-      pushLog(`研发升级：${upgrade.name}`);
-
-      saveGame();
-      render();
-    };
-
-    manualBtn.addEventListener("click", () => {
+    // 手动撮合：加入浮动数字 + 涟漪效果
+    manualBtn.addEventListener("click", (e) => {
       const gain = getManualGain();
       state.gears += gain;
       state.lifetimeGears += gain;
-      state.totalClicks += 1;
-      if (state.totalClicks === 1) pushLog("首次手动生产");
-      saveGame();
-      render();
+      state.totalClicks++;
+      if (state.marketIsBull) state.bullClicks++;
+      if (state.totalClicks === 1) pushLog("完成首次撮合");
+
+      // 浮动数字特效（位置跟随鼠标/触摸）
+      spawnFloatNum(e.clientX + (Math.random()*20-10), e.clientY - 10, `+${fmt(gain)}`);
+
+      // 按钮脉冲
+      manualBtn.classList.remove("clicked");
+      void manualBtn.offsetWidth; // 强制重绘触发动画
+      manualBtn.classList.add("clicked");
+
+      // 涟漪背景
+      const rect = manualZone.getBoundingClientRect();
+      manualZone.style.setProperty("--rx", `${((e.clientX-rect.left)/rect.width)*100}%`);
+      manualZone.style.setProperty("--ry", `${((e.clientY-rect.top)/rect.height)*100}%`);
+      manualZone.classList.add("ripple");
+      setTimeout(() => manualZone.classList.remove("ripple"), 400);
+
+      saveGame(); render();
     });
 
-    buildingList.addEventListener("click", (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLButtonElement)) return;
-      const id = target.dataset.buy;
-      if (!id) return;
+    buildingList.addEventListener("click", e => {
+      if (!(e.target instanceof HTMLButtonElement)) return;
+      const id = e.target.dataset.buy; if (!id) return;
       buyBuilding(id);
     });
 
-    upgradeList.addEventListener("click", (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLButtonElement)) return;
-      const id = target.dataset.upgrade;
-      if (!id) return;
+    upgradeList.addEventListener("click", e => {
+      if (!(e.target instanceof HTMLButtonElement)) return;
+      const id = e.target.dataset.upgrade; if (!id) return;
       buyUpgrade(id);
     });
 
-    skillList.addEventListener("click", (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLButtonElement)) return;
-      const id = target.dataset.skillBuy;
-      if (!id) return;
+    skillList.addEventListener("click", e => {
+      if (!(e.target instanceof HTMLButtonElement)) return;
+      const id = e.target.dataset.skillBuy; if (!id) return;
       buySkill(id);
     });
 
-
-    exportSaveBtn.addEventListener("click", () => {
-      exportSave();
-      render();
-    });
-
-    importSaveBtn.addEventListener("click", () => {
-      importSave();
-      saveGame();
-    });
-
-    document.querySelector(".controls").addEventListener("click", (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLButtonElement)) return;
-
-      const mode = target.dataset.mode;
-      if (mode) {
-        state.purchaseMode = mode;
-        saveGame();
-        render();
-        return;
-      }
-
-      const speed = Number(target.dataset.speed);
-      if ([1, 2, 4].includes(speed)) {
-        state.gameSpeed = speed;
-        saveGame();
-        render();
-        return;
-      }
-
-      if (target.id === "autoBuyBtn") {
+    document.querySelector(".controls").addEventListener("click", e => {
+      if (!(e.target instanceof HTMLButtonElement)) return;
+      const mode = e.target.dataset.mode;
+      if (mode) { state.purchaseMode = mode; saveGame(); render(); return; }
+      const speed = Number(e.target.dataset.speed);
+      if ([1,2,4].includes(speed)) { state.gameSpeed = speed; saveGame(); render(); return; }
+      if (e.target.id === "autoBuyBtn") {
         state.autoBuy = !state.autoBuy;
-        pushLog(`自动购买已${state.autoBuy ? "开启" : "关闭"}`);
-        saveGame();
-        render();
+        pushLog(`自动投资已${state.autoBuy?"开启":"关闭"}`);
+        saveGame(); render();
       }
     });
+
+    exportSaveBtn.addEventListener("click", () => { exportSave(); render(); });
+    importSaveBtn.addEventListener("click", () => { importSave(); saveGame(); });
 
     claimOfflineBtn.addEventListener("click", () => {
       if (state.pendingOfflineGears <= 0) return;
+      spawnFloatNum(window.innerWidth/2, window.innerHeight/2, `+${fmt(state.pendingOfflineGears)} 💤`, "#fbbf24");
       state.gears += state.pendingOfflineGears;
       state.lifetimeGears += state.pendingOfflineGears;
       state.pendingOfflineGears = 0;
-      saveGame();
-      render();
+      saveGame(); render();
     });
 
+    // 软重置（增发股权）
     prestigeBtn.addEventListener("click", () => {
       const gain = Math.floor(Math.sqrt(state.lifetimeGears / 2000));
-      if (gain <= 0) {
-        window.alert("累计齿轮不足，无法获得研究点。继续扩张产线吧！");
-        return;
-      }
-      const ok = window.confirm(`执行软重置可获得 ${gain} 研究点（RP），是否继续？`);
-      if (!ok) return;
-
+      if (gain <= 0) { alert("历史资本不足，无法增发股权。继续扩张产业链！"); return; }
+      if (!confirm(`增发股权可获得 ${gain} RP，本轮进度将重置。继续？`)) return;
       state.researchPoints += gain;
-      pushLog(`执行 Prestige，获得 RP +${gain}`);
-      state.gears = 0;
-      state.purchaseMode = "1";
-      state.pendingOfflineGears = 0;
-      state.accumulator = 0;
-      state.manualPower = 1;
-      state.gpsMultiplier = 1;
-      state.totalClicks = 0;
-      state.lifetimeGears = 0;
-      state.lastRewardText = "";
-      state.gameSpeed = 1;
-      state.questIndex = 0;
-      state.autoBuy = false;
-      state.autoBuyAccumulator = 0;
+      pushLog(`增发股权，获得 +${gain} RP`);
+      // 重置运行状态，保留 RP 和技能
+      Object.assign(state, { gears:0, purchaseMode:"1", pendingOfflineGears:0, accumulator:0,
+        manualPower:1, manualMult:1, gpsMultiplier:1, totalClicks:0, lifetimeGears:0,
+        lastRewardText:"", gameSpeed:1, questIndex:0, autoBuy:false, autoBuyAccumulator:0, bullClicks:0 });
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const s of skills) s.level = 0;
-      for (const a of achievements) { a.done = false; a.claimed = false; }
-      saveGame();
-      render();
+      for (const a of achievements) { a.done=false; a.claimed=false; }
+      saveGame(); render();
     });
 
     resetSaveBtn.addEventListener("click", () => {
-      const ok = window.confirm("确认重置所有进度吗？");
-      if (!ok) return;
+      if (!confirm("确认清盘？所有进度将归零。")) return;
       localStorage.removeItem(SAVE_KEY);
-      state.logs = ["[--:--:--] 执行硬重置"];
-      state.gears = 0;
-      state.purchaseMode = "1";
-      state.pendingOfflineGears = 0;
-      state.accumulator = 0;
-      state.manualPower = 1;
-      state.gpsMultiplier = 1;
-      state.totalClicks = 0;
-      state.lifetimeGears = 0;
-      state.researchPoints = 0;
-      state.lastRewardText = "";
-      state.gameSpeed = 1;
-      state.questIndex = 0;
-      state.autoBuy = false;
-      state.autoBuyAccumulator = 0;
+      Object.assign(state, { gears:0, purchaseMode:"1", pendingOfflineGears:0, accumulator:0,
+        manualPower:1, manualMult:1, gpsMultiplier:1, totalClicks:0, lifetimeGears:0,
+        researchPoints:0, lastRewardText:"", gameSpeed:1, questIndex:0, autoBuy:false,
+        autoBuyAccumulator:0, bullClicks:0, marketIsBull:true, marketTimer:35, marketCycleDuration:35,
+        logs:["[--:--:--] 清盘重来"] });
       for (const b of buildings) b.owned = 0;
       for (const u of upgrades) u.purchased = false;
       for (const s of skills) s.level = 0;
-      for (const a of achievements) { a.done = false; a.claimed = false; }
+      for (const a of achievements) { a.done=false; a.claimed=false; }
       render();
     });
 
-    for (const building of buildings) createBuildingRow(building);
-    for (const upgrade of upgrades) createUpgradeRow(upgrade);
-    for (const skill of skills) createSkillRow(skill);
-    for (const achievement of achievements) createAchievementRow(achievement);
+    // ── 初始化 DOM ──
+    for (const b of buildings)  createBuildingRow(b);
+    for (const u of upgrades)   createUpgradeRow(u);
+    for (const sk of skills)    createSkillRow(sk);
+    for (const a of achievements) createAchievementRow(a);
 
     loadGame();
 
+    // ── 主游戏循环 ──
     let lastAutoSave = performance.now();
     const tick = (now) => {
-      const frameDelta = Math.min((now - state.lastTimestamp) / 1000, MAX_ACCUMULATED_SECONDS);
+      const frameDelta = Math.min((now - state.lastTimestamp) / 1000, MAX_ACCUMULATED_SECS);
       state.lastTimestamp = now;
       state.accumulator += frameDelta;
 
+      // 固定步长更新（避免帧率不稳定影响收益）
       const gps = getTotalGPS();
       while (state.accumulator >= FIXED_STEP) {
         const gain = gps * FIXED_STEP * state.gameSpeed;
-        state.gears += gain;
+        state.gears       += gain;
         state.lifetimeGears += gain;
         state.accumulator -= FIXED_STEP;
 
+        // 市场周期 tick
+        tickMarket(FIXED_STEP);
+
+        // 自动投资（每 0.5s 尝试一次）
         if (state.autoBuy) {
           state.autoBuyAccumulator += FIXED_STEP * state.gameSpeed;
-          if (state.autoBuyAccumulator >= 0.5) {
-            state.autoBuyAccumulator = 0;
-            tryAutoBuy();
-          }
+          if (state.autoBuyAccumulator >= 0.5) { state.autoBuyAccumulator=0; tryAutoBuy(); }
         }
       }
 
-      if (now - lastAutoSave > 5000) {
-        saveGame();
-        lastAutoSave = now;
-      }
+      // 每 5s 自动存档
+      if (now - lastAutoSave > 5000) { saveGame(); lastAutoSave = now; }
 
       render();
       requestAnimationFrame(tick);
