@@ -48,20 +48,6 @@
     const skillViewMap      = new Map();
     const achievViewMap     = new Map();
 
-    // 轻量事件总线（为什么：把反馈层与业务层解耦，后续可独立替换成更复杂 VFX 系统）
-    const eventBus = (() => {
-      const listeners = new Map();
-      const on = (event, handler) => {
-        const bucket = listeners.get(event) || [];
-        bucket.push(handler);
-        listeners.set(event, bucket);
-      };
-      const emit = (event, payload) => {
-        (listeners.get(event) || []).forEach((fn) => fn(payload));
-      };
-      return { on, emit };
-    })();
-
     // ════════════════════════════════════════════════
     // ⑨ 工具函数（生产层，独立于 DOM）
     // ════════════════════════════════════════════════
@@ -107,37 +93,9 @@
       return `${sg}¥${abs.toLocaleString("zh-CN",{maximumFractionDigits:1})}`;
     };
 
-    // ════════════════════════════════════════════════
-    // ⑩ Web Audio 音效（M3）
-    //    无外部依赖，纯 AudioContext 合成
-    // ════════════════════════════════════════════════
-    let audioCtx = null;
-    const getAudioCtx = () => {
-      if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-      return audioCtx;
-    };
-
-    const playTone = (freq, type, duration, gainVal, detune=0) => {
-      if (!st.soundEnabled) return;
-      try {
-        const ctx = getAudioCtx();
-        const osc = ctx.createOscillator();
-        const gain= ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.type      = type;
-        osc.frequency.value = freq;
-        osc.detune.value    = detune;
-        gain.gain.setValueAtTime(gainVal, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-        osc.start(); osc.stop(ctx.currentTime + duration);
-      } catch {}
-    };
-
-    // 三种音效场景（调频率/时长调手感）
-    const sfxClick   = () => playTone(520, "triangle", 0.08, 0.12);        // 手动撮合：短促高音
-    const sfxBuy     = () => { playTone(330,"square",0.12,0.08); playTone(440,"square",0.1,0.06,50); }; // 购买：双音上扬
-    const sfxUpgrade = () => { playTone(660,"sine",0.15,0.1); setTimeout(()=>playTone(880,"sine",0.2,0.08),80); }; // 研发：上扬双音
-    const sfxMarket  = (bull) => playTone(bull?330:220, "sawtooth", 0.25, 0.06, bull?0:-20); // 市场切换
+    // 反馈系统初始化（为什么：反馈层高频迭代，独立工厂减少对主循环的干扰）
+    const feedback = createFeedbackSystem({ st, JUICE, fmt, manualBtn, manualZone, marketFlashEl, gameShellEl });
+    const { eventBus, sfxBuy, sfxUpgrade, sfxMarket, spawnFloat } = feedback;
 
     // ════════════════════════════════════════════════
     // ⑪ 市场切换（含屏闪动效 M3）
@@ -156,17 +114,6 @@
     const tickMarket = (dt) => {
       st.marketTimer -= dt * st.gameSpeed;
       if (st.marketTimer <= 0) doMarketSwitch();
-    };
-
-    // ════════════════════════════════════════════════
-    // ⑬ 浮动数字特效
-    // ════════════════════════════════════════════════
-    const spawnFloat = (x,y,text,color="#fbbf24")=>{
-      const el=document.createElement("div");
-      el.className="float-num"; el.textContent=text;
-      el.style.left=`${x}px`; el.style.top=`${y}px`; el.style.color=color;
-      document.body.appendChild(el);
-      el.addEventListener("animationend",()=>el.remove());
     };
 
     // ════════════════════════════════════════════════
@@ -315,33 +262,6 @@
       for(const u of upgrades){ if(u.purchased||upgradeLockedReason(u))continue; if(st.gears>=u.price){buyUpgrade(u.id);return;} }
       for(const b of [...buildings].reverse()){ if(!isBldUnlocked(b))continue; if(affordableCount(b,st.gears,"1")>0){const p=st.purchaseMode;st.purchaseMode="1";buyBuilding(b.id);st.purchaseMode=p;return;} }
     };
-
-    // 反馈事件（为什么：避免在业务代码里散落动效细节）
-    eventBus.on("manual:clicked", ({ x, y, gain }) => {
-      sfxClick();
-      spawnFloat(x + (Math.random() * JUICE.manualFloatJitter * 2 - JUICE.manualFloatJitter), y - 10, `+${fmt(gain)}`);
-      manualBtn.classList.remove("clicked");
-      if (JUICE.clickPulseResetReflow) void manualBtn.offsetWidth;
-      manualBtn.classList.add("clicked");
-      const rect = manualZone.getBoundingClientRect();
-      manualZone.style.setProperty("--rx", `${((x - rect.left) / rect.width) * 100}%`);
-      manualZone.style.setProperty("--ry", `${((y - rect.top) / rect.height) * 100}%`);
-      manualZone.classList.add("ripple");
-      setTimeout(() => manualZone.classList.remove("ripple"), JUICE.rippleDurationMs);
-    });
-
-    eventBus.on("market:switched", ({ isBull }) => {
-      marketFlashEl.style.background = isBull ? "#10b981" : "#ef4444";
-      marketFlashEl.classList.add("on");
-      setTimeout(() => marketFlashEl.classList.remove("on"), JUICE.marketFlashDurationMs);
-
-      if (!gameShellEl) return;
-      gameShellEl.style.setProperty("--shake-x", `${JUICE.marketShakePx}px`);
-      gameShellEl.classList.remove("screen-shake");
-      void gameShellEl.offsetWidth;
-      gameShellEl.classList.add("screen-shake");
-      setTimeout(() => gameShellEl.classList.remove("screen-shake"), JUICE.marketShakeMs);
-    });
 
     // ════════════════════════════════════════════════
     // ⑱ 渲染层（与生产层解耦，M1 重构核心）
