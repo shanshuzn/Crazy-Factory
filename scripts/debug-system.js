@@ -12,6 +12,7 @@ const createDebugSystem = ({ st, buildings, getGpsBreakdown, SAVE_KEY, fmt }) =>
     <div id="debugMarket"></div>
     <div id="debugSave"></div>
     <div id="debugPerf"></div>
+    <div id="debugRaf"></div>
     <div id="debugMem"></div>
   `;
   document.body.appendChild(panel);
@@ -20,6 +21,7 @@ const createDebugSystem = ({ st, buildings, getGpsBreakdown, SAVE_KEY, fmt }) =>
   const marketEl = panel.querySelector('#debugMarket');
   const saveEl = panel.querySelector('#debugSave');
   const perfEl = panel.querySelector('#debugPerf');
+  const rafEl = panel.querySelector('#debugRaf');
   const memEl = panel.querySelector('#debugMem');
 
   let frameCount = 0;
@@ -39,6 +41,10 @@ const createDebugSystem = ({ st, buildings, getGpsBreakdown, SAVE_KEY, fmt }) =>
     const writesPerMin = (st.saveWriteCount || 0) / elapsedMin;
     const lastSaveAgo = st.lastSaveAt ? ((now - st.lastSaveAt) / 1000).toFixed(1) : '-';
     saveEl.textContent = `Save key ${SAVE_KEY} | size ${(saveBytes / 1024).toFixed(2)} KB | writes/min ${writesPerMin.toFixed(1)} | last ${lastSaveAgo}s`;
+    const rafElapsed = Math.max(1/60, (now - (st.rafWindowStart || now)) / 1000);
+    const rafPerSec = (st.rafTickCount || 0) / rafElapsed;
+    const rafState = rafPerSec > 90 ? 'WARN' : 'OK';
+    rafEl.textContent = `RAF ${rafPerSec.toFixed(1)}/s | ${rafState}`;
 
     frameCount += 1;
     frameAccum += dtSec;

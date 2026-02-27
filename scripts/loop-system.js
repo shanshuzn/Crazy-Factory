@@ -17,6 +17,8 @@ const createLoopSystem = ({
 
   const tick = (now) => {
     const dt = Math.min((now - st.lastTimestamp) / 1000, MAX_ACCUMULATED_SECS);
+    st.rafTickCount = (st.rafTickCount || 0) + 1;
+    if (!st.rafWindowStart) st.rafWindowStart = Date.now();
     st.lastTimestamp = now;
     st.accumulator += dt;
 

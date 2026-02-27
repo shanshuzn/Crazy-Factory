@@ -112,6 +112,8 @@
       saveWriteCount:0,
       saveWriteWindowStart:Date.now(),
       lastSaveAt:0,
+      rafTickCount:0,
+      rafWindowStart:Date.now(),
     };
 
     // 显示值（用于平滑滚动）
