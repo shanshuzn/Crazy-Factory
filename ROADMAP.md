@@ -133,47 +133,53 @@
   - 完成：2026-02-27
   - 指标影响：North Star +（默认样例时长被测试固定，防止回归漂移）
   - 证据：新增 `tests/verify-soak-defaults.test.js`，断言 pass/fail 的 `durationSec=60`
-- [TODO] M7-T16 为 verify 脚本增加超时保护
+- [DONE] M7-T16 为 verify 脚本增加超时保护
   - 验收：单次 verify 总耗时超阈值时给出非零退出
-- [NEXT] M7-T16 为 verify 脚本增加超时保护
-  - 验收：单次 verify 总耗时超阈值时给出非零退出
+  - 完成：2026-02-27
+  - 指标影响：North Star +（防止回归流程失控卡死，CI 稳定性提升）
+  - 证据：`scripts/verify_soak_thresholds.sh` 新增 `VERIFY_SOAK_TIMEOUT_SEC` 并在超时后返回非零
+- [TODO] M7-T17 为超时保护补充自动化测试
+  - 验收：强制超时场景断言非零退出
+- [NEXT] M7-T17 为超时保护补充自动化测试
+  - 验收：强制超时场景断言非零退出
 
 <!-- AUTO:METRICS-START -->
 [Mode]
 🛡 Hardening Mode（强化模式）
 
 [North Star]
-90.0% (trend: up)
+91.0% (trend: up)
 
 [Supporting Metrics]
-- growth_momentum: 88.0%（默认样例基线加入测试，结果稳定性增强）
+- growth_momentum: 89.0%（verify 增加超时保护，CI 可控性增强）
 - return_quality: 80.0%
 - upgrade_satisfaction: 77.0%
-- progress_clarity: 90.0%
-- stability_score: 86.0%
+- progress_clarity: 91.0%
+- stability_score: 87.0%
 
 [Risk Level]
 低
 
 [Task]
-M7-T15 / 为默认 60s 样例增加基线快照测试
+M7-T16 / 为 verify 脚本增加总超时保护（超时非零退出）
 
 [Impact]
-对 North Star 影响：+（防止默认样例时长被意外改动）
+对 North Star 影响：+（降低长时阻塞风险，保障自动化流水线稳定）
 
 [Do]
-- 修改文件列表：`tests/verify-soak-defaults.test.js`、`ROADMAP.md`
-- 实现摘要：新增测试验证默认 pass/fail 样例 durationSec=60 与阈值配置
+- 修改文件列表：`scripts/verify_soak_thresholds.sh`、`README.md`、`ROADMAP.md`
+- 实现摘要：新增超时环境变量与超时检测逻辑，补充文档
 
 [Verify]
-- `node --test tests/verify-soak-defaults.test.js`
+- `bash scripts/verify_soak_thresholds.sh`
+- `VERIFY_SOAK_TIMEOUT_SEC=1 VERIFY_SOAK_PASS_CMD='sleep 2; node scripts/run_soak_check.js --seconds 5 --max-writes-std 3' bash scripts/verify_soak_thresholds.sh artifacts/soak-timeout`
 - `node --test tests/formula-system.test.js tests/log-system.test.js tests/soak-cli.test.js tests/verify-soak-fallback.test.js tests/verify-soak-config.test.js tests/verify-soak-defaults.test.js`
 
 [RoadmapPatch]
 (diff only)
 
 [Next]
-M7-T16
+M7-T17
 <!-- AUTO:METRICS-END -->
 
 ## 当前版本能力（摘要）

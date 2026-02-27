@@ -15,12 +15,14 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   - 执行一个预期失败的 run_soak_check（非法参数，exit 1）
   - 归档每次执行的原始日志与 SOAK_REPORT JSON（非法参数仅归档日志）
   - JSON 解析优先使用 python（python3/python），不可用时自动回退到 node
+  - 支持总耗时超时保护，超时时返回非零退出码
 
 可选环境变量:
   VERIFY_SOAK_PASS_CMD     覆盖 pass 示例命令
   VERIFY_SOAK_FAIL_CMD     覆盖 fail 示例命令
   VERIFY_SOAK_INVALID_CMD  覆盖 invalid 示例命令
   VERIFY_SOAK_DISABLE_PYTHON=1 强制使用 node 解析 JSON
+  VERIFY_SOAK_TIMEOUT_SEC  verify 总超时秒数（默认 180）
 
 输出:
   <OUT_DIR>/pass.log
@@ -36,7 +38,23 @@ OUT_DIR="${1:-artifacts/soak-thresholds}"
 PASS_CMD="${VERIFY_SOAK_PASS_CMD:-node scripts/run_soak_check.js --seconds 60 --max-writes-std 3}"
 FAIL_CMD="${VERIFY_SOAK_FAIL_CMD:-node scripts/run_soak_check.js --seconds 60 --max-writes-std 1}"
 INVALID_CMD="${VERIFY_SOAK_INVALID_CMD:-node scripts/run_soak_check.js --bad-flag}"
+TIMEOUT_SEC="${VERIFY_SOAK_TIMEOUT_SEC:-180}"
+
+if ! [[ "$TIMEOUT_SEC" =~ ^[0-9]+$ ]] || [[ "$TIMEOUT_SEC" -le 0 ]]; then
+  echo "[soak-threshold] VERIFY_SOAK_TIMEOUT_SEC must be a positive integer" >&2
+  exit 1
+fi
+
 mkdir -p "$OUT_DIR"
+START_TS=$SECONDS
+
+check_timeout() {
+  local elapsed=$((SECONDS - START_TS))
+  if (( elapsed > TIMEOUT_SEC )); then
+    echo "[soak-threshold] timeout: elapsed ${elapsed}s > limit ${TIMEOUT_SEC}s" >&2
+    exit 1
+  fi
+}
 
 extract_report_json_with_python() {
   local py_bin="$1"
@@ -87,6 +105,7 @@ run_case() {
   local expect_exit="$2"
   local cmd="$3"
 
+  check_timeout
   echo "[soak-threshold] ${label}: expecting exit ${expect_exit}: ${cmd}"
   set +e
   local output
@@ -103,6 +122,7 @@ run_case() {
 
   printf '%s\n' "$output" | extract_report_json > "$OUT_DIR/${label}.json"
   echo "[soak-threshold] ${label}: wrote $OUT_DIR/${label}.json"
+  check_timeout
 }
 
 run_case pass 0 "$PASS_CMD"
@@ -111,6 +131,7 @@ run_case fail 1 "$FAIL_CMD"
 run_invalid_case() {
   local label=invalid
 
+  check_timeout
   echo "[soak-threshold] ${label}: expecting exit 1 and invalid-arg hint: ${INVALID_CMD}"
   set +e
   local output
@@ -131,6 +152,7 @@ run_invalid_case() {
   fi
 
   echo "[soak-threshold] ${label}: verified invalid-arg path"
+  check_timeout
 }
 
 run_invalid_case
