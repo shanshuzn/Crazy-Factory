@@ -49,39 +49,8 @@
     const achievViewMap     = new Map();
 
     // ════════════════════════════════════════════════
-    // ⑨ 工具函数（生产层，独立于 DOM）
+    // ⑨ 工具函数
     // ════════════════════════════════════════════════
-    const bld      = (id) => buildings.find(b=>b.id===id);
-    const skillLv  = (id) => skills.find(s=>s.id===id)?.level||0;
-    const discount = ()   => Math.max(0.6, 1 - skillLv("bulk_discount")*0.04);
-    const price    = (b,off=0) => Math.floor(b.basePrice * Math.pow(PRICE_GROWTH, b.owned+off) * discount());
-
-    // 建筑产出：基础 dps × 专属倍率
-    const bldGPS   = (b) => b.dps * b.owned * (bldBoost[b.id]||1);
-    const baseGPS  = ()  => buildings.reduce((s,b)=>s+bldGPS(b),0);
-    const resMult  = ()  => 1 + st.researchPoints * 0.1;
-    const skillGPS = ()  => 1 + skillLv("line_optimizer")*0.25;
-    const mktMult  = ()  => {
-      const base = st.marketIsBull ? MARKET_BULL_BONUS : MARKET_BEAR_PENALTY;
-      return st.marketIsBull ? base*(1+skillLv("market_sense")*0.1) : base;
-    };
-    const getTotalGPS  = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult();
-    const getManualGain= () => st.manualPower * st.manualMult * (1+skillLv("manual_mastery")*0.3);
-
-    // ── 批量购买计算（生产层独立）──
-    const affordableCount = (b,budget,mode) => {
-      if (mode==="1") return budget>=price(b)?1:0;
-      if (mode==="10"||mode==="100") {
-        const tgt=Number(mode); let tot=0;
-        for (let i=0;i<tgt;i++){tot+=price(b,i);if(tot>budget)return i;}
-        return tgt;
-      }
-      let n=0,tot=0;
-      while(n<10000){tot+=price(b,n);if(tot>budget)return n;n++;}
-      return n;
-    };
-    const purchaseCost = (b,n) => { let c=0; for(let i=0;i<n;i++) c+=price(b,i); return c; };
-
     // ── 数值格式化 ──
     const fmt = (n) => {
       if (!Number.isFinite(n)) return "¥0";
@@ -202,65 +171,45 @@
       if(rw.type==="gear"){ st.gears+=rw.value; st.lifetimeGears+=rw.value; st.lastRewardText=`${label}：+${fmt(rw.value)}`; pushLog(st.lastRewardText); }
       if(rw.type==="rp"  ){ st.researchPoints+=rw.value; st.lastRewardText=`${label}：+${rw.value} RP`; pushLog(st.lastRewardText); }
     };
+
+    // 经济系统初始化（为什么：将平衡与购买逻辑从 UI/循环中抽离，便于独立调数值）
+    const economy = createEconomySystem({
+      st,
+      buildings,
+      upgrades,
+      skills,
+      bldBoost,
+      PRICE_GROWTH,
+      MARKET_BULL_BONUS,
+      MARKET_BEAR_PENALTY,
+      dirty,
+      buildingViewMap,
+      pushLog,
+      saveGame,
+      fmt,
+      sfxBuy,
+      sfxUpgrade,
+      applyUpgradeEffect,
+    });
+    const {
+      bld,
+      skillLv,
+      price,
+      mktMult,
+      getTotalGPS,
+      getManualGain,
+      affordableCount,
+      purchaseCost,
+      upgradeLockedReason,
+      isBldUnlocked,
+      buyBuilding,
+      buyUpgrade,
+      buySkill,
+      tryAutoBuy,
+    } = economy;
     const claimAchievement = (a) => {
       if(!a.reward||a.claimed) return;
       a.claimed=true; grantReward(a.reward,`成就「${a.name}」`); saveGame();
-    };
-
-    // ════════════════════════════════════════════════
-    // ⑯ 解锁条件检查
-    // ════════════════════════════════════════════════
-    const upgradeLockedReason = (u) => {
-      if(st.researchPoints<u.unlockRP) return `需要 ${u.unlockRP} RP`;
-      if(u.requires){ const r=upgrades.find(x=>x.id===u.requires); if(r&&!r.purchased) return `前置：${r.name}`; }
-      // 建筑专属升级：只有在对应建筑已解锁时才显示
-      if(u.type==="bldBoost"){
-        const b=bld(u.value.id);
-        if(b&&st.lifetimeGears<b.unlock) return `解锁「${b.name}」后可用`;
-      }
-      return "";
-    };
-    const isBldUnlocked = (b) => st.lifetimeGears >= b.unlock;
-
-    // ════════════════════════════════════════════════
-    // ⑰ 购买操作
-    // ════════════════════════════════════════════════
-    const buyBuilding = (id) => {
-      const b=bld(id); if(!b||!isBldUnlocked(b)) return;
-      const n=affordableCount(b,st.gears,st.purchaseMode); if(n<=0) return;
-      const pc=st.purchaseMode==="max"?n:Math.min(n,Number(st.purchaseMode)||1);
-      const cost=purchaseCost(b,pc); if(st.gears<cost) return;
-      st.gears-=cost; b.owned+=pc;
-      pushLog(`收购 ${b.emoji}${b.name} ×${pc}（-${fmt(cost)}）`);
-      sfxBuy();
-      // 购买弹跳动效（M3）
-      const v=buildingViewMap.get(id);
-      if(v){ v.row.classList.remove("bought"); void v.row.offsetWidth; v.row.classList.add("bought"); }
-      dirty.buildings = dirty.stats = dirty.logs = true;
-      saveGame();
-    };
-
-    const buyUpgrade = (id) => {
-      const u=upgrades.find(x=>x.id===id); if(!u||u.purchased) return;
-      const locked=upgradeLockedReason(u); if(locked||st.gears<u.price) return;
-      st.gears-=u.price; u.purchased=true;
-      applyUpgradeEffect(u);
-      dirty.upgrades = dirty.buildings = dirty.stats = dirty.logs = true;
-      saveGame();
-    };
-
-    const buySkill = (id) => {
-      const sk=skills.find(s=>s.id===id);
-      if(!sk||sk.level>=sk.maxLevel||st.researchPoints<sk.costRP) return;
-      st.researchPoints-=sk.costRP; sk.level++;
-      sfxUpgrade(); pushLog(`技能升级：${sk.name} Lv.${sk.level}`);
-      dirty.skills = dirty.logs = true;
-      saveGame();
-    };
-
-    const tryAutoBuy = () => {
-      for(const u of upgrades){ if(u.purchased||upgradeLockedReason(u))continue; if(st.gears>=u.price){buyUpgrade(u.id);return;} }
-      for(const b of [...buildings].reverse()){ if(!isBldUnlocked(b))continue; if(affordableCount(b,st.gears,"1")>0){const p=st.purchaseMode;st.purchaseMode="1";buyBuilding(b.id);st.purchaseMode=p;return;} }
     };
 
     // ════════════════════════════════════════════════
