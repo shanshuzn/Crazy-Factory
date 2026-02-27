@@ -57,9 +57,12 @@ price = floor(basePrice * 1.15 ^ owned)
 ```txt
 .
 ├── index.html
+├── styles/
+│   └── main.css
 ├── README.md
 ├── ROADMAP.md
 └── scripts/
+    ├── game.js
     └── capture_screenshot.py
 ```
 
