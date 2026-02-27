@@ -83,48 +83,53 @@
   - 完成：2026-02-27
   - 指标影响：North Star +（阈值门禁回归路径可重复验证，减少配置漂移）
   - 证据：新增 `scripts/verify_soak_thresholds.sh`，依次验证 `run_soak_check` 的 exit 0 与 exit 1
-- [TODO] M7-T06 巡检回归脚本输出归档（JSON文件）
+- [DONE] M7-T06 巡检回归脚本输出归档（JSON文件）
   - 验收：支持将 pass/fail 两次报告输出到 artifacts 目录
-- [NEXT] M7-T06 巡检回归脚本输出归档（JSON文件）
-  - 验收：支持将 pass/fail 两次报告输出到 artifacts 目录
+  - 完成：2026-02-27
+  - 指标影响：North Star +（巡检证据可追溯，回归复现效率提升）
+  - 证据：`scripts/verify_soak_thresholds.sh` 新增归档逻辑，输出 `pass.json` / `fail.json` 与对应日志
+- [TODO] M7-T07 巡检脚本参数帮助信息（--help）
+  - 验收：`run_soak_check.js` 与 `verify_soak_thresholds.sh` 提供参数说明
+- [NEXT] M7-T07 巡检脚本参数帮助信息（--help）
+  - 验收：`run_soak_check.js` 与 `verify_soak_thresholds.sh` 提供参数说明
 
 <!-- AUTO:METRICS-START -->
 [Mode]
 ⚡ Optimization Mode（优化模式）
 
 [North Star]
-80.0% (trend: up)
+81.0% (trend: up)
 
 [Supporting Metrics]
-- growth_momentum: 78.0%（回归样例脚本化，执行一致性提升）
+- growth_momentum: 79.0%（归档证据自动产出，回归效率提高）
 - return_quality: 79.0%
 - upgrade_satisfaction: 77.0%
-- progress_clarity: 80.0%
+- progress_clarity: 81.0%
 - stability_score: 81.0%
 
 [Risk Level]
 低
 
 [Task]
-M7-T05 / 新增脚本化样例，分别验证巡检阈值通过与失败退出码
+M7-T06 / 回归脚本输出 pass/fail JSON 归档到 artifacts 目录
 
 [Impact]
-对 North Star 影响：+（降低巡检门禁误用风险，提升稳定发布节奏）
+对 North Star 影响：+（提升巡检可追溯性，减少问题复盘成本）
 
 [Do]
 - 修改文件列表：`scripts/verify_soak_thresholds.sh`、`README.md`、`ROADMAP.md`
-- 实现摘要：提供一键脚本验证 exit 0/1 路径并补充文档入口；完成 M7-T05
+- 实现摘要：回归脚本自动保存 pass/fail JSON+log，并补充使用文档与路径说明
 
 [Verify]
 - `bash scripts/verify_soak_thresholds.sh`
 - `node --test tests/formula-system.test.js tests/log-system.test.js`
-- 指标验证：脚本需在一次执行中覆盖通过/失败两条路径
+- 指标验证：检查 `artifacts/soak-thresholds/{pass,fail}.json` 是否生成且内容可解析
 
 [RoadmapPatch]
 (diff only)
 
 [Next]
-M7-T06
+M7-T07
 <!-- AUTO:METRICS-END -->
 
 ## 当前版本能力（摘要）

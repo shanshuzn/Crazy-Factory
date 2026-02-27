@@ -123,10 +123,17 @@ CI 示例（可直接复制）：
 node scripts/run_soak_check.js --seconds 600 --min-fps 55 --max-heap-mb 256 --max-writes-std 2
 ```
 
-阈值回归样例（同时验证 exit 0 与 exit 1）：
+阈值回归样例（同时验证 exit 0 与 exit 1，并归档 JSON）：
 
 ```bash
 bash scripts/verify_soak_thresholds.sh
+```
+
+默认会将 pass/fail 两次结果分别写入 `artifacts/soak-thresholds/pass.json` 与 `artifacts/soak-thresholds/fail.json`（并保留对应 `.log`）。
+如需自定义目录可传入首个参数：
+
+```bash
+bash scripts/verify_soak_thresholds.sh artifacts/my-soak-reports
 ```
 
 ## 路线图
