@@ -13,6 +13,11 @@ const createMarketSystem = ({
   MARKET_BEAR_PENALTY,
   POLICY_RATE_MIN,
   POLICY_RATE_MAX,
+  OUTLOOK_REWARD_BASE,
+  OUTLOOK_REWARD_RATE_SCALE,
+  OUTLOOK_PENALTY_BASE,
+  OUTLOOK_PENALTY_RATE_SCALE,
+  OUTLOOK_PENALTY_GEAR_RATIO,
   MACRO_EVENTS,
   POLICY_GUIDANCE_BASE_BIAS,
   marketMultEl,
@@ -56,15 +61,15 @@ const createMarketSystem = ({
     const hit = predictedUp === actualUp;
     if (hit) {
       st.rateOutlookHits = Math.max(0, Number(st.rateOutlookHits) || 0) + 1;
-      const bonus = Math.max(100, Math.floor((1 + (st.policyRate || 0)) * 35));
+      const bonus = Math.max(OUTLOOK_REWARD_BASE, Math.floor((1 + (st.policyRate || 0)) * OUTLOOK_REWARD_RATE_SCALE));
       st.gears += bonus;
       st.lifetimeGears += bonus;
       st.lastRewardText = `🔮 前瞻命中：奖励 ${bonus}`;
       pushLog(`✅ 前瞻命中（预测${predictedUp ? '上调' : '下调'}）：+${bonus}`);
     } else {
       st.rateOutlookMisses = Math.max(0, Number(st.rateOutlookMisses) || 0) + 1;
-      const lossCap = Math.max(80, Math.floor((1 + (st.policyRate || 0)) * 24));
-      const loss = Math.min(lossCap, Math.floor((st.gears || 0) * 0.03));
+      const lossCap = Math.max(OUTLOOK_PENALTY_BASE, Math.floor((1 + (st.policyRate || 0)) * OUTLOOK_PENALTY_RATE_SCALE));
+      const loss = Math.min(lossCap, Math.floor((st.gears || 0) * OUTLOOK_PENALTY_GEAR_RATIO));
       st.gears = Math.max(0, st.gears - loss);
       st.lastRewardText = `🔮 前瞻误判：回撤 ${loss}`;
       pushLog(`⚠️ 前瞻误判（预测${predictedUp ? '上调' : '下调'}，实际${actualUp ? '上调' : '下调'}）：-${loss}`);

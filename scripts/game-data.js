@@ -24,6 +24,11 @@
     const POLICY_RATE_DEFAULT = 2.5;
     const POLICY_RATE_MIN = 0;
     const POLICY_RATE_MAX = 8;
+    const OUTLOOK_REWARD_BASE = 100;
+    const OUTLOOK_REWARD_RATE_SCALE = 35;
+    const OUTLOOK_PENALTY_BASE = 80;
+    const OUTLOOK_PENALTY_RATE_SCALE = 24;
+    const OUTLOOK_PENALTY_GEAR_RATIO = 0.03;
     const SKILL_MASTERY_STEP = 3;     // 每 3 级技能提升 1 个专精层级
     const SKILL_MASTERY_BONUS = 0.05; // 每层专精提供 +5% 总收益
 
@@ -33,8 +38,9 @@
       { id:"growth_cool", name:"增长放缓", guidanceBiasUp:0.2, rateShock:-0.25, durationSwitches:3 },
     ];
 
-    const APP_VERSION = "v2.3.0";
+    const APP_VERSION = "v2.4.0";
     const CHANGELOG = [
+      { version:"v2.4.0", date:"2026-02-27", notes:["前瞻奖惩系数改为可配置常量", "宏观平衡 CLI 增加净收益波动与奖惩参数输出", "完成 M8-T08 并推进到下一轮"] },
       { version:"v2.3.0", date:"2026-02-27", notes:["新增利率前瞻命中/误判结算（奖励与回撤）", "市场栏显示前瞻命中率统计", "为宏观事件平衡复核新增 CLI 与测试"] },
       { version:"v2.2.0", date:"2026-02-27", notes:["新增宏观事件（通胀升温/增长放缓）", "市场栏增加利率前瞻与事件剩余提示", "利率切换由前瞻概率驱动并写入交易日志"] },
       { version:"v2.1.0", date:"2026-02-27", notes:["新增公式单测与长时巡检脚本", "调试面板支持 RAF/Heap/写入频次诊断", "系统模块拆分至 formula/economy/market/render/loop"] },

@@ -136,7 +136,7 @@ bash scripts/verify_soak_thresholds.sh
 node scripts/run_macro_event_balance_check.js --switches 600 --seed 42
 ```
 
-可加 `--json` 输出纯 JSON，便于 CI 归档与比较。
+可加 `--json` 输出纯 JSON，便于 CI 归档与比较；可通过 `--reward-base/--reward-rate-scale/--penalty-base/--penalty-rate-scale/--penalty-gear-ratio` 复核奖惩参数对净收益波动的影响。
 
 默认会将 pass/fail 的 `SOAK_REPORT` 写入 `artifacts/soak-thresholds/pass.json` 与 `artifacts/soak-thresholds/fail.json`，并保留 `pass.log` / `fail.log` / `invalid.log`。
 JSON 解析优先使用 `python3/python`，若不可用会自动回退到 `node`（可用 `VERIFY_SOAK_DISABLE_PYTHON=1` 强制演练回退路径）。
