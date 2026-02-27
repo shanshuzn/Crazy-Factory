@@ -345,7 +345,7 @@
     });
 
     $("prestigeBtn").addEventListener("click",()=>{
-      const gain=Math.floor(Math.sqrt(st.lifetimeGears/2000));
+      const gain=GameFormulas.calcPrestigeGain({ lifetimeGears: st.lifetimeGears, divisor: 2000 });
       if(gain<=0){alert("历史资本不足，无法增发股权。");return;}
       if(!confirm(`增发股权可获得 ${gain} RP，本轮进度将重置。继续？`))return;
       st.researchPoints+=gain; pushLog(`增发股权，获得 +${gain} RP`);

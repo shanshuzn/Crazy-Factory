@@ -31,7 +31,7 @@
 
 ### M4：工程化与发布准备
 - [ ] 模块化拆分（ui.js / economy.js / save.js）
-- [ ] 单元测试（价格计算、批量购买、离线结算、Prestige 公式）
+- [x] 单元测试（价格计算、批量购买、离线结算、Prestige 公式）— `tests/formula-system.test.js`
 - [x] 调试面板（实时查看 GPS 分解、市场状态、存档大小）— `?debug=1` 面板含 FPS
 - [ ] 长时间运行性能巡检（>30 分钟无内存泄漏）
 - [ ] 发布页与版本日志（changelog）
@@ -50,11 +50,12 @@
 - Prestige（RP 永久研究加成）
 - 自动投资、批量购买、仿真倍速、存档导入导出
 - 调试面板（`?debug=1`）：GPS 分解 / 市场状态 / 存档大小 / FPS
+- 公式系统（price/purchase/offline/prestige）+ Node 单测
 
 ## 下一步优先级（M4）
-1. 为核心经济函数补最小单元测试（价格公式、离线公式、Prestige 公式）
-2. 长时间运行性能巡检（requestAnimationFrame 泄漏检测）
-3. 发布页与版本日志（changelog）
+1. 长时间运行性能巡检（requestAnimationFrame 泄漏检测）
+2. 发布页与版本日志（changelog）
+3. 调试面板补充内存与存档写入频次统计
 
 ## 更新规则
 - 每次迭代只更新三块：`已完成`、`待处理`、`下一步`。

@@ -62,8 +62,11 @@ price = floor(basePrice * 1.15 ^ owned)
 │   └── main.css
 ├── README.md
 ├── ROADMAP.md
+├── tests/
+│   └── formula-system.test.js
 └── scripts/
     ├── game-data.js
+    ├── formula-system.js
     ├── skill-system.js
     ├── economy-system.js
     ├── market-system.js

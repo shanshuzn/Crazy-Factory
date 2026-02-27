@@ -21,7 +21,7 @@ const createEconomySystem = ({
   const bld = (id) => buildings.find((b) => b.id === id);
   const skillLv = (id) => skills.find((s) => s.id === id)?.level || 0;
   const discount = () => Math.max(0.6, 1 - skillLv('bulk_discount') * 0.04);
-  const price = (b, off = 0) => Math.floor(b.basePrice * Math.pow(PRICE_GROWTH, b.owned + off) * discount());
+  const price = (b, off = 0) => GameFormulas.calcBuildingPrice({ basePrice: b.basePrice, owned: b.owned, growth: PRICE_GROWTH, discount: discount(), offset: off });
 
   const bldGPS = (b) => b.dps * b.owned * (bldBoost[b.id] || 1);
   const baseGPS = () => buildings.reduce((s, b) => s + bldGPS(b), 0);
@@ -55,32 +55,22 @@ const createEconomySystem = ({
     };
   };
 
-  const affordableCount = (b, budget, mode) => {
-    if (mode === '1') return budget >= price(b) ? 1 : 0;
-    if (mode === '10' || mode === '100') {
-      const tgt = Number(mode);
-      let tot = 0;
-      for (let i = 0; i < tgt; i++) {
-        tot += price(b, i);
-        if (tot > budget) return i;
-      }
-      return tgt;
-    }
-    let n = 0;
-    let tot = 0;
-    while (n < 10000) {
-      tot += price(b, n);
-      if (tot > budget) return n;
-      n++;
-    }
-    return n;
-  };
+  const affordableCount = (b, budget, mode) => GameFormulas.calcAffordableCount({
+    basePrice: b.basePrice,
+    owned: b.owned,
+    growth: PRICE_GROWTH,
+    discount: discount(),
+    budget,
+    mode,
+  });
 
-  const purchaseCost = (b, n) => {
-    let c = 0;
-    for (let i = 0; i < n; i++) c += price(b, i);
-    return c;
-  };
+  const purchaseCost = (b, n) => GameFormulas.calcPurchaseCost({
+    basePrice: b.basePrice,
+    owned: b.owned,
+    growth: PRICE_GROWTH,
+    discount: discount(),
+    count: n,
+  });
 
   const upgradeLockedReason = (u) => {
     if (st.researchPoints < u.unlockRP) return `需要 ${u.unlockRP} RP`;

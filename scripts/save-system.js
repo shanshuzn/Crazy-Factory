@@ -47,8 +47,8 @@
         (d.achievements||[]).forEach(s=>{const t=achievements.find(a=>a.id===s.id);if(t){t.done=Boolean(s.done);t.claimed=Boolean(s.claimed);}});
         if(d.bldBoost&&typeof d.bldBoost==="object") Object.assign(bldBoost,d.bldBoost);
 
-        const off = Math.max(0,Math.min((Date.now()-(Number(d.savedAt)||Date.now()))/1000,OFFLINE_CAP_SECONDS));
-        const ofg = getTotalGPS()*off;
+        const off = (Date.now()-(Number(d.savedAt)||Date.now()))/1000;
+        const ofg = GameFormulas.calcOfflineGain({ gps: getTotalGPS(), elapsedSec: off, capSec: OFFLINE_CAP_SECONDS });
         if(ofg>0) st.pendingOfflineGears=ofg;
       } catch(e){ console.warn("存档读取失败",e); }
     };
