@@ -152,9 +152,13 @@ def simulate_one(params: Dict[str, Any], seed: int, cfg: SimConfig) -> Dict[str,
                 break
 
         # stall tracking
-        if not bought:
+        # Only measure bottleneck while at least one upgrade is still available.
+        # After all upgrades are purchased, tail time should not be counted as "stall".
+        if not bought and purchased < len(upgrades):
             stall_seconds = int(t - last_purchase_t)
             longest_stall_seconds = max(longest_stall_seconds, stall_seconds)
+        elif purchased >= len(upgrades):
+            stall_seconds = 0
 
         # prestige decision (very simplified):
         # If enabled and past unlock time, and current next upgrade time too long, prestige.

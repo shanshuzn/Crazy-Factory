@@ -1,0 +1,1486 @@
+{
+  "meta": {
+    "runs_budget": 400,
+    "generations": 6,
+    "population": 20,
+    "topk": 5,
+    "seed": 20260227,
+    "runs_per_candidate": 20
+  },
+  "evolution": [
+    {
+      "generation": 0,
+      "runs_per_candidate": 20,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.5038975389251632,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2375970584068108,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1302424928799923,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.554264264981578,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.17403314917127072,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6298719236564541,
+            "V_total": 0.5038975389251632,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.8259668508287292,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.5012422093273157,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 0.8693933513594373,
+            "price_exp": 1.2472963408209676,
+            "reward_scale": 1.1160326238852232,
+            "reward_exp": 1.1673104592783814,
+            "softcap_start": 0.5441748088733003,
+            "softcap_strength": 0.33107790816800364,
+            "offline_rate": 0.8305443274274955,
+            "offline_cap_hours": 8,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 11,
+            "prestige_gain_scale": 0.3498915497510763
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.1607565011820331,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6265527616591446,
+            "V_total": 0.5012422093273157,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.8392434988179669,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.492269717037929,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2359636166775396,
+            "price_exp": 1.1218946693715397,
+            "reward_scale": 0.9230155031877691,
+            "reward_exp": 1.0607741395594452,
+            "softcap_start": 0.640899847760774,
+            "softcap_strength": 0.28102264778005615,
+            "offline_rate": 0.8158842136661071,
+            "offline_cap_hours": 21,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 17,
+            "prestige_gain_scale": 0.09336756765261964
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.11589403973509933,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6153371462974112,
+            "V_total": 0.492269717037929,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.8841059602649006,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.4515923639668189,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.1162159973742054,
+            "price_exp": 1.2402623033801008,
+            "reward_scale": 0.7103724942747311,
+            "reward_exp": 1.1297156696230972,
+            "softcap_start": 0.5963539114979963,
+            "softcap_strength": 0.4058797216310672,
+            "offline_rate": 0.8387009824241931,
+            "offline_cap_hours": 10,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 18,
+            "prestige_gain_scale": 0.20994516668257368
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 0.8573983869066206,
+              "return_quality": 0.11214953271028037,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.5644904549585237,
+            "V_total": 0.4515923639668189,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.8878504672897196,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.3912505591270573,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.0473547066064424,
+            "price_exp": 1.201382948741835,
+            "reward_scale": 0.8457245136413373,
+            "reward_exp": 1.0732319959691619,
+            "softcap_start": 0.6842802387871083,
+            "softcap_strength": 0.28150561113810446,
+            "offline_rate": 0.6613941969770974,
+            "offline_cap_hours": 16,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 20,
+            "prestige_gain_scale": 0.09045762829606549
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 0.6486878723799427,
+              "return_quality": 0.10263522884882108,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.4890631989088216,
+            "V_total": 0.3912505591270573,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.897364771151179,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "generation": 1,
+      "runs_per_candidate": 20,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.5098955067920585,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2375970584068108,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1157390040677946,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.554264264981578,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.20402298850574713,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6373693834900731,
+            "V_total": 0.5098955067920585,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7959770114942529,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.5097688751926039,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2375970584068108,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1302424928799923,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.554264264981578,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.2033898305084746,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6372110939907549,
+            "V_total": 0.5097688751926039,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7966101694915254,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.5074242424242424,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2375970584068108,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1302424928799923,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.554264264981578,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.19166666666666668,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.634280303030303,
+            "V_total": 0.5074242424242424,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.8083333333333333,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.5064472309299896,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2375970584068108,
+            "price_exp": 1.1558791001100837,
+            "reward_scale": 1.0454330303308919,
+            "reward_exp": 1.1302424928799923,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.554264264981578,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.1867816091954023,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6330590386624869,
+            "V_total": 0.5064472309299896,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.8132183908045977,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.5046841294298922,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2375970584068108,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1302424928799923,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5747884289722277,
+            "offline_rate": 1.041500635164135,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.17796610169491525,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6308551617873652,
+            "V_total": 0.5046841294298922,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.8220338983050848,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "generation": 2,
+      "runs_per_candidate": 20,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.5112874408828165,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2375970584068108,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1157390040677946,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.554264264981578,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.21098265895953758,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6391093011035207,
+            "V_total": 0.5112874408828165,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7890173410404624,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.5108491508491508,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2375970584068108,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1302424928799923,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5747884289722277,
+            "offline_rate": 1.041500635164135,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.2087912087912088,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6385614385614385,
+            "V_total": 0.5108491508491508,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7912087912087912,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.5104132231404959,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2375970584068108,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1302424928799923,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.6,
+            "offline_rate": 1.041500635164135,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.29941097658175336
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.2066115702479339,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6380165289256199,
+            "V_total": 0.5104132231404959,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7933884297520661,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.509534122387308,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1302424928799923,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.20221606648199447,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6369176529841349,
+            "V_total": 0.509534122387308,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7977839335180056,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.5081970543423058,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.195180980903593,
+            "price_exp": 1.07992426628736,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1157390040677946,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.554264264981578,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.19553072625698323,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6352463179278822,
+            "V_total": 0.5081970543423058,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.8044692737430168,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "generation": 3,
+      "runs_per_candidate": 20,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.514789833822092,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.195180980903593,
+            "price_exp": 1.07992426628736,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.0998166557928843,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.554264264981578,
+            "offline_rate": 1.2,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.22849462365591397,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6434872922776149,
+            "V_total": 0.514789833822092,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.771505376344086,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.5135353535353536,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.18,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 8,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.2222222222222222,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.641919191919192,
+            "V_total": 0.5135353535353536,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7777777777777778,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.5134744707347447,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1447194736096495,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.137093096589799,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.2219178082191781,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.641843088418431,
+            "V_total": 0.5134744707347447,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7780821917808219,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.5129265255292653,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1302424928799923,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5106082186201684,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.25054833270221705
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.2191780821917808,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6411581569115816,
+            "V_total": 0.5129265255292653,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7808219178082192,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.5113444302176696,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2375970584068108,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.1157390040677946,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.554264264981578,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.2112676056338028,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.639180537772087,
+            "V_total": 0.5113444302176696,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7887323943661971,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "generation": 4,
+      "runs_per_candidate": 20,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.5375524475524476,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1550260453048626,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.137093096589799,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 5,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.3423076923076923,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6719405594405594,
+            "V_total": 0.5375524475524476,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.6576923076923077,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.5180584607133281,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9062826570332411,
+            "reward_exp": 1.18,
+            "softcap_start": 0.6237152308899765,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 8,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.2448377581120944,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.64757307589166,
+            "V_total": 0.5180584607133281,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7551622418879056,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.5134678087869577,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.18,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.104059450072287,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 8,
+            "prestige_gain_scale": 0.2956846934769028
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.22188449848024316,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6418347609836972,
+            "V_total": 0.5134678087869577,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7781155015197568,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.5109641873278237,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.1086363866935827,
+            "price_exp": 1.07992426628736,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.0998166557928843,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.554264264981578,
+            "offline_rate": 1.2,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 9,
+            "prestige_gain_scale": 0.3023984377458704
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.209366391184573,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6387052341597796,
+            "V_total": 0.5109641873278237,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.790633608815427,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.5095972382048332,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.18,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 8,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.20253164556962025,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6369965477560414,
+            "V_total": 0.5095972382048332,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7974683544303798,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "generation": 5,
+      "runs_per_candidate": 20,
+      "top": [
+        {
+          "rank": 1,
+          "V_total": 0.5346510750660128,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1502450022394388,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.137093096589799,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 5,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.3278008298755187,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.668313843832516,
+            "V_total": 0.5346510750660128,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.6721991701244814,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 2,
+          "V_total": 0.5258594680428741,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1550260453048626,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.137093096589799,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 5,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.2838427947598253,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6573243350535927,
+            "V_total": 0.5258594680428741,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7161572052401747,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 3,
+          "V_total": 0.5151031790295594,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9062826570332411,
+            "reward_exp": 1.18,
+            "softcap_start": 0.6237152308899765,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.0053689949306717,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 8,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.23006134969325154,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6438789737869492,
+            "V_total": 0.5151031790295594,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7699386503067485,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 4,
+          "V_total": 0.5150610583446404,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9505662341572546,
+            "reward_exp": 1.18,
+            "softcap_start": 0.6166314500067044,
+            "softcap_strength": 0.5227530122280428,
+            "offline_rate": 1.104059450072287,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 8,
+            "prestige_gain_scale": 0.2956846934769028
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.2298507462686567,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6438263229308006,
+            "V_total": 0.5150610583446404,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7701492537313432,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        },
+        {
+          "rank": 5,
+          "V_total": 0.5144640434192673,
+          "accepted": true,
+          "constraint_failed": null,
+          "params": {
+            "price_scale": 1.2892254388800533,
+            "price_exp": 1.1631513989544304,
+            "reward_scale": 0.9062826570332411,
+            "reward_exp": 1.18,
+            "softcap_start": 0.6237152308899765,
+            "softcap_strength": 0.479085196642596,
+            "offline_rate": 1.1346886970113623,
+            "offline_cap_hours": 3,
+            "prestige_enabled": true,
+            "prestige_unlock_hours": 8,
+            "prestige_gain_scale": 0.2756497494580078
+          },
+          "score": {
+            "accepted": true,
+            "fail_rate": 0.0,
+            "components": {
+              "growth_momentum": 1.0,
+              "return_quality": 0.22686567164179106,
+              "upgrade_satisfaction": 0.181818181818182,
+              "progress_clarity": 1.0,
+              "stability_score": 0.0,
+              "curve_health": 0.0
+            },
+            "V_idle": 0.6430800542740842,
+            "V_total": 0.5144640434192673,
+            "bottleneck": {
+              "longest_stall_median_seconds": 0.0
+            },
+            "shadow": {
+              "claim_then_stop_rate": 0.7731343283582089,
+              "upgrade_then_stall_rate": 0.0
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "final_ranking": [
+    {
+      "rank": 1,
+      "V_total": 0.5289170553325999,
+      "accepted": true,
+      "constraint_failed": null,
+      "params": {
+        "price_scale": 1.2892254388800533,
+        "price_exp": 1.1502450022394388,
+        "reward_scale": 0.9505662341572546,
+        "reward_exp": 1.137093096589799,
+        "softcap_start": 0.6166314500067044,
+        "softcap_strength": 0.5227530122280428,
+        "offline_rate": 1.1346886970113623,
+        "offline_cap_hours": 3,
+        "prestige_enabled": true,
+        "prestige_unlock_hours": 5,
+        "prestige_gain_scale": 0.2756497494580078
+      },
+      "score": {
+        "accepted": true,
+        "fail_rate": 0.0,
+        "components": {
+          "growth_momentum": 1.0,
+          "return_quality": 0.29913073120845407,
+          "upgrade_satisfaction": 0.181818181818182,
+          "progress_clarity": 1.0,
+          "stability_score": 0.0,
+          "curve_health": 0.0
+        },
+        "V_idle": 0.6611463191657498,
+        "V_total": 0.5289170553325999,
+        "bottleneck": {
+          "longest_stall_median_seconds": 0.0
+        },
+        "shadow": {
+          "claim_then_stop_rate": 0.700869268791546,
+          "upgrade_then_stall_rate": 0.0
+        }
+      }
+    },
+    {
+      "rank": 2,
+      "V_total": 0.5285688138853127,
+      "accepted": true,
+      "constraint_failed": null,
+      "params": {
+        "price_scale": 1.2892254388800533,
+        "price_exp": 1.1550260453048626,
+        "reward_scale": 0.9505662341572546,
+        "reward_exp": 1.137093096589799,
+        "softcap_start": 0.6166314500067044,
+        "softcap_strength": 0.5227530122280428,
+        "offline_rate": 1.1346886970113623,
+        "offline_cap_hours": 3,
+        "prestige_enabled": true,
+        "prestige_unlock_hours": 5,
+        "prestige_gain_scale": 0.2756497494580078
+      },
+      "score": {
+        "accepted": true,
+        "fail_rate": 0.0,
+        "components": {
+          "growth_momentum": 1.0,
+          "return_quality": 0.2973895239720184,
+          "upgrade_satisfaction": 0.181818181818182,
+          "progress_clarity": 1.0,
+          "stability_score": 0.0,
+          "curve_health": 0.0
+        },
+        "V_idle": 0.660711017356641,
+        "V_total": 0.5285688138853127,
+        "bottleneck": {
+          "longest_stall_median_seconds": 0.0
+        },
+        "shadow": {
+          "claim_then_stop_rate": 0.7026104760279815,
+          "upgrade_then_stall_rate": 0.0
+        }
+      }
+    },
+    {
+      "rank": 3,
+      "V_total": 0.5133462282398453,
+      "accepted": true,
+      "constraint_failed": null,
+      "params": {
+        "price_scale": 1.2892254388800533,
+        "price_exp": 1.1631513989544304,
+        "reward_scale": 0.9062826570332411,
+        "reward_exp": 1.18,
+        "softcap_start": 0.6237152308899765,
+        "softcap_strength": 0.5227530122280428,
+        "offline_rate": 1.0053689949306717,
+        "offline_cap_hours": 3,
+        "prestige_enabled": true,
+        "prestige_unlock_hours": 8,
+        "prestige_gain_scale": 0.2756497494580078
+      },
+      "score": {
+        "accepted": true,
+        "fail_rate": 0.0,
+        "components": {
+          "growth_momentum": 1.0,
+          "return_quality": 0.22127659574468084,
+          "upgrade_satisfaction": 0.181818181818182,
+          "progress_clarity": 1.0,
+          "stability_score": 0.0,
+          "curve_health": 0.0
+        },
+        "V_idle": 0.6416827852998066,
+        "V_total": 0.5133462282398453,
+        "bottleneck": {
+          "longest_stall_median_seconds": 0.0
+        },
+        "shadow": {
+          "claim_then_stop_rate": 0.7787234042553192,
+          "upgrade_then_stall_rate": 0.0
+        }
+      }
+    },
+    {
+      "rank": 4,
+      "V_total": 0.5126218900536834,
+      "accepted": true,
+      "constraint_failed": null,
+      "params": {
+        "price_scale": 1.2892254388800533,
+        "price_exp": 1.1631513989544304,
+        "reward_scale": 0.9062826570332411,
+        "reward_exp": 1.18,
+        "softcap_start": 0.6237152308899765,
+        "softcap_strength": 0.479085196642596,
+        "offline_rate": 1.1346886970113623,
+        "offline_cap_hours": 3,
+        "prestige_enabled": true,
+        "prestige_unlock_hours": 8,
+        "prestige_gain_scale": 0.2756497494580078
+      },
+      "score": {
+        "accepted": true,
+        "fail_rate": 0.0,
+        "components": {
+          "growth_momentum": 1.0,
+          "return_quality": 0.2176549048138717,
+          "upgrade_satisfaction": 0.181818181818182,
+          "progress_clarity": 1.0,
+          "stability_score": 0.0,
+          "curve_health": 0.0
+        },
+        "V_idle": 0.6407773625671043,
+        "V_total": 0.5126218900536834,
+        "bottleneck": {
+          "longest_stall_median_seconds": 0.0
+        },
+        "shadow": {
+          "claim_then_stop_rate": 0.7823450951861283,
+          "upgrade_then_stall_rate": 0.0
+        }
+      }
+    },
+    {
+      "rank": 5,
+      "V_total": 0.5111871710014881,
+      "accepted": true,
+      "constraint_failed": null,
+      "params": {
+        "price_scale": 1.2892254388800533,
+        "price_exp": 1.1631513989544304,
+        "reward_scale": 0.9505662341572546,
+        "reward_exp": 1.18,
+        "softcap_start": 0.6166314500067044,
+        "softcap_strength": 0.5227530122280428,
+        "offline_rate": 1.104059450072287,
+        "offline_cap_hours": 3,
+        "prestige_enabled": true,
+        "prestige_unlock_hours": 8,
+        "prestige_gain_scale": 0.2956846934769028
+      },
+      "score": {
+        "accepted": true,
+        "fail_rate": 0.0,
+        "components": {
+          "growth_momentum": 1.0,
+          "return_quality": 0.21048130955289518,
+          "upgrade_satisfaction": 0.181818181818182,
+          "progress_clarity": 1.0,
+          "stability_score": 0.0,
+          "curve_health": 0.0
+        },
+        "V_idle": 0.6389839637518602,
+        "V_total": 0.5111871710014881,
+        "bottleneck": {
+          "longest_stall_median_seconds": 0.0
+        },
+        "shadow": {
+          "claim_then_stop_rate": 0.7895186904471048,
+          "upgrade_then_stall_rate": 0.0
+        }
+      }
+    }
+  ],
+  "top1": {
+    "params": {
+      "price_scale": 1.2892254388800533,
+      "price_exp": 1.1502450022394388,
+      "reward_scale": 0.9505662341572546,
+      "reward_exp": 1.137093096589799,
+      "softcap_start": 0.6166314500067044,
+      "softcap_strength": 0.5227530122280428,
+      "offline_rate": 1.1346886970113623,
+      "offline_cap_hours": 3,
+      "prestige_enabled": true,
+      "prestige_unlock_hours": 5,
+      "prestige_gain_scale": 0.2756497494580078
+    },
+    "score": {
+      "accepted": true,
+      "fail_rate": 0.0,
+      "components": {
+        "growth_momentum": 1.0,
+        "return_quality": 0.29913073120845407,
+        "upgrade_satisfaction": 0.181818181818182,
+        "progress_clarity": 1.0,
+        "stability_score": 0.0,
+        "curve_health": 0.0
+      },
+      "V_idle": 0.6611463191657498,
+      "V_total": 0.5289170553325999,
+      "bottleneck": {
+        "longest_stall_median_seconds": 0.0
+      },
+      "shadow": {
+        "claim_then_stop_rate": 0.700869268791546,
+        "upgrade_then_stall_rate": 0.0
+      }
+    }
+  }
+}
