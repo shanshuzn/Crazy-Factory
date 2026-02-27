@@ -87,6 +87,7 @@
       background: linear-gradient(90deg,var(--bear),var(--warn),var(--bull));
       transition: width .3s ease;
     }
+    .market-tag { font-size:.75rem; color:var(--muted); border:1px solid #1f2937; border-radius:999px; padding:2px 8px; }
 
     /* 市场切换屏闪覆盖层 */
     #marketFlash {
