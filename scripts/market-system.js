@@ -34,12 +34,43 @@ const createMarketSystem = ({
 
   const chooseDirectionByBias = (biasUp) => (Math.random() < biasUp ? 0.25 : -0.25);
 
+  const getOutlookHitRate = () => {
+    const hits = Math.max(0, Number(st.rateOutlookHits) || 0);
+    const misses = Math.max(0, Number(st.rateOutlookMisses) || 0);
+    const total = hits + misses;
+    if (total <= 0) return 0;
+    return hits / total;
+  };
+
   const updateRateOutlook = () => {
     const macro = getActiveMacro();
     const biasUp = Math.max(0.05, Math.min(0.95, Number(macro?.guidanceBiasUp ?? POLICY_GUIDANCE_BASE_BIAS ?? 0.5)));
     st.rateOutlookBiasUp = biasUp;
     st.rateOutlookDirection = biasUp >= 0.5 ? '上调' : '下调';
     st.rateOutlookConfidence = Math.round(Math.abs(biasUp - 0.5) * 200);
+  };
+
+  const settleOutlookResult = (rateStep) => {
+    const predictedUp = st.rateOutlookDirection !== '下调';
+    const actualUp = rateStep > 0;
+    const hit = predictedUp === actualUp;
+    if (hit) {
+      st.rateOutlookHits = Math.max(0, Number(st.rateOutlookHits) || 0) + 1;
+      const bonus = Math.max(100, Math.floor((1 + (st.policyRate || 0)) * 35));
+      st.gears += bonus;
+      st.lifetimeGears += bonus;
+      st.lastRewardText = `🔮 前瞻命中：奖励 ${bonus}`;
+      pushLog(`✅ 前瞻命中（预测${predictedUp ? '上调' : '下调'}）：+${bonus}`);
+    } else {
+      st.rateOutlookMisses = Math.max(0, Number(st.rateOutlookMisses) || 0) + 1;
+      const lossCap = Math.max(80, Math.floor((1 + (st.policyRate || 0)) * 24));
+      const loss = Math.min(lossCap, Math.floor((st.gears || 0) * 0.03));
+      st.gears = Math.max(0, st.gears - loss);
+      st.lastRewardText = `🔮 前瞻误判：回撤 ${loss}`;
+      pushLog(`⚠️ 前瞻误判（预测${predictedUp ? '上调' : '下调'}，实际${actualUp ? '上调' : '下调'}）：-${loss}`);
+    }
+    dirty.gears = true;
+    dirty.stats = true;
   };
 
   const maybeRollMacroEvent = () => {
@@ -76,10 +107,10 @@ const createMarketSystem = ({
 
     const rateStep = chooseDirectionByBias(st.rateOutlookBiasUp || POLICY_GUIDANCE_BASE_BIAS || 0.5);
     st.policyRate = clampRate((st.policyRate || 0) + rateStep);
+    settleOutlookResult(rateStep);
 
     const label = st.marketIsBull ? '📈 多头行情爆发！' : '📉 空头来袭，注意风控';
     pushLog(`${label}（政策利率 ${st.policyRate.toFixed(2)}%）`);
-    st.lastRewardText = `${label}｜政策利率 ${st.policyRate.toFixed(2)}%`;
 
     decayMacroEvent();
     maybeRollMacroEvent();
@@ -129,7 +160,10 @@ const createMarketSystem = ({
     }
     if (marketOutlookEl) {
       const arrow = st.rateOutlookDirection === '上调' ? '↑' : '↓';
-      marketOutlookEl.textContent = `利率前瞻：${st.rateOutlookDirection}${arrow}（置信 ${st.rateOutlookConfidence || 0}%）`;
+      const hits = Math.max(0, Number(st.rateOutlookHits) || 0);
+      const misses = Math.max(0, Number(st.rateOutlookMisses) || 0);
+      const hitRatePct = (getOutlookHitRate() * 100).toFixed(1);
+      marketOutlookEl.textContent = `利率前瞻：${st.rateOutlookDirection}${arrow}（置信 ${st.rateOutlookConfidence || 0}%｜命中 ${hitRatePct}% ${hits}/${hits + misses}）`;
     }
   };
 

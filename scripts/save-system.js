@@ -9,7 +9,7 @@
         autoBuy:st.autoBuy, questIndex:st.questIndex, logs:st.logs.slice(0,LOG_CAP),
         manualPower:st.manualPower, manualMult:st.manualMult, gpsMultiplier:st.gpsMultiplier,
         totalClicks:st.totalClicks, lifetimeGears:st.lifetimeGears, researchPoints:st.researchPoints,
-        bullClicks:st.bullClicks, marketMomentum:st.marketMomentum, marketMomentumTimer:st.marketMomentumTimer, policyRate:st.policyRate, policyHedge:st.policyHedge, macroEventId:st.macroEventId, macroEventTimer:st.macroEventTimer, rateOutlookDirection:st.rateOutlookDirection, rateOutlookBiasUp:st.rateOutlookBiasUp, rateOutlookConfidence:st.rateOutlookConfidence, marketIsBull:st.marketIsBull, soundEnabled:st.soundEnabled,
+        bullClicks:st.bullClicks, marketMomentum:st.marketMomentum, marketMomentumTimer:st.marketMomentumTimer, policyRate:st.policyRate, policyHedge:st.policyHedge, macroEventId:st.macroEventId, macroEventTimer:st.macroEventTimer, rateOutlookDirection:st.rateOutlookDirection, rateOutlookBiasUp:st.rateOutlookBiasUp, rateOutlookConfidence:st.rateOutlookConfidence, rateOutlookHits:st.rateOutlookHits, rateOutlookMisses:st.rateOutlookMisses, marketIsBull:st.marketIsBull, soundEnabled:st.soundEnabled,
         skillMasteryTier:st.skillMasteryTier,
         buildings: buildings.map(b=>({id:b.id,owned:b.owned})),
         upgrades:  upgrades.map(u=>({id:u.id,purchased:u.purchased})),
@@ -42,6 +42,8 @@
         st.rateOutlookDirection = d.rateOutlookDirection === "下调" ? "下调" : "上调";
         st.rateOutlookBiasUp = Math.max(0.05, Math.min(0.95, Number(d.rateOutlookBiasUp) || 0.5));
         st.rateOutlookConfidence = Math.max(0, Math.min(100, Math.floor(Number(d.rateOutlookConfidence) || 0)));
+        st.rateOutlookHits = Math.max(0, Math.floor(Number(d.rateOutlookHits) || 0));
+        st.rateOutlookMisses = Math.max(0, Math.floor(Number(d.rateOutlookMisses) || 0));
         st.marketIsBull   = d.marketIsBull!==false;
         st.soundEnabled   = d.soundEnabled!==false;
         st.skillMasteryTier = Math.max(0,Math.floor(Number(d.skillMasteryTier)||0));
