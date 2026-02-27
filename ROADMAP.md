@@ -3,22 +3,29 @@
 ## 目标
 以“可持续迭代 + 可验证”为核心：每轮交付 1 个可验证增量（MVI），并保持模块边界清晰。
 
-## 版本路线图（迭代版）
+## 版本路线图（迭代版 v2）
 
-> 说明：版本规划与 `AUTO:METRICS` 同步，按 North Star、Risk Level 和唯一 `NEXT` 任务推进。
+> 说明：仅保留“可执行版本计划”，与 `AUTO:METRICS`、风险规则、唯一 `NEXT` 严格对齐。
 
-| 版本 | 目标模式 | 核心交付（单版本主任务） | 发布门槛（必须同时满足） |
-| --- | --- | --- | --- |
-| v0.9 | Hardening | 完成 `M8-T05`：市场事件与利率前瞻（≥2 类事件、可预告下次利率方向） | `node --test tests/formula-system.test.js tests/log-system.test.js` 通过；10 分钟试玩事件触发≥3 次；`NEXT` 切换到 v1.0 主任务 |
-| v1.0 | Optimization | 资产配置/风险偏好系统一期（影响自动购买权重与收益波动） | `bash scripts/verify_soak_thresholds.sh` 通过；新手 15 分钟流程无阻塞；风险等级不升高 |
-| v1.1 | Optimization→Hardening | 季度目标 + 赛季结算 + 可重复挑战内容 | 180 天模拟指标不劣化（`cagr_180`、`max_drawdown_180`、`blowup_rate`）；关键参数可复现 |
-| v1.2 | Hardening（RC） | 发布候选：存档兼容、回归脚本集成、版本日志自动化 | 全量测试通过 + `node scripts/run_soak_check.js --seconds 1800` 达标；发布清单（验收/回滚/已知问题）齐备 |
+| 版本 | 模式目标 | 本版本唯一主任务（MVI） | 进入条件 | 完成门槛（全部满足） |
+| --- | --- | --- | --- | --- |
+| v0.9（当前） | Hardening | `M8-T05`：市场事件与利率前瞻（≥2 类宏观事件 + 下一次利率方向预告） | `AUTO:METRICS` 显示 Hardening 或 Risk=中/高 | `node --test tests/formula-system.test.js tests/log-system.test.js` 通过；10 分钟试玩事件触发≥3 次；`NEXT` 更新为 v1.0 主任务 |
+| v1.0 | Optimization | 资产配置/风险偏好系统一期（影响自动购买权重与收益波动） | v0.9 发布门槛全部通过 | `bash scripts/verify_soak_thresholds.sh` 通过；新手 15 分钟流程无阻塞；`fail_rate` 不上升 |
+| v1.1 | Optimization→Hardening | 季度目标 + 赛季结算 + 可重复挑战 | v1.0 稳定运行一轮迭代 | 180 天指标不劣化（`cagr_180`、`max_drawdown_180`、`blowup_rate`）；关键参数可复现 |
+| v1.2（RC） | Hardening | 发布候选收口：存档兼容、回归脚本集成、版本日志自动化 | v1.1 指标稳定且风险等级=低 | 全量测试通过；`node scripts/run_soak_check.js --seconds 1800` 达标；发布清单（验收/回滚/已知问题）完整 |
 
-### 版本节奏与发布规则（修订）
-- 迭代节奏：双周冻结 1 个候选版本；每轮只推进 1 个 MVI 主任务。
-- 路线图约束：`DONE` 仅在验收与验证命令均通过后更新；`NEXT` 始终保持唯一。
-- 指标门禁：North Star 低于目标或出现两轮下滑时，自动降级为 `Recovery`，暂停新功能并优先修复风险项。
-- 风险门禁：若 `bankruptcy_flag=true` 或 `max_drawdown_180>0.7`，仅允许稳定性与回归任务进入版本计划。
+### 版本节奏与发布规则（修订 v2）
+- 单任务原则：每轮只推进 1 个主任务；未达门槛不得并行开启下个版本任务。
+- 状态原则：`DONE` 仅在验收证据 + 验证命令通过后更新；`NEXT` 必须且只能有 1 个。
+- 指标降级：North Star 连续两轮下降或出现 `trend=down` 时，版本状态降级为 `Recovery`，暂停新功能。
+- 风险硬门禁：`bankruptcy_flag=true` 或 `max_drawdown_180>0.7` 时，只允许稳定性/回归类任务进入排期。
+- 发布复盘：每次版本完成后，必须在里程碑条目补充“指标影响 + 验证命令 + 证据位置”。
+
+### 发布前检查清单（Checklist）
+- [ ] 路线图中仅保留 1 个 `[NEXT]`，且与当前版本主任务一致。
+- [ ] `AUTO:METRICS` 区块模式与版本模式无冲突（如 Hardening/Recovery）。
+- [ ] 至少 1 条自动化验证命令已执行并记录结果。
+- [ ] 对风险指标（`bankruptcy_flag`、`max_drawdown_180`、`blowup_rate`、`fail_rate`）给出当前结论。
 
 ## Milestones
 
