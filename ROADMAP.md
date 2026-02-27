@@ -68,10 +68,14 @@
   - 验收：新增 1 个 Node 测试覆盖上限与提示触发
   - 完成：2026-02-27
   - 证据：`tests/log-system.test.js` 覆盖 `LOG_CAP` 裁剪与提示文案仅触发一次；`node --test tests/formula-system.test.js tests/log-system.test.js` 全通过
-- [TODO] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
+- [DONE] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
   - 验收：为 FPS/Heap/writes 波动增加可配置阈值参数
-- [NEXT] M7-T03 巡检脚本输出阈值化（超阈值返回非零退出码）
-  - 验收：为 FPS/Heap/writes 波动增加可配置阈值参数
+  - 完成：2026-02-27
+  - 证据：`scripts/run_soak_check.js` 新增 `--min-fps/--max-heap-mb/--max-writes-std`，并在任一阈值失败时返回退出码 1；`node --test tests/run-soak-check.test.js` 覆盖通过与失败两条路径
+- [TODO] M7-T04 巡检脚本阈值参数文档与示例命令
+  - 验收：README 增加参数表与 1 条成功/1 条失败示例命令
+- [NEXT] M7-T04 巡检脚本阈值参数文档与示例命令
+  - 验收：README 增加参数表与 1 条成功/1 条失败示例命令
 
 ## 当前版本能力（摘要）
 - 模块化系统：formula/economy/skill/market/feedback/save/render/loop/debug
