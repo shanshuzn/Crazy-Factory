@@ -33,6 +33,17 @@
       box-shadow: 0 24px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(59,130,246,.08);
     }
 
+    .game.screen-shake { animation: screenShake .22s linear; }
+    @keyframes screenShake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(calc(var(--shake-x, 6px) * -1)); }
+      40% { transform: translateX(var(--shake-x, 6px)); }
+      60% { transform: translateX(calc(var(--shake-x, 6px) * -0.6)); }
+      80% { transform: translateX(calc(var(--shake-x, 6px) * 0.6)); }
+      100% { transform: translateX(0); }
+    }
+
+
     /* ── HEADER ── */
     .header {
       padding: 20px 24px; border-bottom: 1px solid var(--border);

@@ -1,4 +1,4 @@
-    // ════════════════════════════════════════════════
+═══════════════════════════════════════════════
     // ① 经济常量（调这里调手感）
     // ════════════════════════════════════════════════
     const PRICE_GROWTH         = 1.15;   // 建筑价格增长指数
@@ -118,6 +118,7 @@
     let lastRender = 0;
 
     // ════════════════════════════════════════════════
+
     // ⑧ DOM 引用（渲染层缓存，M1 解耦）
     // ════════════════════════════════════════════════
     const $ = (id) => document.getElementById(id);
@@ -139,6 +140,9 @@
     const buildingListEl= $("buildingList");
     const upgradeListEl = $("upgradeList");
     const skillListEl   = $("skillList");
+
+    const skillMasteryMetaEl = $("skillMasteryMeta");
+
     const achievListEl  = $("achievementList");
     const modeButtons   = [...document.querySelectorAll("[data-mode]")];
     const speedButtons  = [...document.querySelectorAll("[data-speed]")];
@@ -161,6 +165,10 @@
     const statModeEl    = $("statMode");
     const statLifeEl    = $("statLifetime");
 
+    const gameShellEl   = document.querySelector(".game");
+
+
+
     // View 缓存（渲染解耦核心，避免每帧 querySelector）
     const buildingViewMap   = new Map();
     const upgradeViewMap    = new Map();
@@ -168,6 +176,10 @@
     const achievViewMap     = new Map();
 
     // ════════════════════════════════════════════════
+
+    // ⑨ 工具函数
+    // ════════════════════════════════════════════════
+
     // ⑨ 工具函数（生产层，独立于 DOM）
     // ════════════════════════════════════════════════
     const bld      = (id) => buildings.find(b=>b.id===id);
@@ -201,6 +213,7 @@
     };
     const purchaseCost = (b,n) => { let c=0; for(let i=0;i<n;i++) c+=price(b,i); return c; };
 
+
     // ── 数值格式化 ──
     const fmt = (n) => {
       if (!Number.isFinite(n)) return "¥0";
@@ -211,6 +224,11 @@
       if(abs>=1e3)  return `${sg}¥${(abs/1e3).toFixed(2)}K`;
       return `${sg}¥${abs.toLocaleString("zh-CN",{maximumFractionDigits:1})}`;
     };
+
+
+    // 反馈系统初始化（为什么：反馈层高频迭代，独立工厂减少对主循环的干扰）
+    const feedback = createFeedbackSystem({ st, JUICE, fmt, manualBtn, manualZone, marketFlashEl, gameShellEl });
+    const { eventBus, sfxBuy, sfxUpgrade, sfxMarket, spawnFloat } = feedback;
 
     // ════════════════════════════════════════════════
     // ⑩ Web Audio 音效（M3）
@@ -352,6 +370,7 @@
       el.addEventListener("animationend",()=>el.remove());
     };
 
+
     // ════════════════════════════════════════════════
     // ⑭ DOM 构建（只调用一次）
     // ════════════════════════════════════════════════
@@ -438,12 +457,87 @@
       if(rw.type==="gear"){ st.gears+=rw.value; st.lifetimeGears+=rw.value; st.lastRewardText=`${label}：+${fmt(rw.value)}`; pushLog(st.lastRewardText); }
       if(rw.type==="rp"  ){ st.researchPoints+=rw.value; st.lastRewardText=`${label}：+${rw.value} RP`; pushLog(st.lastRewardText); }
     };
+
+
+    // 经济系统初始化（为什么：将平衡与购买逻辑从 UI/循环中抽离，便于独立调数值）
+    const economy = createEconomySystem({
+      st,
+      buildings,
+      upgrades,
+      skills,
+      bldBoost,
+      PRICE_GROWTH,
+      MARKET_BULL_BONUS,
+      MARKET_BEAR_PENALTY,
+      SKILL_MASTERY_BONUS,
+      dirty,
+      buildingViewMap,
+      pushLog,
+      saveGame,
+      fmt,
+      sfxBuy,
+      sfxUpgrade,
+      applyUpgradeEffect,
+    });
+    const {
+      bld,
+      skillLv,
+      price,
+      mktMult,
+      getTotalGPS,
+      getManualGain,
+      affordableCount,
+      purchaseCost,
+      upgradeLockedReason,
+      isBldUnlocked,
+      buyBuilding,
+      buyUpgrade,
+      tryAutoBuy,
+    } = economy;
+
+    const skillSystem = createSkillSystem({
+      st,
+      skills,
+      dirty,
+      pushLog,
+      saveGame,
+      sfxUpgrade,
+      SKILL_MASTERY_STEP,
+      SKILL_MASTERY_BONUS,
+    });
+    const { buySkill, getTotalSkillLevels, refreshSkillMastery } = skillSystem;
+
+    const marketSystem = createMarketSystem({
+      st,
+      dirty,
+      pushLog,
+      eventBus,
+      sfxMarket,
+      mktMult,
+      MARKET_CYCLE_MIN,
+      MARKET_CYCLE_MAX,
+      MARKET_BULL_BONUS,
+      MARKET_BEAR_PENALTY,
+      marketMultEl,
+      marketStatusEl,
+      marketDotEl,
+      marketLabelEl,
+      marketWaveEl,
+      marketCountEl,
+      marketEffectEl,
+    });
+    const { tickMarket, renderMarket } = marketSystem;
+
+
+
     const claimAchievement = (a) => {
       if(!a.reward||a.claimed) return;
       a.claimed=true; grantReward(a.reward,`成就「${a.name}」`); saveGame();
     };
 
     // ════════════════════════════════════════════════
+
+
     // ⑯ 解锁条件检查
     // ════════════════════════════════════════════════
     const upgradeLockedReason = (u) => {
@@ -500,6 +594,7 @@
     };
 
     // ════════════════════════════════════════════════
+
     // ⑱ 渲染层（与生产层解耦，M1 重构核心）
     // ════════════════════════════════════════════════
     const renderQuest = () => {
@@ -518,6 +613,8 @@
       if(cur>=q.target){ grantReward(q.reward,`任务「${q.title}」`); st.questIndex++; dirty.quest = dirty.gears = dirty.stats = dirty.logs = true; saveGame(); }
     };
 
+
+
     const renderMarket = () => {
       const bull=st.marketIsBull, mult=mktMult();
       marketMultEl.textContent=`×${mult.toFixed(2)}`; marketMultEl.style.color=bull?"var(--bull)":"var(--bear)";
@@ -530,6 +627,7 @@
       marketEffectEl.textContent=bull?`多头加成 ×${MARKET_BULL_BONUS.toFixed(1)}`:`空头折损 ×${MARKET_BEAR_PENALTY.toFixed(1)}`;
       marketEffectEl.style.color=bull?"var(--bull)":"var(--bear)";
     };
+
 
     // ════════════════════════════════════════════════
     // 渲染层（带脏标记 + 数字平滑滚动）
@@ -598,6 +696,12 @@
           if(sk.level>=sk.maxLevel){v.btn.disabled=true;v.btn.textContent="已满级";}
           else{v.btn.disabled=st.researchPoints<sk.costRP;v.btn.textContent=`升级（${sk.costRP} RP）`;}
         }
+
+        if(skillMasteryMetaEl){
+          const totalLv = getTotalSkillLevels();
+          skillMasteryMetaEl.textContent = `专精 T${st.skillMasteryTier} · 总技能等级 ${totalLv} · 总收益加成 ×${(1 + st.skillMasteryTier * SKILL_MASTERY_BONUS).toFixed(2)}`;
+        }
+
         dirty.skills = false;
       }
 
@@ -659,6 +763,9 @@
       st.gears+=gain; st.lifetimeGears+=gain; st.totalClicks++;
       if(st.marketIsBull) st.bullClicks++;
       if(st.totalClicks===1) pushLog("完成首次撮合");
+
+      eventBus.emit("manual:clicked", { x: e.clientX, y: e.clientY, gain });
+
       sfxClick();
       spawnFloat(e.clientX+(Math.random()*20-10), e.clientY-10, `+${fmt(gain)}`);
       manualBtn.classList.remove("clicked"); void manualBtn.offsetWidth; manualBtn.classList.add("clicked");
@@ -666,6 +773,7 @@
       manualZone.style.setProperty("--rx",`${((e.clientX-rect.left)/rect.width)*100}%`);
       manualZone.style.setProperty("--ry",`${((e.clientY-rect.top)/rect.height)*100}%`);
       manualZone.classList.add("ripple"); setTimeout(()=>manualZone.classList.remove("ripple"),400);
+
       dirty.gears = dirty.stats = true;
       saveGame();
     });
@@ -712,7 +820,11 @@
       st.researchPoints+=gain; pushLog(`增发股权，获得 +${gain} RP`);
       Object.assign(st,{gears:0,purchaseMode:"1",pendingOfflineGears:0,accumulator:0,
         manualPower:1,manualMult:1,gpsMultiplier:1,totalClicks:0,lifetimeGears:0,
+
+        lastRewardText:"",gameSpeed:1,questIndex:0,autoBuy:false,autoBuyAccumulator:0,bullClicks:0,skillMasteryTier:0});
+
         lastRewardText:"",gameSpeed:1,questIndex:0,autoBuy:false,autoBuyAccumulator:0,bullClicks:0});
+
       buildings.forEach(b=>b.owned=0);
       upgrades.forEach(u=>u.purchased=false);
       skills.forEach(s=>s.level=0);
@@ -729,7 +841,11 @@
         manualPower:1,manualMult:1,gpsMultiplier:1,totalClicks:0,lifetimeGears:0,researchPoints:0,
         lastRewardText:"",gameSpeed:1,questIndex:0,autoBuy:false,autoBuyAccumulator:0,
         bullClicks:0,marketIsBull:true,marketTimer:35,marketCycleDuration:35,
+
+        soundEnabled:true,skillMasteryTier:0,logs:["[--:--:--] 清盘重来"]});
+
         soundEnabled:true,logs:["[--:--:--] 清盘重来"]});
+
       buildings.forEach(b=>b.owned=0);
       upgrades.forEach(u=>u.purchased=false);
       skills.forEach(s=>s.level=0);
@@ -748,6 +864,25 @@
     achievements.forEach(createAchievRow);
 
     loadGame();
+
+    refreshSkillMastery(true);
+    dirty.market = dirty.buildings = dirty.upgrades = dirty.skills = dirty.achievements = dirty.quest = dirty.stats = dirty.logs = true;
+
+    const loopSystem = createLoopSystem({
+      st,
+      dirty,
+      MAX_ACCUMULATED_SECS,
+      FIXED_STEP,
+      SAVE_INTERVAL,
+      getTotalGPS,
+      tickMarket,
+      tryAutoBuy,
+      saveGame,
+      render,
+    });
+
+    loopSystem.startLoop();
+
     dirty.market = dirty.buildings = dirty.upgrades = dirty.skills = dirty.achievements = dirty.quest = dirty.stats = dirty.logs = true;
 
     let lastSave = performance.now();
@@ -776,4 +911,5 @@
 
     render(true);
     requestAnimationFrame(tick);
+
   

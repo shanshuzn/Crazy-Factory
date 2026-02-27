@@ -62,8 +62,14 @@ price = floor(basePrice * 1.15 ^ owned)
 ├── README.md
 ├── ROADMAP.md
 └── scripts/
-    ├── game.js
-    └── capture_screenshot.py
+    ├── game-data.js
+    ├── skill-system.js
+    ├── economy-system.js
+    ├── market-system.js
+    ├── feedback-system.js
+    ├── save-system.js
+    ├── loop-system.js
+
 ```
 
 ## 截图与调试（容器/CI）
