@@ -68,25 +68,6 @@
     const { eventBus, sfxBuy, sfxUpgrade, sfxMarket, spawnFloat } = feedback;
 
     // ════════════════════════════════════════════════
-    // ⑪ 市场切换（含屏闪动效 M3）
-    // ════════════════════════════════════════════════
-    const doMarketSwitch = () => {
-      st.marketIsBull = !st.marketIsBull;
-      st.marketCycleDuration = MARKET_CYCLE_MIN + Math.random()*(MARKET_CYCLE_MAX-MARKET_CYCLE_MIN);
-      st.marketTimer = st.marketCycleDuration;
-      const label = st.marketIsBull ? "📈 多头行情爆发！" : "📉 空头来袭，注意风控";
-      pushLog(label); st.lastRewardText = label;
-      sfxMarket(st.marketIsBull);
-      dirty.market = true; dirty.logs = true;
-      eventBus.emit("market:switched", { isBull: st.marketIsBull });
-    };
-
-    const tickMarket = (dt) => {
-      st.marketTimer -= dt * st.gameSpeed;
-      if (st.marketTimer <= 0) doMarketSwitch();
-    };
-
-    // ════════════════════════════════════════════════
     // ⑭ DOM 构建（只调用一次）
     // ════════════════════════════════════════════════
     const createBuildingRow = (b) => {
@@ -221,6 +202,27 @@
     });
     const { buySkill, getTotalSkillLevels, refreshSkillMastery } = skillSystem;
 
+    const marketSystem = createMarketSystem({
+      st,
+      dirty,
+      pushLog,
+      eventBus,
+      sfxMarket,
+      mktMult,
+      MARKET_CYCLE_MIN,
+      MARKET_CYCLE_MAX,
+      MARKET_BULL_BONUS,
+      MARKET_BEAR_PENALTY,
+      marketMultEl,
+      marketStatusEl,
+      marketDotEl,
+      marketLabelEl,
+      marketWaveEl,
+      marketCountEl,
+      marketEffectEl,
+    });
+    const { tickMarket, renderMarket } = marketSystem;
+
     const claimAchievement = (a) => {
       if(!a.reward||a.claimed) return;
       a.claimed=true; grantReward(a.reward,`成就「${a.name}」`); saveGame();
@@ -243,19 +245,6 @@
       goalPctEl.textContent=`${pct.toFixed(0)}%`;
       questRewardEl.textContent=`奖励：${q.rewardText}`;
       if(cur>=q.target){ grantReward(q.reward,`任务「${q.title}」`); st.questIndex++; dirty.quest = dirty.gears = dirty.stats = dirty.logs = true; saveGame(); }
-    };
-
-    const renderMarket = () => {
-      const bull=st.marketIsBull, mult=mktMult();
-      marketMultEl.textContent=`×${mult.toFixed(2)}`; marketMultEl.style.color=bull?"var(--bull)":"var(--bear)";
-      marketStatusEl.textContent=bull?"多头市场":"空头市场"; marketStatusEl.style.color=bull?"var(--bull)":"var(--bear)";
-      marketDotEl.classList.toggle("bear",!bull);
-      marketLabelEl.textContent=bull?"多头市场":"空头市场"; marketLabelEl.style.color=bull?"var(--bull)":"var(--bear)";
-      const pct=bull?50+(1-st.marketTimer/st.marketCycleDuration)*50:(st.marketTimer/st.marketCycleDuration)*50;
-      marketWaveEl.style.width=`${Math.max(5,Math.min(95,pct))}%`;
-      marketCountEl.textContent=`切换：${Math.ceil(st.marketTimer)}s`;
-      marketEffectEl.textContent=bull?`多头加成 ×${MARKET_BULL_BONUS.toFixed(1)}`:`空头折损 ×${MARKET_BEAR_PENALTY.toFixed(1)}`;
-      marketEffectEl.style.color=bull?"var(--bull)":"var(--bear)";
     };
 
     // ════════════════════════════════════════════════
