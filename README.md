@@ -130,6 +130,7 @@ bash scripts/verify_soak_thresholds.sh
 ```
 
 默认会将 pass/fail 的 `SOAK_REPORT` 写入 `artifacts/soak-thresholds/pass.json` 与 `artifacts/soak-thresholds/fail.json`，并保留 `pass.log` / `fail.log` / `invalid.log`。
+JSON 解析优先使用 `python3/python`，若不可用会自动回退到 `node`（可用 `VERIFY_SOAK_DISABLE_PYTHON=1` 强制演练回退路径）。
 如需自定义目录可传入首个参数：
 
 ```bash

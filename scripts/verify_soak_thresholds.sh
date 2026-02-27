@@ -14,6 +14,7 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   - 执行一个预期失败的 run_soak_check（阈值失败，exit 1）
   - 执行一个预期失败的 run_soak_check（非法参数，exit 1）
   - 归档每次执行的原始日志与 SOAK_REPORT JSON（非法参数仅归档日志）
+  - JSON 解析优先使用 python（python3/python），不可用时自动回退到 node
 
 输出:
   <OUT_DIR>/pass.log
@@ -31,8 +32,9 @@ FAIL_CMD=(node scripts/run_soak_check.js --seconds 10)
 INVALID_CMD=(node scripts/run_soak_check.js --bad-flag)
 mkdir -p "$OUT_DIR"
 
-extract_report_json() {
-  python -c 'import json,sys
+extract_report_json_with_python() {
+  local py_bin="$1"
+  "$py_bin" -c 'import json,sys
 text=sys.stdin.read()
 marker="SOAK_REPORT"
 idx=text.find(marker)
@@ -41,6 +43,37 @@ if idx < 0:
 json_text=text[idx+len(marker):].strip()
 obj=json.loads(json_text)
 print(json.dumps(obj, ensure_ascii=False, indent=2))'
+}
+
+extract_report_json_with_node() {
+  node -e 'const fs=require("fs");
+const text=fs.readFileSync(0,"utf8");
+const marker="SOAK_REPORT";
+const idx=text.indexOf(marker);
+if (idx < 0) {
+  console.error("SOAK_REPORT marker not found");
+  process.exit(1);
+}
+const jsonText=text.slice(idx + marker.length).trim();
+const obj=JSON.parse(jsonText);
+process.stdout.write(JSON.stringify(obj, null, 2) + "\n");'
+}
+
+extract_report_json() {
+  local disable_python="${VERIFY_SOAK_DISABLE_PYTHON:-0}"
+
+  if [[ "$disable_python" != "1" ]]; then
+    if command -v python3 >/dev/null 2>&1; then
+      extract_report_json_with_python python3
+      return
+    fi
+    if command -v python >/dev/null 2>&1; then
+      extract_report_json_with_python python
+      return
+    fi
+  fi
+
+  extract_report_json_with_node
 }
 
 run_case() {
