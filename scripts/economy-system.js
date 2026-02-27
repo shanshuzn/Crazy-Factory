@@ -12,6 +12,7 @@ const createEconomySystem = ({
   MARKET_MOMENTUM_GPS_PER_STACK,
   MARKET_MOMENTUM_MANUAL_PER_STACK,
   SKILL_MASTERY_BONUS,
+  MACRO_PREFERRED_BONUS,
   dirty,
   buildingViewMap,
   pushLog,
@@ -25,7 +26,8 @@ const createEconomySystem = ({
   const discount = () => Math.max(0.6, 1 - skillLv('bulk_discount') * 0.04);
   const price = (b, off = 0) => GameFormulas.calcBuildingPrice({ basePrice: b.basePrice, owned: b.owned, growth: PRICE_GROWTH, discount: discount(), offset: off });
 
-  const bldGPS = (b) => b.dps * b.owned * (bldBoost[b.id] || 1);
+  const bldPreferredMult = (b) => (st.macroPreferredBuildingId && st.macroPreferredBuildingId === b.id ? 1 + MACRO_PREFERRED_BONUS : 1);
+  const bldGPS = (b) => b.dps * b.owned * (bldBoost[b.id] || 1) * bldPreferredMult(b);
   const baseGPS = () => buildings.reduce((s, b) => s + bldGPS(b), 0);
   const resMult = () => 1 + st.researchPoints * 0.1;
   const skillGPS = () => 1 + skillLv('line_optimizer') * 0.25;
@@ -54,6 +56,7 @@ const createEconomySystem = ({
     const _mastery = skillMasteryMult();
     const _momentum = marketMomentumGPSMult();
     const _policy = policyRateDrag();
+    const _preferred = st.macroPreferredBuildingId ? `偏好:${st.macroPreferredBuildingId}` : '偏好:none';
     const finalMult = st.gpsMultiplier * _resMult * _skillGPS * _mktMult * _mastery * _momentum * _policy;
     return {
       baseGPS: _baseGPS,
@@ -64,6 +67,7 @@ const createEconomySystem = ({
       masteryMult: _mastery,
       momentumMult: _momentum,
       policyRateMult: _policy,
+      preferredHint: _preferred,
       finalMult,
       totalGPS: _baseGPS * finalMult,
     };
