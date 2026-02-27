@@ -18,10 +18,10 @@
 - [DONE] M4-T04 长时间运行巡检脚本（30 分钟）
   - 验收：`node scripts/run_soak_check.js --seconds 1800` 输出平均 FPS、峰值 Heap、writes/min 波动与结论
   - 完成：2026-02-27
-- [TODO] M4-T05 发布页与版本日志（changelog）
-  - 验收：新增发布说明区块 + 版本记录条目 + 首页可见版本号
-- [NEXT] M4-T05 发布页与版本日志（changelog）
-  - 验收：同 M4-T05
+- [DONE] M4-T05 发布页与版本日志（changelog）
+  - 验收：首页标题展示版本号 + 页面存在“版本日志”区块并含版本记录
+  - 完成：2026-02-27
+  - 证据：`index.html` 含 `#appVersion` 与 `#changelogList`；`scripts/game.js` 初始化调用 `renderChangelog()`
 
 ### M5：平衡与体验抛光（规划）
 - [TODO] M5-T01 市场波动平衡回归（牛/熊周期与收益体感）
@@ -30,6 +30,8 @@
   - 验收：专精层级阈值与收益倍率对照表
 - [TODO] M5-T03 反馈层细化（购买/研发/市场切换分层反馈）
   - 验收：每类反馈至少 1 项可调参数与截图证明
+- [NEXT] M5-T02 技能专精曲线复核（前中后期收益斜率）
+  - 验收：同 M5-T02
 
 ## 当前版本能力（摘要）
 - 模块化系统：formula/economy/skill/market/feedback/save/render/loop/debug
