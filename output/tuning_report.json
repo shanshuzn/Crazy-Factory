@@ -1,37 +1,6 @@
 {
   "baseline": {
     "params": {
-      "price_scale": 0.7977304526748971,
-      "price_exp": 1.1268647119341564,
-      "reward_scale": 1.1239773353231977,
-      "reward_exp": 1.122912037037037,
-      "softcap_start": 0.6789197530864197,
-      "softcap_strength": 0.4964399005486968,
-      "offline_rate": 1.2,
-      "offline_cap_hours": 2,
-      "prestige_enabled": true,
-      "prestige_unlock_hours": 22,
-      "prestige_gain_scale": 0.34283809161394546
-    },
-    "score": {
-      "accepted": true,
-      "constraint_failed": null,
-      "fail_rate": 0,
-      "V_total": 0.5305108133279781,
-      "components": {
-        "growth_momentum": 0,
-        "return_quality": 1,
-        "upgrade_satisfaction": 1,
-        "progress_clarity": 0.9012368248652343,
-        "stability_score": 0.01213882133862463
-      },
-      "bottleneck": {
-        "longest_stall_median_seconds": 1065
-      }
-    }
-  },
-  "top1": {
-    "params": {
       "price_scale": 1.5,
       "price_exp": 1.1519470723477978,
       "reward_scale": 1.3423649545629168,
@@ -48,188 +17,219 @@
       "accepted": true,
       "constraint_failed": null,
       "fail_rate": 0,
-      "V_total": 0.5305618175416604,
+      "V_total": 0.5496335223548713,
       "components": {
-        "growth_momentum": 0,
+        "growth_momentum": 0.055859534316036054,
         "return_quality": 1,
         "upgrade_satisfaction": 1,
-        "progress_clarity": 0.9016446217956365,
-        "stability_score": 0.012251475568244697
+        "progress_clarity": 0.9009342163859178,
+        "stability_score": 0.012062743659702637
       },
       "bottleneck": {
-        "longest_stall_median_seconds": 1065
+        "longest_stall_median_seconds": 1050
+      }
+    }
+  },
+  "top1": {
+    "params": {
+      "price_scale": 1.423174984396786,
+      "price_exp": 1.0181493336976162,
+      "reward_scale": 1.8,
+      "reward_exp": 1.35,
+      "softcap_start": 0.4992290594993141,
+      "softcap_strength": 0.3744675925925926,
+      "offline_rate": 0.9123809401479122,
+      "offline_cap_hours": 3,
+      "prestige_enabled": true,
+      "prestige_unlock_hours": 25,
+      "prestige_gain_scale": 0.5211754157398675
+    },
+    "score": {
+      "accepted": true,
+      "constraint_failed": null,
+      "fail_rate": 0,
+      "V_total": 0.5910914681529893,
+      "components": {
+        "growth_momentum": 0.8348901348355987,
+        "return_quality": 0.041100000000000005,
+        "upgrade_satisfaction": 1,
+        "progress_clarity": 0.99318480515793,
+        "stability_score": 0.013495316315325618
+      },
+      "bottleneck": {
+        "longest_stall_median_seconds": 1175
       }
     }
   },
   "topk": [
     {
       "params": {
-        "price_scale": 1.5,
-        "price_exp": 1.1519470723477978,
-        "reward_scale": 1.3423649545629168,
-        "reward_exp": 1.2708167615641015,
-        "softcap_start": 0.7904169837572658,
-        "softcap_strength": 0.41195808373263093,
-        "offline_rate": 1.0200344885590251,
-        "offline_cap_hours": 13,
+        "price_scale": 1.423174984396786,
+        "price_exp": 1.0181493336976162,
+        "reward_scale": 1.8,
+        "reward_exp": 1.35,
+        "softcap_start": 0.4992290594993141,
+        "softcap_strength": 0.3744675925925926,
+        "offline_rate": 0.9123809401479122,
+        "offline_cap_hours": 3,
         "prestige_enabled": true,
-        "prestige_unlock_hours": 22,
-        "prestige_gain_scale": 0.4861003943758574
+        "prestige_unlock_hours": 25,
+        "prestige_gain_scale": 0.5211754157398675
       },
       "score": {
         "accepted": true,
         "constraint_failed": null,
         "fail_rate": 0,
-        "V_total": 0.5305618175416604,
+        "V_total": 0.5910914681529893,
         "components": {
-          "growth_momentum": 0,
-          "return_quality": 1,
+          "growth_momentum": 0.8348901348355987,
+          "return_quality": 0.041100000000000005,
           "upgrade_satisfaction": 1,
-          "progress_clarity": 0.9016446217956365,
-          "stability_score": 0.012251475568244697
+          "progress_clarity": 0.99318480515793,
+          "stability_score": 0.013495316315325618
         },
         "bottleneck": {
-          "longest_stall_median_seconds": 1065
+          "longest_stall_median_seconds": 1175
         }
       }
     },
     {
       "params": {
-        "price_scale": 1.5,
-        "price_exp": 1.1519470723477978,
-        "reward_scale": 1.3423649545629168,
-        "reward_exp": 1.2708167615641015,
-        "softcap_start": 0.7904169837572658,
-        "softcap_strength": 0.4851680641119735,
-        "offline_rate": 1.090477389793593,
-        "offline_cap_hours": 16,
+        "price_scale": 1.4294840186479671,
+        "price_exp": 1.2885270490397804,
+        "reward_scale": 1.8,
+        "reward_exp": 1.35,
+        "softcap_start": 0.5005179085897933,
+        "softcap_strength": 0.3744675925925926,
+        "offline_rate": 0.8056401090023848,
+        "offline_cap_hours": 3,
         "prestige_enabled": true,
-        "prestige_unlock_hours": 22,
-        "prestige_gain_scale": 0.4861003943758574
+        "prestige_unlock_hours": 25,
+        "prestige_gain_scale": 0.456639687960974
       },
       "score": {
         "accepted": true,
         "constraint_failed": null,
         "fail_rate": 0,
-        "V_total": 0.5305618175416604,
+        "V_total": 0.5910914681529893,
         "components": {
-          "growth_momentum": 0,
-          "return_quality": 1,
+          "growth_momentum": 0.8348901348355987,
+          "return_quality": 0.041100000000000005,
           "upgrade_satisfaction": 1,
-          "progress_clarity": 0.9016446217956365,
-          "stability_score": 0.012251475568244697
+          "progress_clarity": 0.99318480515793,
+          "stability_score": 0.013495316315325618
         },
         "bottleneck": {
-          "longest_stall_median_seconds": 1065
+          "longest_stall_median_seconds": 1170
         }
       }
     },
     {
       "params": {
-        "price_scale": 1.5,
-        "price_exp": 1.1519470723477978,
-        "reward_scale": 1.3423649545629168,
-        "reward_exp": 1.2708167615641015,
-        "softcap_start": 0.7904169837572658,
-        "softcap_strength": 0.4748174587326309,
-        "offline_rate": 1.0200344885590251,
-        "offline_cap_hours": 13,
+        "price_scale": 1.4778136673751472,
+        "price_exp": 1.143895013459401,
+        "reward_scale": 1.8,
+        "reward_exp": 1.35,
+        "softcap_start": 0.5005179085897933,
+        "softcap_strength": 0.3744675925925926,
+        "offline_rate": 0.8468701091795324,
+        "offline_cap_hours": 3,
         "prestige_enabled": true,
-        "prestige_unlock_hours": 22,
-        "prestige_gain_scale": 0.4861003943758574
+        "prestige_unlock_hours": 25,
+        "prestige_gain_scale": 0.456639687960974
       },
       "score": {
         "accepted": true,
         "constraint_failed": null,
         "fail_rate": 0,
-        "V_total": 0.5305605758964576,
+        "V_total": 0.5910914681529893,
         "components": {
-          "growth_momentum": 0,
-          "return_quality": 1,
+          "growth_momentum": 0.8348901348355987,
+          "return_quality": 0.041100000000000005,
           "upgrade_satisfaction": 1,
-          "progress_clarity": 0.9016321217956367,
-          "stability_score": 0.012251305719236674
+          "progress_clarity": 0.99318480515793,
+          "stability_score": 0.013495316315325618
         },
         "bottleneck": {
-          "longest_stall_median_seconds": 1065
+          "longest_stall_median_seconds": 1170
         }
       }
     },
     {
       "params": {
-        "price_scale": 1.5,
-        "price_exp": 1.1519470723477978,
-        "reward_scale": 1.3423649545629168,
-        "reward_exp": 1.2708167615641015,
-        "softcap_start": 0.7904169837572658,
-        "softcap_strength": 0.5,
-        "offline_rate": 1.0200344885590251,
-        "offline_cap_hours": 13,
+        "price_scale": 1.4778136673751472,
+        "price_exp": 1.2010742409892101,
+        "reward_scale": 1.8,
+        "reward_exp": 1.35,
+        "softcap_start": 0.5005179085897933,
+        "softcap_strength": 0.3744675925925926,
+        "offline_rate": 0.7861528600180409,
+        "offline_cap_hours": 3,
         "prestige_enabled": true,
-        "prestige_unlock_hours": 22,
-        "prestige_gain_scale": 0.4861003943758574
+        "prestige_unlock_hours": 25,
+        "prestige_gain_scale": 0.46829351333081126
       },
       "score": {
         "accepted": true,
         "constraint_failed": null,
         "fail_rate": 0,
-        "V_total": 0.5305605758964576,
+        "V_total": 0.5910914681529893,
         "components": {
-          "growth_momentum": 0,
-          "return_quality": 1,
+          "growth_momentum": 0.8348901348355987,
+          "return_quality": 0.041100000000000005,
           "upgrade_satisfaction": 1,
-          "progress_clarity": 0.9016321217956367,
-          "stability_score": 0.012251305719236674
+          "progress_clarity": 0.99318480515793,
+          "stability_score": 0.013495316315325618
         },
         "bottleneck": {
-          "longest_stall_median_seconds": 1065
+          "longest_stall_median_seconds": 1170
         }
       }
     },
     {
       "params": {
-        "price_scale": 1.5,
-        "price_exp": 1.1519470723477978,
-        "reward_scale": 1.3423649545629168,
-        "reward_exp": 1.2708167615641015,
-        "softcap_start": 0.7904169837572658,
-        "softcap_strength": 0.4851680641119735,
-        "offline_rate": 1.0200344885590251,
-        "offline_cap_hours": 15,
+        "price_scale": 1.3954659470277786,
+        "price_exp": 1.2763927254801097,
+        "reward_scale": 1.8,
+        "reward_exp": 1.35,
+        "softcap_start": 0.5818557446182805,
+        "softcap_strength": 0.3744675925925926,
+        "offline_rate": 0.8347356594139075,
+        "offline_cap_hours": 3,
         "prestige_enabled": true,
-        "prestige_unlock_hours": 22,
-        "prestige_gain_scale": 0.4861003943758574
+        "prestige_unlock_hours": 25,
+        "prestige_gain_scale": 0.5496024176894996
       },
       "score": {
         "accepted": true,
         "constraint_failed": null,
         "fail_rate": 0,
-        "V_total": 0.5305605758964576,
+        "V_total": 0.5910914681529893,
         "components": {
-          "growth_momentum": 0,
-          "return_quality": 1,
+          "growth_momentum": 0.8348901348355987,
+          "return_quality": 0.041100000000000005,
           "upgrade_satisfaction": 1,
-          "progress_clarity": 0.9016321217956367,
-          "stability_score": 0.012251305719236674
+          "progress_clarity": 0.99318480515793,
+          "stability_score": 0.013495316315325618
         },
         "bottleneck": {
-          "longest_stall_median_seconds": 1065
+          "longest_stall_median_seconds": 1170
         }
       }
     }
   ],
   "metadata": {
     "runs_per_eval": 2000,
-    "generations": 20,
-    "population": 50,
-    "timestamp": "2026-02-28T05:41:47.376Z"
+    "generations": 15,
+    "population": 40,
+    "timestamp": "2026-02-28T05:44:37.238Z"
   },
   "metrics": {
-    "risk_adjusted_return_180": 0.5305618175416604,
-    "cagr_180": 0,
-    "max_drawdown_180": 0.2975497048863511,
+    "risk_adjusted_return_180": 0.5910914681529893,
+    "cagr_180": 0.8348901348355987,
+    "max_drawdown_180": 0.29730093673693486,
     "active_system_count": 10,
-    "market_stability_score": 0.012251475568244697,
+    "market_stability_score": 0.013495316315325618,
     "bankruptcy_flag": false,
     "blowup_rate": 0,
     "fail_rate": 0
