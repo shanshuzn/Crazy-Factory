@@ -586,4 +586,40 @@
       localStorage.removeItem('dailyQuestLastReset');
       location.reload();
     };
+
+    // ════════════════════════════════════════════════
+    // ㉔ 数据分析埋点系统 (P5-T5)
+    // ════════════════════════════════════════════════
+    const analyticsSystem = createAnalyticsSystem({
+      st,
+      eventBus,
+      enabled: true,
+    });
+
+    // 初始化数据分析
+    analyticsSystem.init();
+
+    // 监听 Prestige 事件
+    eventBus.on('prestige:executed', () => {
+      analyticsSystem.track('prestiges');
+    });
+
+    // 调试命令：window.getAnalytics() 查看统计
+    window.getAnalytics = () => {
+      console.log('Analytics Stats:', analyticsSystem.getStats());
+      return analyticsSystem.getStats();
+    };
+
+    // 调试命令：window.exportAnalytics() 导出原始数据
+    window.exportAnalytics = () => {
+      console.log('Analytics Raw Data:', analyticsSystem.exportData());
+      return analyticsSystem.exportData();
+    };
+
+    // 调试命令：window.clearAnalytics() 清除数据
+    window.clearAnalytics = () => {
+      analyticsSystem.clearData();
+      console.log('Analytics data cleared');
+      location.reload();
+    };
   
