@@ -78,7 +78,11 @@ const createEconomySystem = ({
   let boostMult = () => 1.0;
   const setBoostMultiplier = (fn) => { boostMult = fn; };
 
-  const getTotalGPS = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult() * marketMomentumGPSMult() * policyRateDrag() * synergyMult() * regionMult() * crisisMult() * guildMult() * boostMult();
+  // P7-T3: 订阅加成（由外部传入）
+  let subscriptionMult = () => 1.0;
+  const setSubscriptionMultiplier = (fn) => { subscriptionMult = fn; };
+
+  const getTotalGPS = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult() * marketMomentumGPSMult() * policyRateDrag() * synergyMult() * regionMult() * crisisMult() * guildMult() * boostMult() * subscriptionMult();
   const getManualGain = () => st.manualPower * st.manualMult * (1 + skillLv('manual_mastery') * 0.3) * marketMomentumManualMult() * policyRateDrag();
 
   const getGpsBreakdown = () => {
@@ -228,6 +232,7 @@ const createEconomySystem = ({
     setCrisisMultiplier,
     setGuildMultiplier,
     setBoostMultiplier,
+    setSubscriptionMultiplier,
     getGpsBreakdown,
     affordableCount,
     purchaseCost,

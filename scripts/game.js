@@ -1210,4 +1210,91 @@
       console.log('Active Effects:', activeEffects);
       return { inventory, stats, activeEffects };
     };
+
+    // ════════════════════════════════════════════════
+    // ㉝ 特权订阅系统 (P7-T3)
+    // ════════════════════════════════════════════════
+    const subscriptionSystem = createSubscriptionSystem({
+      st,
+      eventBus,
+      pushLog,
+      I18N,
+    });
+
+    // 初始化订阅系统
+    subscriptionSystem.init();
+
+    // 将订阅加成应用到经济系统
+    economy.setSubscriptionMultiplier(() => {
+      return subscriptionSystem.getTotalGPSBonus();
+    });
+
+    // 添加订阅UI
+    setTimeout(() => {
+      const gameContainer = document.querySelector('.game');
+      if (gameContainer) {
+        const subscriptionContainer = document.createElement('div');
+        subscriptionContainer.id = 'subscriptionContainer';
+        subscriptionContainer.innerHTML =
+          subscriptionSystem.renderSubscriptionPanel() +
+          subscriptionSystem.renderBenefitsComparison();
+        gameContainer.appendChild(subscriptionContainer);
+      }
+    }, 4800);
+
+    // 定期刷新订阅面板（每60秒）
+    setInterval(() => {
+      const container = document.getElementById('subscriptionContainer');
+      if (container) {
+        container.innerHTML =
+          subscriptionSystem.renderSubscriptionPanel() +
+          subscriptionSystem.renderBenefitsComparison();
+      }
+    }, 60000);
+
+    // 监听订阅事件
+    eventBus.on('subscription:subscribed', ({ tier, billingCycle, price }) => {
+      pushLog(`🎉 成功订阅！等级: ${tier}，周期: ${billingCycle}，价格: $${price}`);
+    });
+
+    eventBus.on('subscription:cancelled', ({ tier, expiresAt }) => {
+      const daysRemaining = Math.ceil((expiresAt - Date.now()) / (24 * 60 * 60 * 1000));
+      pushLog(`⚠️ 订阅已取消，还有 ${daysRemaining} 天权益`);
+    });
+
+    eventBus.on('subscription:monthlyRewardClaimed', ({ tier, reward }) => {
+      pushLog(`🎁 月度奖励已领取！获得 ${reward.items.length} 个道具和 ${reward.rp} 研究点`);
+    });
+
+    // 调试命令：window.subscribe(tierId, billingCycle) 订阅
+    window.subscribe = async (tierId, billingCycle = 'monthly') => {
+      const result = await subscriptionSystem.subscribe(tierId, billingCycle);
+      console.log('Subscribe Result:', result);
+      return result;
+    };
+
+    // 调试命令：window.cancelSubscription() 取消订阅
+    window.cancelSubscription = () => {
+      const result = subscriptionSystem.cancelSubscription();
+      console.log('Cancel Result:', result);
+      return result;
+    };
+
+    // 调试命令：window.claimSubscriptionReward() 领取月度奖励
+    window.claimSubscriptionReward = () => {
+      const result = subscriptionSystem.claimMonthlyReward();
+      console.log('Claim Result:', result);
+      return result;
+    };
+
+    // 调试命令：window.getSubscriptionStatus() 查看订阅状态
+    window.getSubscriptionStatus = () => {
+      const status = subscriptionSystem.getSubscriptionStatus();
+      const bonuses = subscriptionSystem.getSubscriptionBonuses();
+      const privileges = subscriptionSystem.getSubscriptionPrivileges();
+      console.log('Subscription Status:', status);
+      console.log('Bonuses:', bonuses);
+      console.log('Privileges:', privileges);
+      return { status, bonuses, privileges };
+    };
   
