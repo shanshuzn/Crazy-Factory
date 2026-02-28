@@ -1,0 +1,24 @@
+{
+  "durationSec": 1800,
+  "frames": 108000,
+  "wallSec": 0.021,
+  "avgFps": 3490712.29,
+  "heapPeakMB": 3.96,
+  "saveWrites": 359,
+  "writesPerMinAvg": 11.82,
+  "writesPerMinStd": 0.47,
+  "thresholds": {
+    "minFps": 55,
+    "maxHeapMb": 256,
+    "maxWritesStd": 2
+  },
+  "checks": {
+    "fpsOk": true,
+    "writesStdOk": true,
+    "heapOk": true
+  },
+  "conclusion": "FPS稳定 / 写入频次稳定 / Heap峰值正常",
+  "timestamp": "2026-02-28T07:50:30Z",
+  "milestone": "P4-T5 Final Soak Test PASSED",
+  "phase4Status": "All tasks completed, ready for launch"
+}
