@@ -867,4 +867,107 @@
       console.log('Derivatives Config:', config);
       return { stats, config };
     };
+
+    // ════════════════════════════════════════════════
+    // ㉙ 全球化市场系统 (P6-T3)
+    // ════════════════════════════════════════════════
+    const globalMarketSystem = createGlobalMarketSystem({
+      st,
+      market,
+      eventBus,
+      pushLog,
+      I18N,
+    });
+
+    // 初始化全球化市场系统
+    globalMarketSystem.init();
+
+    // 将地区加成应用到经济系统
+    economy.setRegionMultiplier(() => {
+      const bonus = globalMarketSystem.getRegionBonus();
+      return bonus.productionMultiplier;
+    });
+
+    // 添加全球市场面板到UI（在衍生品面板之后）
+    setTimeout(() => {
+      const statsPanel = document.querySelector('.stats');
+      if (statsPanel) {
+        const globalMarketContainer = document.createElement('div');
+        globalMarketContainer.id = 'globalMarketContainer';
+        globalMarketContainer.innerHTML =
+          globalMarketSystem.renderRegionPanel() +
+          globalMarketSystem.renderArbitragePanel() +
+          globalMarketSystem.renderInvestmentPanel();
+
+        // 插入在衍生品面板之后
+        const derivativesContainer = document.getElementById('derivativesContainer');
+        if (derivativesContainer && derivativesContainer.nextSibling) {
+          statsPanel.insertBefore(globalMarketContainer, derivativesContainer.nextSibling);
+        } else {
+          statsPanel.appendChild(globalMarketContainer);
+        }
+      }
+    }, 3400);
+
+    // 定期刷新全球市场面板（每5秒）
+    setInterval(() => {
+      const container = document.getElementById('globalMarketContainer');
+      if (container) {
+        container.innerHTML =
+          globalMarketSystem.renderRegionPanel() +
+          globalMarketSystem.renderArbitragePanel() +
+          globalMarketSystem.renderInvestmentPanel();
+      }
+    }, 5000);
+
+    // 监听地区切换事件
+    eventBus.on('region:switched', ({ from, to }) => {
+      pushLog(`🌍 切换市场：${from} → ${to}`);
+    });
+
+    // 监听地区事件
+    eventBus.on('region:eventStarted', ({ region, event }) => {
+      pushLog(`📢 地区事件：${event.name.zh} 在 ${region} 开始！`);
+    });
+
+    // 监听套利交易
+    eventBus.on('arbitrage:executed', ({ opportunity, profit }) => {
+      pushLog(`💱 套利成功！收益: ${formatNumber(profit)}`);
+    });
+
+    // 调试命令：window.switchRegion(regionId) 切换地区
+    window.switchRegion = (regionId) => {
+      const result = globalMarketSystem.switchRegion(regionId);
+      console.log('Switch Region:', result);
+      return result;
+    };
+
+    // 调试命令：window.getRegionInfo() 查看地区信息
+    window.getRegionInfo = () => {
+      const regions = globalMarketSystem.getAllRegions();
+      const current = globalMarketSystem.getCurrentRegion();
+      const bonus = globalMarketSystem.getRegionBonus();
+      console.log('Regions:', regions);
+      console.log('Current:', current);
+      console.log('Bonus:', bonus);
+      return { regions, current, bonus };
+    };
+
+    // 调试命令：window.executeArbitrage(idx, amount) 执行套利
+    window.executeArbitrage = (idx, amount) => {
+      const opportunities = globalMarketSystem.detectArbitrageOpportunities();
+      if (opportunities[idx]) {
+        const result = globalMarketSystem.executeArbitrage(opportunities[idx], amount);
+        console.log('Arbitrage Result:', result);
+        return result;
+      }
+      return { success: false, error: 'Invalid opportunity index' };
+    };
+
+    // 调试命令：window.investInRegion(regionId, amount) 地区投资
+    window.investInRegion = (regionId, amount) => {
+      const result = globalMarketSystem.investInRegion(regionId, amount);
+      console.log('Investment Result:', result);
+      return result;
+    };
   

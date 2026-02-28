@@ -62,7 +62,11 @@ const createEconomySystem = ({
   let synergyMult = () => 1.0;
   const setSynergyMultiplier = (fn) => { synergyMult = fn; };
 
-  const getTotalGPS = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult() * marketMomentumGPSMult() * policyRateDrag() * synergyMult();
+  // P6-T3: 全球化市场地区加成（由外部传入）
+  let regionMult = () => 1.0;
+  const setRegionMultiplier = (fn) => { regionMult = fn; };
+
+  const getTotalGPS = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult() * marketMomentumGPSMult() * policyRateDrag() * synergyMult() * regionMult();
   const getManualGain = () => st.manualPower * st.manualMult * (1 + skillLv('manual_mastery') * 0.3) * marketMomentumManualMult() * policyRateDrag();
 
   const getGpsBreakdown = () => {
@@ -208,6 +212,7 @@ const createEconomySystem = ({
     getTotalGPS,
     getManualGain,
     setSynergyMultiplier,
+    setRegionMultiplier,
     getGpsBreakdown,
     affordableCount,
     purchaseCost,

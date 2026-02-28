@@ -257,11 +257,66 @@ const calculateSynergyBonus = (building, allBuildings) => {
 
 ---
 
-## P6-T3: 全球化市场
+## P6-T3: 全球化市场 🚧 进行中
 
 **优先级**: 🟡 中  
 **预计工期**: 2-3 周  
-**前置依赖**: P6-T2 产业链联动
+**前置依赖**: P6-T2 产业链联动（已完成）  
+**进度**: 核心框架已实现，多地区市场已集成，GPS公式已更新
+
+### ✅ 已完成任务
+
+- [x] **1. 创建 global-market-system.js 模块**
+  - 模块工厂函数 `createGlobalMarketSystem()`
+  - 数据持久化结构 (st.globalMarket)
+  - 事件总线集成
+  - 多语言支持 (I18N)
+
+- [x] **2. 定义地区数据结构**
+  - 亚洲市场 (Asia): UTC+8, 波动率1.2x, 科技驱动
+  - 欧洲市场 (Europe): UTC+0, 波动率1.0x, 金融主导
+  - 美洲市场 (America): UTC-5, 波动率1.3x, 消费驱动
+  - 各地区独立价格、趋势、事件状态
+
+- [x] **3. 地区切换与加成系统**
+  - `switchRegion(regionId)` 切换当前市场
+  - 地区生产加成 `productionBonus` (70%-130%)
+  - 地区投资加成 `investmentBonus`
+  - GPS公式集成地区加成因子 `regionMult()`
+
+- [x] **4. 跨地区套利系统**
+  - 自动检测价格差异 (>5%触发)
+  - 套利交易执行 `executeArbitrage()`
+  - 日限额机制 (每日5次)
+  - 冷却时间 60秒
+  - 手续费 0.5%
+
+- [x] **5. 地区特定事件系统**
+  - 亚洲: 科技繁荣、货币危机、贸易协定
+  - 欧洲: 欧央行政策、脱欧影响、绿色协议
+  - 美洲: 美联储加息、科技股IPO、衰退恐慌
+  - 事件效果: 生产加成/投资加成/波动率变化
+
+- [x] **6. 跨地区投资系统**
+  - 向任意地区投资 `investInRegion()`
+  - 每秒收益 0.1% * 地区投资加成
+  - 实时收益计算
+
+- [x] **7. UI面板与集成**
+  - 地区列表面板 `renderRegionPanel()`
+  - 套利机会面板 `renderArbitragePanel()`
+  - 投资统计面板 `renderInvestmentPanel()`
+  - game.js 集成与 5秒自动刷新
+  - economy-system.js GPS加成集成
+  - 调试命令: switchRegion, getRegionInfo, executeArbitrage, investInRegion
+
+### 待完成任务
+
+- [ ] **8. 测试与优化**
+  - 套利平衡性测试（防止过度套利）
+  - 地区切换流畅度优化
+  - 事件触发频率校准
+  - 多地区数据同步测试
 
 ### 技术方案
 
