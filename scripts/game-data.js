@@ -105,6 +105,7 @@
     // ⑤ 成就
     // ════════════════════════════════════════════════
     const achievements = [
+      // 基础成就（原有）
       { id:"first_click",  name:"初入江湖",  desc:"完成首次撮合",                    reward:{type:"gear",value:20},    check:()=>st.totalClicks>=1,                                                     done:false, claimed:false },
       { id:"workshop_1",   name:"小作坊主",  desc:"拥有 1 个手工作坊",               reward:{type:"gear",value:60},    check:()=>bld("workshop").owned>=1,                                              done:false, claimed:false },
       { id:"hundred",      name:"百元起步",  desc:"历史资本达到 ¥100",               reward:{type:"gear",value:150},   check:()=>st.lifetimeGears>=100,                                                 done:false, claimed:false },
@@ -113,6 +114,48 @@
       { id:"bull_market",  name:"牛市猎手",  desc:"多头市场中完成 50 次撮合",         reward:{type:"gear",value:2000},  check:()=>st.bullClicks>=50,                                                     done:false, claimed:false },
       { id:"central_bank", name:"央行行长",  desc:"拥有 1 家中央银行",               reward:{type:"rp",value:3},       check:()=>bld("central").owned>=1,                                               done:false, claimed:false },
       { id:"conglom_owner",name:"金融帝国",  desc:"拥有 1 个金融集团",               reward:{type:"rp",value:5},       check:()=>bld("conglom").owned>=1,                                               done:false, claimed:false },
+
+      // P5-T3: 新增成就扩展
+      // 累计点击类
+      { id:"click_100",    name:"百次撮合",  desc:"完成 100 次手动撮合",             reward:{type:"gear",value:500},   check:()=>st.totalClicks>=100,                                                   done:false, claimed:false },
+      { id:"click_1k",     name:"千次交易",  desc:"完成 1000 次手动撮合",            reward:{type:"gear",value:5000},  check:()=>st.totalClicks>=1000,                                                  done:false, claimed:false },
+      { id:"click_10k",    name:"万次成交",  desc:"完成 10000 次手动撮合",           reward:{type:"rp",value:2},       check:()=>st.totalClicks>=10000,                                                 done:false, claimed:false },
+
+      // 建筑数量类
+      { id:"buildings_10", name:"产业初具",  desc:"拥有 10 个任意建筑",              reward:{type:"gear",value:1000},  check:()=>buildings.reduce((s,b)=>s+b.owned,0)>=10,                              done:false, claimed:false },
+      { id:"buildings_50", name:"产业扩张",  desc:"拥有 50 个任意建筑",              reward:{type:"gear",value:10000}, check:()=>buildings.reduce((s,b)=>s+b.owned,0)>=50,                              done:false, claimed:false },
+      { id:"buildings_100",name:"产业帝国",  desc:"拥有 100 个任意建筑",             reward:{type:"rp",value:3},       check:()=>buildings.reduce((s,b)=>s+b.owned,0)>=100,                             done:false, claimed:false },
+
+      // GPS 产能类
+      { id:"gps_500",      name:"产能飞跃",  desc:"总产出 ≥ ¥500/s",                reward:{type:"gear",value:50000}, check:()=>getTotalGPS()>=500,                                                    done:false, claimed:false },
+      { id:"gps_5k",       name:"产能爆发",  desc:"总产出 ≥ ¥5,000/s",              reward:{type:"rp",value:3},       check:()=>getTotalGPS()>=5000,                                                   done:false, claimed:false },
+      { id:"gps_50k",      name:"产能巅峰",  desc:"总产出 ≥ ¥50,000/s",             reward:{type:"rp",value:5},       check:()=>getTotalGPS()>=50000,                                                  done:false, claimed:false },
+
+      // 历史资本类
+      { id:"million",      name:"百万富翁",  desc:"历史资本达到 ¥1,000,000",         reward:{type:"rp",value:2},       check:()=>st.lifetimeGears>=1e6,                                                 done:false, claimed:false },
+      { id:"billion",      name:"亿万富翁",  desc:"历史资本达到 ¥1,000,000,000",     reward:{type:"rp",value:5},       check:()=>st.lifetimeGears>=1e9,                                                 done:false, claimed:false },
+
+      // 升级类
+      { id:"upgrades_5",   name:"研发入门",  desc:"完成 5 次研发升级",               reward:{type:"gear",value:2000},  check:()=>upgrades.filter(u=>u.purchased).length>=5,                             done:false, claimed:false },
+      { id:"upgrades_all", name:"全数研发",  desc:"完成所有研发升级",                reward:{type:"rp",value:5},       check:()=>upgrades.every(u=>u.purchased),                                        done:false, claimed:false },
+
+      // 技能类
+      { id:"skills_5",     name:"技能入门",  desc:"总技能等级达到 5",                reward:{type:"rp",value:1},       check:()=>skills.reduce((s,sk)=>s+sk.level,0)>=5,                                done:false, claimed:false },
+      { id:"skills_max",   name:"技能大师",  desc:"将所有技能升至满级",              reward:{type:"rp",value:5},       check:()=>skills.every(s=>s.level>=s.maxLevel),                                   done:false, claimed:false },
+
+      // Prestige 类
+      { id:"prestige_1",   name:"股权增发",  desc:"首次增发股权",                  reward:{type:"rp",value:1},       check:()=>st.researchPoints>0,                                                   done:false, claimed:false },
+      { id:"prestige_5",   name:"多次增发",  desc:"累计获得 50 RP",                  reward:{type:"rp",value:3},       check:()=>st.researchPoints>=50,                                                 done:false, claimed:false },
+
+      // 每日任务类
+      { id:"daily_1",      name:"日常完成",  desc:"完成 1 次每日任务",               reward:{type:"gear",value:1000},  check:()=>false, /* 由每日任务系统触发 */                                         done:false, claimed:false },
+      { id:"daily_7",      name:"周常坚持",  desc:"连续 7 天完成所有每日任务",       reward:{type:"rp",value:5},       check:()=>false, /* 由每日任务系统检查 */                                         done:false, claimed:false },
+
+      // 牛市类扩展
+      { id:"bull_200",     name:"牛市专家",  desc:"多头市场完成 200 次撮合",         reward:{type:"gear",value:10000}, check:()=>st.bullClicks>=200,                                                    done:false, claimed:false },
+
+      // 宏观事件类
+      { id:"macro_10",     name:"宏观洞察",  desc:"经历 10 次宏观事件",              reward:{type:"rp",value:2},       check:()=>st.macroChainCount>=10,                                                done:false, claimed:false },
     ];
 
     // ════════════════════════════════════════════════
