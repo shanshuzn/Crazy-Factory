@@ -1,0 +1,24 @@
+{
+  "durationSec": 1800,
+  "frames": 108000,
+  "wallSec": 0.015,
+  "avgFps": 4557496.52,
+  "heapPeakMB": 3.96,
+  "saveWrites": 359,
+  "writesPerMinAvg": 11.82,
+  "writesPerMinStd": 0.47,
+  "thresholds": {
+    "minFps": 55,
+    "maxHeapMb": 256,
+    "maxWritesStd": 2
+  },
+  "checks": {
+    "fpsOk": true,
+    "writesStdOk": true,
+    "heapOk": true
+  },
+  "conclusion": "FPS稳定 / 写入频次稳定 / Heap峰值正常",
+  "timestamp": "2026-02-28T06:17:20.425Z",
+  "baselineParams": "84.2% North Star config",
+  "milestone": "30min soak test PASSED"
+}
