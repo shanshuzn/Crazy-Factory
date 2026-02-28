@@ -622,4 +622,54 @@
       console.log('Analytics data cleared');
       location.reload();
     };
+
+    // ════════════════════════════════════════════════
+    // ㉕ 排行榜系统 (P5-T1)
+    // ════════════════════════════════════════════════
+    const leaderboardSystem = createLeaderboardSystem({
+      st,
+      buildings,
+      skills,
+      eventBus,
+      pushLog,
+      I18N,
+    });
+
+    // 初始化排行榜
+    leaderboardSystem.init();
+
+    // 添加排行榜面板到UI（延迟确保DOM就绪）
+    setTimeout(() => {
+      const statsPanel = document.querySelector('.stats');
+      if (statsPanel) {
+        // 在每日任务之前插入排行榜
+        const questContainer = document.getElementById('dailyQuestContainer');
+        const leaderboardContainer = document.createElement('div');
+        leaderboardContainer.id = 'leaderboardContainer';
+        leaderboardContainer.innerHTML = leaderboardSystem.renderLeaderboardPanel() +
+                                         leaderboardSystem.renderHistoryPanel();
+
+        if (questContainer) {
+          statsPanel.insertBefore(leaderboardContainer, questContainer);
+        } else {
+          statsPanel.appendChild(leaderboardContainer);
+        }
+      }
+    }, 2500);
+
+    // 定期刷新排行榜UI（每30秒）
+    setInterval(() => {
+      const container = document.getElementById('leaderboardContainer');
+      if (container) {
+        container.innerHTML = leaderboardSystem.renderLeaderboardPanel() +
+                              leaderboardSystem.renderHistoryPanel();
+      }
+    }, 30000);
+
+    // 调试命令：window.resetLeaderboard() 重置排行榜
+    window.resetLeaderboard = () => {
+      leaderboardSystem.resetData();
+      console.log('Leaderboard data cleared');
+      location.reload();
+    };
   
