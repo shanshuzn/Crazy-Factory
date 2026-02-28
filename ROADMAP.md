@@ -221,7 +221,7 @@
 ⚡ Optimization Mode（优化模式）
 
 [North Star]
-53.1% (trend: flat)
+53.1% (trend: up)
 
 [Supporting Metrics]
 - growth_momentum: 0.0%
