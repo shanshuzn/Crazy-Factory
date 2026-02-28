@@ -74,7 +74,11 @@ const createEconomySystem = ({
   let guildMult = () => 1.0;
   const setGuildMultiplier = (fn) => { guildMult = fn; };
 
-  const getTotalGPS = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult() * marketMomentumGPSMult() * policyRateDrag() * synergyMult() * regionMult() * crisisMult() * guildMult();
+  // P7-T2: 加速道具加成（由外部传入）
+  let boostMult = () => 1.0;
+  const setBoostMultiplier = (fn) => { boostMult = fn; };
+
+  const getTotalGPS = () => baseGPS() * st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult() * marketMomentumGPSMult() * policyRateDrag() * synergyMult() * regionMult() * crisisMult() * guildMult() * boostMult();
   const getManualGain = () => st.manualPower * st.manualMult * (1 + skillLv('manual_mastery') * 0.3) * marketMomentumManualMult() * policyRateDrag();
 
   const getGpsBreakdown = () => {
@@ -223,6 +227,7 @@ const createEconomySystem = ({
     setRegionMultiplier,
     setCrisisMultiplier,
     setGuildMultiplier,
+    setBoostMultiplier,
     getGpsBreakdown,
     affordableCount,
     purchaseCost,

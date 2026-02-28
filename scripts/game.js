@@ -1132,4 +1132,82 @@
       console.log('Guild Ranking:', ranking);
       return { info, stats, ranking };
     };
+
+    // ════════════════════════════════════════════════
+    // ㉜ 加速道具系统 (P7-T2)
+    // ════════════════════════════════════════════════
+    const boostSystem = createBoostSystem({
+      st,
+      eventBus,
+      pushLog,
+      I18N,
+      economy,
+    });
+
+    // 初始化加速道具系统
+    boostSystem.init();
+
+    // 将道具加成应用到经济系统
+    economy.setBoostMultiplier(() => {
+      return boostSystem.getGPSMultiplier();
+    });
+
+    // 添加道具商店UI
+    setTimeout(() => {
+      const gameContainer = document.querySelector('.game');
+      if (gameContainer) {
+        const boostContainer = document.createElement('div');
+        boostContainer.id = 'boostContainer';
+        boostContainer.innerHTML =
+          boostSystem.renderShopPanel() +
+          boostSystem.renderInventoryPanel() +
+          boostSystem.renderActiveEffectsPanel();
+        gameContainer.appendChild(boostContainer);
+      }
+    }, 4400);
+
+    // 定期刷新道具面板（每5秒）
+    setInterval(() => {
+      const container = document.getElementById('boostContainer');
+      if (container) {
+        container.innerHTML =
+          boostSystem.renderShopPanel() +
+          boostSystem.renderInventoryPanel() +
+          boostSystem.renderActiveEffectsPanel();
+      }
+    }, 5000);
+
+    // 监听道具事件
+    eventBus.on('boost:purchased', ({ itemId, item, price }) => {
+      pushLog(`💎 购买成功：${item.name.zh} ($${price})`);
+    });
+
+    eventBus.on('boost:used', ({ itemId, item, result }) => {
+      pushLog(`✨ 使用道具：${item.name.zh} - ${result.message}`);
+    });
+
+    // 调试命令：window.purchaseBoostItem(itemId) 购买道具
+    window.purchaseBoostItem = async (itemId) => {
+      const result = await boostSystem.purchaseItem(itemId);
+      console.log('Purchase Result:', result);
+      return result;
+    };
+
+    // 调试命令：window.useBoostItem(itemId) 使用道具
+    window.useBoostItem = (itemId) => {
+      const result = boostSystem.useItem(itemId);
+      console.log('Use Result:', result);
+      return result;
+    };
+
+    // 调试命令：window.getBoostInventory() 查看道具背包
+    window.getBoostInventory = () => {
+      const inventory = boostSystem.getInventory();
+      const stats = boostSystem.getStats();
+      const activeEffects = boostSystem.getActiveEffects();
+      console.log('Inventory:', inventory);
+      console.log('Stats:', stats);
+      console.log('Active Effects:', activeEffects);
+      return { inventory, stats, activeEffects };
+    };
   
