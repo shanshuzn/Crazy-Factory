@@ -221,13 +221,13 @@
 ⚡ Optimization Mode（优化模式）
 
 [North Star]
-52.8% (trend: flat)
+53.1% (trend: up)
 
 [Supporting Metrics]
 - growth_momentum: 0.0%
 - return_quality: 100.0%
 - upgrade_satisfaction: 100.0%
-- progress_clarity: 87.9%
+- progress_clarity: 90.2%
 - stability_score: 1.2%
 
 [Risk Level]
@@ -262,7 +262,7 @@ improve-return-quality
 - accepted: true
 - constraint_failed: null
 - fail_rate: 0
-- longest_stall_median_seconds: 1005
+- longest_stall_median_seconds: 1075
 <!-- AUTO:METRICS-END -->
 
 ## 当前版本能力（摘要）
