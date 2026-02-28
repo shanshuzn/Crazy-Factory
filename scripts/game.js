@@ -360,11 +360,15 @@
 
     buildingListEl.addEventListener("click",e=>{
       if(!(e.target instanceof HTMLButtonElement))return;
-      const id=e.target.dataset.buy; if(!id)return; buyBuilding(id);
+      const id=e.target.dataset.buy; if(!id)return;
+      buyBuilding(id);
+      eventBus.emit('building:purchased', { id });
     });
     upgradeListEl.addEventListener("click",e=>{
       if(!(e.target instanceof HTMLButtonElement))return;
-      const id=e.target.dataset.upgrade; if(!id)return; buyUpgrade(id);
+      const id=e.target.dataset.upgrade; if(!id)return;
+      buyUpgrade(id);
+      eventBus.emit('upgrade:purchased', { id });
     });
     skillListEl.addEventListener("click",e=>{
       if(!(e.target instanceof HTMLButtonElement))return;
@@ -531,6 +535,55 @@
     // 调试命令：window.resetTutorial() 可重置引导
     window.resetTutorial = () => {
       tutorialSystem.reset();
+      location.reload();
+    };
+
+    // ════════════════════════════════════════════════
+    // ㉓ 每日任务系统 (P5-T2)
+    // ════════════════════════════════════════════════
+    const dailyQuestSystem = createDailyQuestSystem({
+      st,
+      I18N,
+      eventBus,
+      buildings,
+      pushLog,
+      saveGame,
+      onQuestComplete: ({ quest, reward }) => {
+        pushLog(`🎁 领取每日任务奖励: ${reward} ${quest.rewardType === 'rp' ? 'RP' : '资本'}`);
+      },
+      onAllComplete: ({ bonusRP }) => {
+        pushLog(`🌟 每日任务全部完成! 额外获得 ${bonusRP} RP`);
+      },
+    });
+
+    // 初始化每日任务
+    dailyQuestSystem.init();
+    dailyQuestSystem.setupEventListeners();
+
+    // 在游戏循环中追踪收益
+    const originalOnAfterFrame = debugSystem.update;
+    debugSystem.update = (dtSec) => {
+      originalOnAfterFrame(dtSec);
+      dailyQuestSystem.trackEarnedGears();
+    };
+
+    // 添加每日任务面板到UI（延迟确保DOM就绪）
+    setTimeout(() => {
+      const statsPanel = document.querySelector('.stats');
+      if (statsPanel) {
+        const questContainer = document.createElement('div');
+        questContainer.id = 'dailyQuestContainer';
+        questContainer.style.marginTop = '16px';
+        questContainer.innerHTML = dailyQuestSystem.renderQuestPanel();
+        statsPanel.appendChild(questContainer);
+        dailyQuestSystem.bindClaimButtons(questContainer);
+      }
+    }, 2000);
+
+    // 调试命令：window.resetDailyQuests() 可重置每日任务
+    window.resetDailyQuests = () => {
+      localStorage.removeItem('dailyQuestData');
+      localStorage.removeItem('dailyQuestLastReset');
       location.reload();
     };
   
