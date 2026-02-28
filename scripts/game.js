@@ -29,6 +29,7 @@
     const speedButtons  = [...document.querySelectorAll("[data-speed]")];
     const autoBuyBtn    = $("autoBuyBtn");
     const soundBtn      = $("soundBtn");
+    const langBtn       = $("langBtn");
     const offlineEl     = $("offlineNotice");
     const offlineTextEl = $("offlineText");
     const claimBtn      = $("claimOfflineBtn");
@@ -378,6 +379,12 @@
       const id=e.target.id;
       if(id==="autoBuyBtn"){ st.autoBuy=!st.autoBuy; pushLog(`自动投资已${st.autoBuy?"开启":"关闭"}`); dirty.logs = dirty.stats = true; saveGame(); }
       if(id==="soundBtn")  { st.soundEnabled=!st.soundEnabled; saveGame(); }
+      if(id==="langBtn")   { 
+        const newLang = I18N.toggle(); 
+        e.target.textContent = `语言: ${newLang === 'zh' ? '中文' : 'English'}`;
+        pushLog(`语言已切换为: ${newLang === 'zh' ? '中文' : 'English'}`);
+        location.reload();
+      }
     });
 
     $("exportSaveBtn").addEventListener("click",()=>{exportSave();});
