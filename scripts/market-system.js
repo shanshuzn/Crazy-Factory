@@ -195,6 +195,85 @@ const createMarketSystem = ({
     }
   };
 
+  // Market Volatility System (P3-T1)
+  const VOLATILITY_DECAY = 0.95;
+  const VOLATILITY_SHOCK = 0.3;
+  const MAX_VOLATILITY = 1.0;
+  const MIN_VOLATILITY = 0.05;
+
+  const updateVolatility = () => {
+    // Volatility increases during macro events and market switches
+    const macro = getActiveMacro();
+    const baseVol = Number(st.marketVolatility) || MIN_VOLATILITY;
+    let newVol = baseVol * VOLATILITY_DECAY;
+
+    if (macro) {
+      newVol += VOLATILITY_SHOCK * (Math.abs(macro.rateShock) || 0.1);
+    }
+
+    // Recent market switches increase volatility
+    const recentSwitches = Math.min(5, Number(st.recentMarketSwitches) || 0);
+    newVol += recentSwitches * 0.05;
+
+    st.marketVolatility = Math.max(MIN_VOLATILITY, Math.min(MAX_VOLATILITY, newVol));
+  };
+
+  const getPriceVolatilityFactor = () => {
+    const vol = Number(st.marketVolatility) || MIN_VOLATILITY;
+    // Returns factor between 0.85 (low vol) and 1.15 (high vol)
+    return 1 + (vol - 0.5) * 0.3;
+  };
+
+  const recordMarketSwitch = () => {
+    st.recentMarketSwitches = Math.min(10, (Number(st.recentMarketSwitches) || 0) + 1);
+    // Decay recent switches over time
+    setTimeout(() => {
+      st.recentMarketSwitches = Math.max(0, (Number(st.recentMarketSwitches) || 1) - 1);
+    }, 30000); // Decay after 30 seconds
+  };
+
+  // Wrap doMarketSwitch to record volatility
+  const originalDoMarketSwitch = doMarketSwitch;
+  const wrappedDoMarketSwitch = () => {
+    recordMarketSwitch();
+    updateVolatility();
+    return originalDoMarketSwitch();
+  };
+
+  // Add volatility rendering
+  const originalRenderMarket = renderMarket;
+  const wrappedRenderMarket = () => {
+    originalRenderMarket();
+
+    // Add volatility indicator if element exists
+    const volEl = document.getElementById('marketVolatility');
+    if (volEl) {
+      const vol = Number(st.marketVolatility) || MIN_VOLATILITY;
+      const volPct = Math.round(vol * 100);
+      const volLevel = vol < 0.3 ? '低' : vol < 0.6 ? '中' : '高';
+      const volColor = vol < 0.3 ? 'var(--bull)' : vol < 0.6 ? 'var(--warn)' : 'var(--bear)';
+
+      volEl.textContent = `波动率 ${volLevel} (${volPct}%)`;
+      volEl.style.color = volColor;
+
+      // Show warning for high volatility
+      if (vol > 0.7 && !st.volatilityWarningShown) {
+        pushLog(`⚠️ 市场波动剧烈，价格可能大幅震荡`);
+        st.volatilityWarningShown = true;
+      } else if (vol < 0.5) {
+        st.volatilityWarningShown = false;
+      }
+    }
+  };
+
   updateRateOutlook();
-  return { doMarketSwitch, tickMarket, renderMarket };
+  updateVolatility();
+
+  return {
+    doMarketSwitch: wrappedDoMarketSwitch,
+    tickMarket,
+    renderMarket: wrappedRenderMarket,
+    getPriceVolatilityFactor,
+    updateVolatility
+  };
 };

@@ -24,7 +24,19 @@ const createEconomySystem = ({
   const bld = (id) => buildings.find((b) => b.id === id);
   const skillLv = (id) => skills.find((s) => s.id === id)?.level || 0;
   const discount = () => Math.max(0.6, 1 - skillLv('bulk_discount') * 0.04);
-  const price = (b, off = 0) => GameFormulas.calcBuildingPrice({ basePrice: b.basePrice, owned: b.owned, growth: PRICE_GROWTH, discount: discount(), offset: off });
+
+  // Market volatility affects building prices (P3-T1)
+  const volMult = () => {
+    const vol = Number(st.marketVolatility) || 0.05;
+    // High volatility increases prices (0.85 to 1.15 range)
+    return 1 + (vol - 0.5) * 0.3;
+  };
+
+  const price = (b, off = 0) => {
+    const basePrice = GameFormulas.calcBuildingPrice({ basePrice: b.basePrice, owned: b.owned, growth: PRICE_GROWTH, discount: discount(), offset: off });
+    // Apply market volatility to prices
+    return Math.max(1, Math.floor(basePrice * volMult()));
+  };
 
   const bldPreferredMult = (b) => (st.macroPreferredBuildingId && st.macroPreferredBuildingId === b.id ? 1 + MACRO_PREFERRED_BONUS : 1);
   const bldGPS = (b) => b.dps * b.owned * (bldBoost[b.id] || 1) * bldPreferredMult(b);
