@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-03-06T18:05:48.569Z",
+  "switches": 120,
+  "seed": 7,
+  "totalCombos": 1,
+  "passCount": 1,
+  "failCount": 0,
+  "firstFailingCombo": null,
+  "trendDiff": {
+    "previousPassCount": 4,
+    "passCountDelta": -3,
+    "previousBestLiftPerSwitch": 9.2885,
+    "bestLiftPerSwitchDelta": -3.3534
+  },
+  "records": [
+    {
+      "preferredBonus": 0.08,
+      "planSwitchCost": 0.01,
+      "exitCode": 0,
+      "passed": true,
+      "liftPerSwitch": 5.9351,
+      "volatilityRatio": 1.1411,
+      "recommendation": "预案收益提升与波动约束均达标，可保持当前宏观自动预案参数。"
+    }
+  ],
+  "safeZone": {
+    "preferredBonus": [
+      0.08
+    ],
+    "planSwitchCost": [
+      0.01
+    ]
+  },
+  "bestCandidate": {
+    "preferredBonus": 0.08,
+    "planSwitchCost": 0.01,
+    "exitCode": 0,
+    "passed": true,
+    "liftPerSwitch": 5.9351,
+    "volatilityRatio": 1.1411,
+    "recommendation": "预案收益提升与波动约束均达标，可保持当前宏观自动预案参数。"
+  },
+  "recommendation": "推荐优先参数：preferred-bonus=0.08, plan-switch-cost=0.01"
+}
