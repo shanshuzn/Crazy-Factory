@@ -223,8 +223,13 @@
   - 完成：2026-03-06
   - 指标影响：North Star +（参数安全区间可视化，降低后续改动引发收益回退风险）
   - 证据：新增 `scripts/run_macro_plan_sensitivity_scan.js`；示例 `--bonus-set 0.08,0.12,0.16 --cost-set 0.01,0.015,0.02 --json` 输出 `totalCombos=9`、`passCount=6`，推荐组合 `preferred-bonus=0.12, plan-switch-cost=0.01`
-- [NEXT] M8-T13 宏观策略门禁自动化：CI 汇总与失败快照
+- [DONE] M8-T13 宏观策略门禁自动化：CI 汇总与失败快照
   - 验收：新增 1 条可在 CI 直接消费的汇总命令，失败时输出首个不通过组合
+  - 完成：2026-03-06
+  - 指标影响：North Star +（门禁结果可直接接入 CI，降低人工解读成本并提升回归拦截效率）
+  - 证据：`scripts/run_macro_plan_sensitivity_scan.js` 新增 `--ci-summary`；示例 `--bonus-set 0.16 --cost-set 0.01 --ci-summary` 输出 `firstFailingCombo` 且退出码 `2`
+- [NEXT] M8-T14 宏观策略可观测性：失败组合归档与趋势对比
+  - 验收：将最近一次失败组合写入 `output/` 报告，并提供与上次结果的差异摘要
 
 <!-- AUTO:METRICS-START -->
 [Mode]

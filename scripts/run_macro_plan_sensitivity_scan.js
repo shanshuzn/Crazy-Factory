@@ -18,6 +18,7 @@ const help = `用法:
   --cost-set <csv>              plan-switch-cost 参数集合，默认 ${DEFAULT_COST_SET}
   --min-lift-per-switch <f>     传递给回归脚本的收益门槛（可选）
   --max-volatility-ratio <f>    传递给回归脚本的波动门槛（可选）
+  --ci-summary                  CI 摘要模式：输出单行 JSON，并在存在失败组合时返回 2
   --json                        仅输出 JSON
   -h, --help                    显示帮助
 `;
@@ -30,6 +31,7 @@ const opts = {
   costSet: DEFAULT_COST_SET,
   minLiftPerSwitch: null,
   maxVolatilityRatio: null,
+  ciSummary: false,
   jsonOnly: false,
 };
 
@@ -68,6 +70,7 @@ for (let i = 0; i < args.length; i += 1) {
   else if (a === '--cost-set') opts.costSet = args[++i];
   else if (a === '--min-lift-per-switch') opts.minLiftPerSwitch = readFloat(args[++i], '--min-lift-per-switch', -9999, 9999);
   else if (a === '--max-volatility-ratio') opts.maxVolatilityRatio = readFloat(args[++i], '--max-volatility-ratio', 0, 9999);
+  else if (a === '--ci-summary') opts.ciSummary = true;
   else if (a === '--json') opts.jsonOnly = true;
   else if (a === '--help' || a === '-h') {
     console.log(help);
@@ -124,6 +127,7 @@ for (const preferredBonus of bonusValues) {
 }
 
 const passing = records.filter((r) => r.passed);
+const firstFailingCombo = records.find((r) => !r.passed) || null;
 const safeZone = {
   preferredBonus: [...new Set(passing.map((r) => r.preferredBonus))].sort((a, b) => a - b),
   planSwitchCost: [...new Set(passing.map((r) => r.planSwitchCost))].sort((a, b) => a - b),
@@ -137,6 +141,7 @@ const result = {
   totalCombos: records.length,
   passCount: passing.length,
   failCount: records.length - passing.length,
+  firstFailingCombo,
   records,
   safeZone,
   bestCandidate: best,
@@ -144,6 +149,17 @@ const result = {
     ? `推荐优先参数：preferred-bonus=${best.preferredBonus}, plan-switch-cost=${best.planSwitchCost}`
     : '本轮参数集中未找到通过门禁组合，建议提高 bonus 或放宽波动阈值后重跑。',
 };
+
+if (opts.ciSummary) {
+  console.log(JSON.stringify({
+    totalCombos: result.totalCombos,
+    passCount: result.passCount,
+    failCount: result.failCount,
+    bestCandidate: result.bestCandidate,
+    firstFailingCombo: result.firstFailingCombo,
+  }));
+  process.exit(result.failCount > 0 ? 2 : 0);
+}
 
 if (opts.jsonOnly) {
   console.log(JSON.stringify(result, null, 2));
