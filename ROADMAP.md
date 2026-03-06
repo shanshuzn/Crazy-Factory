@@ -228,8 +228,13 @@
   - 完成：2026-03-06
   - 指标影响：North Star +（门禁结果可直接接入 CI，降低人工解读成本并提升回归拦截效率）
   - 证据：`scripts/run_macro_plan_sensitivity_scan.js` 新增 `--ci-summary`；示例 `--bonus-set 0.16 --cost-set 0.01 --ci-summary` 输出 `firstFailingCombo` 且退出码 `2`
-- [NEXT] M8-T14 宏观策略可观测性：失败组合归档与趋势对比
+- [DONE] M8-T14 宏观策略可观测性：失败组合归档与趋势对比
   - 验收：将最近一次失败组合写入 `output/` 报告，并提供与上次结果的差异摘要
+  - 完成：2026-03-06
+  - 指标影响：North Star +（参数回归结果可追溯，趋势差异可直接用于调参复盘）
+  - 证据：`run_macro_plan_sensitivity_scan.js` 默认写入 `output/macro_plan_sensitivity_latest.json` 并输出 `trendDiff`；失败场景保留 `firstFailingCombo`
+- [NEXT] M8-T15 宏观策略发布门禁：一键命令与文档固化
+  - 验收：在 README 增加 1 条发布前门禁命令，覆盖回归 + 敏感性 + CI 摘要
 
 <!-- AUTO:METRICS-START -->
 [Mode]

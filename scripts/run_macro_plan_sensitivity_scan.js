@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 'use strict';
 
+const fs = require('node:fs');
+const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const DEFAULT_SWITCHES = 600;
 const DEFAULT_SEED = 42;
 const DEFAULT_BONUS_SET = '0.08,0.12,0.16';
 const DEFAULT_COST_SET = '0.01,0.015,0.02';
+const DEFAULT_ARCHIVE_FILE = 'output/macro_plan_sensitivity_latest.json';
 
 const help = `用法:
   node scripts/run_macro_plan_sensitivity_scan.js [options]
@@ -18,6 +21,8 @@ const help = `用法:
   --cost-set <csv>              plan-switch-cost 参数集合，默认 ${DEFAULT_COST_SET}
   --min-lift-per-switch <f>     传递给回归脚本的收益门槛（可选）
   --max-volatility-ratio <f>    传递给回归脚本的波动门槛（可选）
+  --archive-file <path>         归档文件路径，默认 ${DEFAULT_ARCHIVE_FILE}
+  --no-archive                  不写入归档文件
   --ci-summary                  CI 摘要模式：输出单行 JSON，并在存在失败组合时返回 2
   --json                        仅输出 JSON
   -h, --help                    显示帮助
@@ -31,6 +36,8 @@ const opts = {
   costSet: DEFAULT_COST_SET,
   minLiftPerSwitch: null,
   maxVolatilityRatio: null,
+  archiveFile: DEFAULT_ARCHIVE_FILE,
+  noArchive: false,
   ciSummary: false,
   jsonOnly: false,
 };
@@ -62,6 +69,15 @@ const parseCsvFloats = (csv, name) => {
   return parts.map((p) => readFloat(p, name, 0, 1));
 };
 
+const readJsonIfExists = (file) => {
+  if (!fs.existsSync(file)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    return null;
+  }
+};
+
 for (let i = 0; i < args.length; i += 1) {
   const a = args[i];
   if (a === '--switches') opts.switches = readInt(args[++i], '--switches', 1);
@@ -70,6 +86,8 @@ for (let i = 0; i < args.length; i += 1) {
   else if (a === '--cost-set') opts.costSet = args[++i];
   else if (a === '--min-lift-per-switch') opts.minLiftPerSwitch = readFloat(args[++i], '--min-lift-per-switch', -9999, 9999);
   else if (a === '--max-volatility-ratio') opts.maxVolatilityRatio = readFloat(args[++i], '--max-volatility-ratio', 0, 9999);
+  else if (a === '--archive-file') opts.archiveFile = String(args[++i] || '').trim();
+  else if (a === '--no-archive') opts.noArchive = true;
   else if (a === '--ci-summary') opts.ciSummary = true;
   else if (a === '--json') opts.jsonOnly = true;
   else if (a === '--help' || a === '-h') {
@@ -82,8 +100,14 @@ for (let i = 0; i < args.length; i += 1) {
   }
 }
 
+if (!opts.noArchive && !opts.archiveFile) {
+  console.error('--archive-file 不能为空');
+  process.exit(1);
+}
+
 const bonusValues = parseCsvFloats(opts.bonusSet, '--bonus-set');
 const costValues = parseCsvFloats(opts.costSet, '--cost-set');
+const previous = opts.noArchive ? null : readJsonIfExists(opts.archiveFile);
 
 const records = [];
 for (const preferredBonus of bonusValues) {
@@ -108,7 +132,7 @@ for (const preferredBonus of bonusValues) {
     let parsed;
     try {
       parsed = JSON.parse(run.stdout);
-    } catch (err) {
+    } catch {
       console.error('无法解析回归脚本输出为 JSON');
       console.error(run.stdout);
       process.exit(1);
@@ -134,14 +158,25 @@ const safeZone = {
 };
 
 const best = [...passing].sort((a, b) => (b.liftPerSwitch - a.liftPerSwitch) || (a.volatilityRatio - b.volatilityRatio))[0] || null;
+const previousBest = previous?.bestCandidate || null;
+const trendDiff = {
+  previousPassCount: typeof previous?.passCount === 'number' ? previous.passCount : null,
+  passCountDelta: typeof previous?.passCount === 'number' ? passing.length - previous.passCount : null,
+  previousBestLiftPerSwitch: typeof previousBest?.liftPerSwitch === 'number' ? previousBest.liftPerSwitch : null,
+  bestLiftPerSwitchDelta: typeof previousBest?.liftPerSwitch === 'number' && best
+    ? Number((best.liftPerSwitch - previousBest.liftPerSwitch).toFixed(4))
+    : null,
+};
 
 const result = {
+  generatedAt: new Date().toISOString(),
   switches: opts.switches,
   seed: opts.seed,
   totalCombos: records.length,
   passCount: passing.length,
   failCount: records.length - passing.length,
   firstFailingCombo,
+  trendDiff,
   records,
   safeZone,
   bestCandidate: best,
@@ -150,6 +185,11 @@ const result = {
     : '本轮参数集中未找到通过门禁组合，建议提高 bonus 或放宽波动阈值后重跑。',
 };
 
+if (!opts.noArchive) {
+  fs.mkdirSync(path.dirname(opts.archiveFile), { recursive: true });
+  fs.writeFileSync(opts.archiveFile, JSON.stringify(result, null, 2));
+}
+
 if (opts.ciSummary) {
   console.log(JSON.stringify({
     totalCombos: result.totalCombos,
@@ -157,6 +197,8 @@ if (opts.ciSummary) {
     failCount: result.failCount,
     bestCandidate: result.bestCandidate,
     firstFailingCombo: result.firstFailingCombo,
+    trendDiff: result.trendDiff,
+    archiveFile: opts.noArchive ? null : opts.archiveFile,
   }));
   process.exit(result.failCount > 0 ? 2 : 0);
 }
