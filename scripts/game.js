@@ -133,6 +133,8 @@
     const marketWaveEl  = $("marketWave");
     const marketCountEl = $("marketCountdown");
     const marketEffectEl= $("marketEffect");
+    const marketEventEl = $("marketEvent");
+    const marketOutlookEl = $("marketOutlook");
     const marketFlashEl = $("marketFlash");
     const manualBtn     = $("manualBtn");
     const manualDesc    = $("manualDesc");
@@ -470,6 +472,7 @@
       MARKET_BULL_BONUS,
       MARKET_BEAR_PENALTY,
       SKILL_MASTERY_BONUS,
+      MACRO_PREFERRED_BONUS,
       dirty,
       buildingViewMap,
       pushLog,
@@ -525,6 +528,8 @@
       marketWaveEl,
       marketCountEl,
       marketEffectEl,
+      marketEventEl,
+      marketOutlookEl,
     });
     const { tickMarket, renderMarket } = marketSystem;
 

@@ -10,6 +10,7 @@ const createEconomySystem = ({
   MARKET_BULL_BONUS,
   MARKET_BEAR_PENALTY,
   SKILL_MASTERY_BONUS,
+  MACRO_PREFERRED_BONUS,
   dirty,
   buildingViewMap,
   pushLog,
@@ -23,7 +24,8 @@ const createEconomySystem = ({
   const discount = () => Math.max(0.6, 1 - skillLv('bulk_discount') * 0.04);
   const price = (b, off = 0) => Math.floor(b.basePrice * Math.pow(PRICE_GROWTH, b.owned + off) * discount());
 
-  const bldGPS = (b) => b.dps * b.owned * (bldBoost[b.id] || 1);
+  const bldPreferredMult = (b) => (st.macroPreferredBuildingId && st.macroPreferredBuildingId === b.id ? 1 + MACRO_PREFERRED_BONUS : 1);
+  const bldGPS = (b) => b.dps * b.owned * (bldBoost[b.id] || 1) * bldPreferredMult(b);
   const baseGPS = () => buildings.reduce((s, b) => s + bldGPS(b), 0);
   const resMult = () => 1 + st.researchPoints * 0.1;
   const skillGPS = () => 1 + skillLv('line_optimizer') * 0.25;
