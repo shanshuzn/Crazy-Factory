@@ -109,6 +109,26 @@ SCREENSHOT_ENGINES=firefox,webkit,chromium SCREENSHOT_URL=http://127.0.0.1:4173 
 node scripts/run_soak_check.js --seconds 1800
 ```
 
+阈值参数（用于 CI 失败门禁）：
+
+| 参数 | 默认值 | 说明 |
+| --- | --- | --- |
+| `--min-fps` | `55` | 平均 FPS 下限，低于该值判定失败 |
+| `--max-heap-mb` | `256` | Heap 峰值上限（MB），高于该值判定失败 |
+| `--max-writes-std` | `1` | `writesPerMin` 标准差上限，高于该值判定失败 |
+
+成功示例（应返回退出码 `0`）：
+
+```bash
+node scripts/run_soak_check.js --seconds 5 --min-fps 1 --max-heap-mb 1024 --max-writes-std 10
+```
+
+失败示例（应返回退出码 `1`）：
+
+```bash
+node scripts/run_soak_check.js --seconds 5 --max-heap-mb 1
+```
+
 ## 路线图
 
 后续迭代见 `ROADMAP.md`（已精简为可执行清单）。
