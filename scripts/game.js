@@ -56,6 +56,13 @@
     const perkViewMap       = new Map();
     const speedQuestViewMap = new Map();
 
+    // 版本号
+    const APP_VERSION = 'v2.10.0';
+    const CHANGELOG = [
+      { version: 'v2.10.0', date: '2026-08-07', notes: ['UGC 场景编辑器正式接入游戏（创建/导入/导出/模板切换）', '修复滚动更新检测在无 RAF 调度器环境下的崩溃', '存档新增场景状态持久化'] },
+      { version: 'v2.9.0', date: '2026-06-08', notes: ['市场稳定性优化', '新增公会科技树', 'i18n 扩展至 10 种语言'] },
+    ];
+
     // ════════════════════════════════════════════════
     // ⑨ 工具函数
     // ════════════════════════════════════════════════
@@ -219,6 +226,7 @@
     // ════════════════════════════════════════════════
     // ⑮ 奖励/日志
     // ════════════════════════════════════════════════
+    const LOG_CAP = 200;
     const { pushLog } = createLogSystem({ st, dirty, LOG_CAP });
     const grantReward = (rw,label) => {
       if(!rw) return;
@@ -315,7 +323,44 @@
       marketEventEl,
       marketOutlookEl,
     });
-    const { tickMarket, renderMarket } = marketSystem;
+    const { tickMarket, renderMarket, setScenarioParams: marketSetScenarioParams } = marketSystem;
+
+    // ════════════════════════════════════════════════
+    // UGC 场景编辑器系统（ROADMAP P0）
+    // 场景参数覆盖经济/市场参数，切换时同步到各系统
+    // ════════════════════════════════════════════════
+    const scenarioSystem = createScenarioEditorSystem({
+      st,
+      eventBus,
+      pushLog,
+      I18N,
+      buildings,
+    });
+    scenarioSystem.init();
+
+    // 监听场景切换：将参数同步到经济系统与市场系统
+    eventBus.on('scenario:applied', ({ params }) => {
+      if (params) {
+        economy.setScenarioParams(params);
+        marketSetScenarioParams(params);
+      } else {
+        economy.setScenarioParams(null);
+        marketSetScenarioParams(null);
+      }
+    });
+
+    // 注入场景编辑器面板（延迟确保 DOM 就绪，插入到市场栏之后）
+    setTimeout(() => {
+      const marketBar = document.querySelector('.market-bar');
+      const content = document.querySelector('.content');
+      if (!content) return;
+      const scenarioContainer = document.createElement('div');
+      scenarioContainer.id = 'scenarioContainer';
+      scenarioContainer.className = 'scenario-editor';
+      scenarioContainer.innerHTML = scenarioSystem.renderScenarioPanel();
+      content.insertBefore(scenarioContainer, content.firstChild);
+      scenarioSystem.bindEvents(scenarioContainer);
+    }, 1500);
 
     // Event System (P3-T2)
     const eventSystem = createEventSystem({
@@ -560,10 +605,6 @@
     claimBtn.addEventListener("click", _onClaim);
     _listeners.push([claimBtn, "click", _onClaim]);
 
-    // Tab 可见性处理
-    document.addEventListener('visibilitychange', loopSystem.handleVisibilityChange);
-    _listeners.push([document, 'visibilitychange', loopSystem.handleVisibilityChange]);
-
 
     // ════════════════════════════════════════════════
     // ⑳ 初始化 & 主循环
@@ -665,10 +706,28 @@
     renderChangelog();
 
     loadGame();
+    // 读档后恢复场景参数（存档中的 activeScenario 需重新应用到经济/市场系统）
+    {
+      const activeScen = scenarioSystem.getActiveScenario();
+      const scenParams = activeScen && activeScen.params ? activeScen.params : null;
+      economy.setScenarioParams(scenParams);
+      marketSetScenarioParams(scenParams);
+    }
     // 首次加载或读档后，设置本局开始时间（用于速通计时）
     if (!st.gameStartTime) st.gameStartTime = Date.now();
     refreshSkillMastery(true);
     dirty.market = dirty.buildings = dirty.upgrades = dirty.skills = dirty.achievements = dirty.quest = dirty.stats = dirty.logs = true;
+
+    // ════════════════════════════════════════════════
+    // 资产配置/风险偏好系统 (v1.0)
+    // ════════════════════════════════════════════════
+    const allocationSystem = createAssetAllocationSystem({
+      st,
+      eventBus,
+      pushLog,
+      I18N,
+      buildings,
+    });
 
     const loopSystem = createLoopSystem({
       st,
@@ -687,6 +746,22 @@
     });
 
     loopSystem.startLoop();
+
+    // Tab 可见性处理
+    document.addEventListener('visibilitychange', loopSystem.handleVisibilityChange);
+    _listeners.push([document, 'visibilitychange', loopSystem.handleVisibilityChange]);
+
+    // ════════════════════════════════════════════════
+    // ㉚ 国债系统 (moved before usage at line 708)
+    // ════════════════════════════════════════════════
+    const treasurySystem = createTreasurySystem({
+      st,
+      eventBus,
+      pushLog,
+      I18N,
+      fmt,
+    });
+    treasurySystem.initTreasuryData();
 
     // 注入国债面板
     treasurySystem.injectPanel('treasuryContainer');
@@ -974,6 +1049,7 @@
 
     // 初始化产业链系统
     synergySystem.init();
+    window.synergySystem = synergySystem;
 
     // 将产业链加成应用到经济系统
     economy.setSynergyMultiplier(() => {
@@ -1218,18 +1294,6 @@
       return result;
     };
 
-    // ════════════════════════════════════════════════
-    // ㉚ 国债系统
-    // ════════════════════════════════════════════════
-    const treasurySystem = createTreasurySystem({
-      st,
-      eventBus,
-      pushLog,
-      I18N,
-      fmt,
-    });
-    treasurySystem.initTreasuryData();
-
     // 定期结算国债利息（每30秒，统一由 RAF 驱动）
     window.__timerManager.schedule(() => {
       treasurySystem.tickBonds(30);
@@ -1290,17 +1354,6 @@
       const methodText = method === 'bailout' ? '已通过救助结束' : '已自然结束';
       pushLog(`✅ ${crisisName} ${methodText}`);
       spawnFloat(window.innerWidth/2, window.innerHeight/2, `✅ ${crisisName}结束`, '#22c55e');
-    });
-
-    // ════════════════════════════════════════════════
-    // ㉜ 资产配置/风险偏好系统 (v1.0)
-    // ════════════════════════════════════════════════
-    const allocationSystem = createAssetAllocationSystem({
-      st,
-      eventBus,
-      pushLog,
-      I18N,
-      buildings,
     });
 
     // 初始化资产配置系统

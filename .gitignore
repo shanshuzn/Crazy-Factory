@@ -1,5 +1,15 @@
 .mavis/
 .opencode/
 .claude/
+.codebuddy/
+.cu-screenshots/
+.qoder/
+.trae/
+.workbuddy/
 output/
 artifacts/
+node_modules/
+nul
+game-screenshot.png
+game-view.png
+play-screenshot-1.png

@@ -675,6 +675,63 @@ const createSubscriptionSystem = ({
   // 导出接口
   // ═══════════════════════════════════════════════════════════════════════════
 
+
+  // Payment Gateway Scaffold (Phase 3)
+  const PaymentGateway = {
+    // Supported platforms
+    platforms: {
+      stripe: { id: 'stripe', name: 'Stripe', supported: true, env: 'production' },
+      apple_iap: { id: 'apple_iap', name: 'Apple IAP', supported: false, env: 'sandbox' },
+      google_play: { id: 'google_play', name: 'Google Play', supported: false, env: 'sandbox' },
+    },
+
+    // Initialize payment (stub - connect to real gateway)
+    initPayment: async (tierId, billingCycle, platform) => {
+      const lang = getLang();
+      const tier = TIERS[tierId];
+      if (!tier) return { success: false, error: lang === 'en' ? 'Invalid tier' : '无效等级' };
+
+      const price = billingCycle === 'yearly' ? tier.price.yearly : tier.price.monthly;
+      const plat = PaymentGateway.platforms[platform] || PaymentGateway.platforms.stripe;
+
+      // In production, this would call the real payment API
+      console.log('[PaymentGateway] Init payment:', { tierId, billingCycle, price, platform: plat.id });
+
+      return {
+        success: true,
+        paymentId: 'pay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8),
+        tierId: tierId,
+        amount: price,
+        currency: tier.price.currency || 'USD',
+        platform: plat.id,
+        status: 'pending',
+      };
+    },
+
+    // Confirm payment (stub)
+    confirmPayment: async (paymentId) => {
+      console.log('[PaymentGateway] Confirming payment:', paymentId);
+      return { success: true, paymentId: paymentId, status: 'confirmed' };
+    },
+
+    // Cancel payment
+    cancelPayment: async (paymentId) => {
+      console.log('[PaymentGateway] Cancelling payment:', paymentId);
+      return { success: true, paymentId: paymentId, status: 'cancelled' };
+    },
+
+    // Restore purchases (for mobile)
+    restorePurchases: async () => {
+      console.log('[PaymentGateway] Restoring purchases');
+      return { success: true, subscriptions: [] };
+    },
+
+    // Get available platforms
+    getAvailablePlatforms: () => {
+      return Object.values(PaymentGateway.platforms).filter(p => p.supported);
+    },
+  };
+
   return {
     // 初始化
     init,
@@ -709,6 +766,7 @@ const createSubscriptionSystem = ({
 
     // UI
     renderSubscriptionPanel,
+    PaymentGateway,
     renderBenefitsComparison,
   };
 };

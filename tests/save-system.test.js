@@ -18,6 +18,7 @@ const REQUIRED_SUBSYSTEMS = [
   'subscription',
   'globalMarket',
   'assetAllocation',  // v1.0 资产配置系统
+  'scenarios',        // UGC 场景编辑器
 ];
 
 test('_TOP_LEVEL_FIELDS includes all subsystem states', () => {

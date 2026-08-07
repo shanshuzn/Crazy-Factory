@@ -37,8 +37,8 @@ const createTutorialSystem = ({
       id: 'manualClick',
       title: { zh: '第一步：手动生产', en: 'Step 1: Manual Production' },
       content: {
-        zh: '点击这里的按钮开始手动生产资本。每次点击都会直接增加你的资本！',
-        en: 'Click this button to manually produce capital. Each click adds capital directly!'
+        zh: '点击这里的按钮开始手动生产资本。每次点击都会直接增加你的资本！连续点击还有连击加成哦。',
+        en: 'Click this button to manually produce capital. Each click adds capital directly! Chain clicks for combo bonuses.'
       },
       target: '#manualBtn',
       targetEvent: 'click',
@@ -48,8 +48,8 @@ const createTutorialSystem = ({
       id: 'buyBuilding',
       title: { zh: '第二步：购买产业', en: 'Step 2: Buy Buildings' },
       content: {
-        zh: '积累足够资本后，购买产业来自动产生收益。产业是被动收入的主要来源！',
-        en: 'After accumulating enough capital, buy buildings to generate passive income. Buildings are your main source of passive income!'
+        zh: '积累足够资本后，购买产业来自动产生收益。产业是被动收入的主要来源！你可以使用 ×1/×10/×100/Max 来批量购买。',
+        en: 'After accumulating enough capital, buy buildings to generate passive income. Use ×1/×10/×100/Max to bulk buy!'
       },
       target: '#buildingList .buy-btn',
       targetEvent: 'click',
@@ -59,30 +59,71 @@ const createTutorialSystem = ({
       id: 'upgrades',
       title: { zh: '第三步：研发升级', en: 'Step 3: Research Upgrades' },
       content: {
-        zh: '升级可以提升生产效率。切换到这个标签页查看可研发的升级项目！',
-        en: 'Upgrades boost production efficiency. Switch to this tab to see available upgrades!'
+        zh: '升级可以大幅提升生产效率。用齿轮购买升级项目，每个升级都有独特的加成效果！',
+        en: 'Upgrades boost production efficiency. Purchase upgrade projects with Gears for unique bonuses!'
       },
-      target: '[data-tab="upgrades"]',
-      targetEvent: 'click',
+      target: null,
       action: { zh: '查看升级', en: 'View Upgrades' },
     },
     {
       id: 'market',
       title: { zh: '第四步：把握市场', en: 'Step 4: Market Timing' },
       content: {
-        zh: '市场会周期性地在牛市和熊市之间切换。牛市时收益增加，熊市时减少。把握时机很重要！',
-        en: 'The market cycles between bull and bear markets. Profits increase in bull markets and decrease in bear markets. Timing matters!'
+        zh: '市场会在牛市和熊市之间周期切换。牛市时收益增加，熊市时减少。把握切换时机很重要！',
+        en: 'The market cycles between bull and bear. Profits increase in bull markets, decrease in bear. Timing matters!'
       },
-      target: '.market-panel',
+      target: '.market-bar',
       targetEvent: null,
       action: { zh: '下一步', en: 'Next' },
+    },
+    {
+      id: 'skills',
+      title: { zh: '第五步：技能树', en: 'Step 5: Skill Tree' },
+      content: {
+        zh: '研究点（RP）通过声望重置获得，可以学习永久技能。技能分为：交易直觉、产线优化、采购折扣、市场嗅觉。',
+        en: 'Research Points (RP) from Prestige unlock permanent skills: trading, production, discount, and market sense.'
+      },
+      target: null,
+      action: { zh: '了解技能', en: 'Learn Skills' },
+    },
+    {
+      id: 'synergy',
+      title: { zh: '第六步：产业链联动', en: 'Step 6: Industry Synergy' },
+      content: {
+        zh: '建筑之间有上下游联动关系！手工作坊为轻工厂提供原材料，物流公司为房地产运输建材。均衡发展产业链可以获得额外加成。',
+        en: 'Buildings have upstream/downstream synergy! Workshop feeds Factory, Logistics supports Real Estate. Balance your chain for bonuses.'
+      },
+      target: null,
+      action: { zh: '下一步', en: 'Next' },
+    },
+    {
+      id: 'autoBuy',
+      title: { zh: '第七步：自动投资', en: 'Step 7: Auto Investment' },
+      content: {
+        zh: '当积累一定资本后，可以开启自动投资。系统会根据当前状态智能分配资金到最优建筑，让你解放双手！',
+        en: 'Once you have enough capital, enable Auto Investment. The system intelligently allocates funds to optimal buildings!'
+      },
+      target: '#autoBuyBtn',
+      targetEvent: 'click',
+      action: { zh: '了解自动投资', en: 'Enable Auto' },
+    },
+    {
+      id: 'prestige',
+      title: { zh: '第八步：声望重置', en: 'Step 8: Prestige' },
+      content: {
+        zh: '当进度放缓时，可以进行声望重置。重置会清空建筑和资本，但获得研究点（RP）用于解锁强力天赋和技能。这是长期增长的关键！',
+        en: 'When progress slows, Prestige resets buildings but grants RP for powerful perks and skills. Key to long-term growth!'
+      },
+      target: '#prestigeBtn',
+      targetEvent: null,
+      action: { zh: '了解声望', en: 'Learn Prestige' },
     },
     {
       id: 'complete',
       title: { zh: '引导完成！', en: 'Tutorial Complete!' },
       content: {
-        zh: '你已经了解了游戏的基础玩法。继续积累资本，扩张产业，把握市场时机，建立你的金融帝国吧！',
-        en: 'You now know the basics. Keep accumulating capital, expanding industries, and timing the market to build your financial empire!'
+        zh: '你已经了解了游戏的核心玩法。继续积累资本、扩张产业、把握市场时机，建立你的金融帝国吧！提示：右下角的MCP状态可以让AI Agent帮你操控游戏。',
+        en: 'You now know the basics! Keep growing your empire. Tip: The MCP status indicator enables AI agent control.'
       },
       target: null,
       action: { zh: '开始游戏', en: 'Start Playing' },

@@ -315,6 +315,85 @@ const createAnalyticsSystem = ({
     `;
   };
 
+
+  // ════════════════════════════════════════════════
+  // A/B Testing Framework (Phase 3)
+  // ════════════════════════════════════════════════
+  const AB_KEY = 'abTestAssignments';
+
+  const getAssignment = (experimentId) => {
+    try {
+      const assignments = JSON.parse(localStorage.getItem(AB_KEY) || '{}');
+      return assignments[experimentId] || null;
+    } catch { return null; }
+  };
+
+  const assignExperiment = (experimentId, variants) => {
+    // Check existing assignment
+    const existing = getAssignment(experimentId);
+    if (existing) return existing;
+
+    // Random assignment (50/50 for two variants, equal for N)
+    const variantIdx = Math.floor(Math.random() * variants.length);
+    const variant = variants[variantIdx];
+
+    try {
+      const assignments = JSON.parse(localStorage.getItem(AB_KEY) || '{}');
+      assignments[experimentId] = { variant: variant, assignedAt: Date.now() };
+      localStorage.setItem(AB_KEY, JSON.stringify(assignments));
+    } catch {}
+
+    return variant;
+  };
+
+  const trackConversion = (experimentId, metric, value) => {
+    const assignment = getAssignment(experimentId);
+    if (!assignment) return;
+
+    track('ab_conversion', {
+      experiment: experimentId,
+      variant: assignment.variant,
+      metric: metric,
+      value: value,
+    });
+  };
+
+  const getExperimentResults = (experimentId) => {
+    const data = getData();
+    const events = data.events.filter(e =>
+      e.type === 'ab_conversion' && e.data.experiment === experimentId
+    );
+
+    const results = {};
+    for (const event of events) {
+      const variant = event.data.variant;
+      if (!results[variant]) results[variant] = { count: 0, conversions: {} };
+      results[variant].count++;
+      if (!results[variant].conversions[event.data.metric]) {
+        results[variant].conversions[event.data.metric] = { sum: 0, count: 0 };
+      }
+      results[variant].conversions[event.data.metric].sum += event.data.value || 0;
+      results[variant].conversions[event.data.metric].count++;
+    }
+    return results;
+  };
+
+  // Pre-defined experiments
+  const EXPERIMENTS = {
+    offline_rate: {
+      id: 'offline_rate',
+      name: { zh: '离线收益比例测试', en: 'Offline Rate Test' },
+      variants: ['standard_57', 'reduced_40', 'increased_70'],
+      description: { zh: '测试不同离线收益比例对留存的影响', en: 'Testing offline rate impact on retention' },
+    },
+    prestige_timing: {
+      id: 'prestige_timing',
+      name: { zh: 'Prestige 时机测试', en: 'Prestige Timing Test' },
+      variants: ['early_12h', 'standard_22h', 'late_36h'],
+      description: { zh: '测试不同 Prestige 解锁时间对留存的影响', en: 'Testing prestige unlock time impact on retention' },
+    },
+  };
+
   return {
     init,
     track,

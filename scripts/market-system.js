@@ -23,6 +23,21 @@ const createMarketSystem = ({
 }) => {
   const clampRate = (x) => Math.max(POLICY_RATE_MIN, Math.min(POLICY_RATE_MAX, x));
 
+  // 场景系统动态覆盖参数（UGC 场景编辑器）：读取 st.scenarioParams，未设置时回退到常量
+  let _scenarioParams = null;
+  const _scp = (key, fallback) => {
+    const v = _scenarioParams && _scenarioParams[key];
+    return v != null && isFinite(Number(v)) && Number(v) > 0 ? Number(v) : fallback;
+  };
+  const setScenarioParams = (params = null) => {
+    _scenarioParams = params;
+    if (dirty) dirty.market = true;
+  };
+  const _cycleMin = () => _scp('marketCycleMin', MARKET_CYCLE_MIN);
+  const _cycleMax = () => _scp('marketCycleMax', MARKET_CYCLE_MAX);
+  const _bullBonus = () => _scp('bullBonus', MARKET_BULL_BONUS);
+  const _bearPenalty = () => _scp('bearPenalty', MARKET_BEAR_PENALTY);
+
   // 预取宏事件数组（消除 getActiveMacro/getEventById 内每次 (MACRO_EVENTS || []) 分配）
   const _macroEvents = MACRO_EVENTS ?? [];
 
@@ -76,11 +91,11 @@ const createMarketSystem = ({
 
   const maybeRollMacroEvent = () => {
     if (st.macroEventTimer > 0 || !Array.isArray(MACRO_EVENTS) || MACRO_EVENTS.length === 0) return;
-    if (Math.random() >= 0.22) return;   // 0.35 → 0.22：降低宏观事件触发概率，减少市场冲击
+    if (Math.random() >= 0.15) return;   // 0.35 → 0.22 → 0.15：进一步降低宏观事件触发概率
 
     const prev = getEventById(st.lastMacroEventId || '');
     const chainTargetId = prev?.nextEventId || '';
-    const chainPick = chainTargetId && Math.random() < 0.65;
+    const chainPick = chainTargetId && Math.random() < 0.50;  // 0.65 → 0.50：降低连锁概率
 
     let ev = null;
     if (chainPick) {
@@ -126,7 +141,7 @@ const createMarketSystem = ({
 
   const doMarketSwitch = () => {
     st.marketIsBull = !st.marketIsBull;
-    st.marketCycleDuration = MARKET_CYCLE_MIN + Math.random() * (MARKET_CYCLE_MAX - MARKET_CYCLE_MIN);
+    st.marketCycleDuration = _cycleMin() + Math.random() * (_cycleMax() - _cycleMin());
     st.marketTimer = st.marketCycleDuration;
     const label = st.marketIsBull ? '📈 多头行情爆发！' : '📉 空头来袭，注意风控';
     pushLog(label);
@@ -167,7 +182,7 @@ const createMarketSystem = ({
       : (st.marketTimer / st.marketCycleDuration) * 50;
     if (_mcSet('wave', pct)) marketWaveEl.style.width = `${Math.max(5, Math.min(95, pct))}%`;
     if (_mcSet('count', `切换：${Math.ceil(st.marketTimer)}s`)) marketCountEl.textContent = `切换：${Math.ceil(st.marketTimer)}s`;
-    const effTxt = bull ? `多头加成 ×${MARKET_BULL_BONUS.toFixed(1)}` : `空头折损 ×${MARKET_BEAR_PENALTY.toFixed(1)}`;
+    const effTxt = bull ? `多头加成 ×${_bullBonus().toFixed(1)}` : `空头折损 ×${_bearPenalty().toFixed(1)}`;
     if (_mcSet('effect', effTxt)) {
       marketEffectEl.textContent = effTxt;
       marketEffectEl.style.color = bull ? 'var(--bull)' : 'var(--bear)';
@@ -190,5 +205,5 @@ const createMarketSystem = ({
   };
 
   updateRateOutlook();
-  return { doMarketSwitch, tickMarket, renderMarket };
+  return { doMarketSwitch, tickMarket, renderMarket, setScenarioParams };
 };

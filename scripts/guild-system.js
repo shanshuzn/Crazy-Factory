@@ -532,6 +532,62 @@ const createGuildSystem = ({
   // 导出接口
   // ═══════════════════════════════════════════════════════════════════════════
 
+
+  // Guild Tech Tree
+  const getTechTree = () => {
+    if (!st.guild || !st.guild.techTree) return null;
+    return st.guild.techTree;
+  };
+
+  const upgradeTech = (techId) => {
+    const lang = getLang();
+    if (!st.guild || !st.guild.techTree) return { success: false, error: 'Not in guild' };
+    const tech = st.guild.techTree[techId];
+    if (!tech) return { success: false, error: 'Tech not found' };
+    if (tech.level >= tech.maxLevel) return { success: false, error: 'Max level' };
+    const cost = Math.floor(tech.costBase * Math.pow(tech.costMult, tech.level));
+    if (st.gears < cost) return { success: false, error: 'Need $' + cost };
+    st.gears -= cost;
+    tech.level++;
+    if (eventBus) eventBus.emit('guild:techUpgraded', { techId: techId, level: tech.level });
+    if (pushLog) pushLog('Tech upgraded: ' + (tech.desc[lang] || tech.desc.zh) + ' Lv.' + tech.level);
+    return { success: true, level: tech.level, cost: cost };
+  };
+
+  const getTechBonuses = () => {
+    const tech = getTechTree();
+    if (!tech) return { gps: 1, discount: 1, rp: 1, synergy: 1, offline: 1 };
+    return {
+      gps: 1 + (tech.gpsBoost ? tech.gpsBoost.level * tech.gpsBoost.bonusPerLevel : 0),
+      discount: 1 - (tech.discountBoost ? tech.discountBoost.level * tech.discountBoost.bonusPerLevel : 0),
+      rp: 1 + (tech.rpBonus ? tech.rpBonus.level * tech.rpBonus.bonusPerLevel : 0),
+      synergy: 1 + (tech.synergyBoost ? tech.synergyBoost.level * tech.synergyBoost.bonusPerLevel : 0),
+      offline: 1 + (tech.offlineBoost ? tech.offlineBoost.level * tech.offlineBoost.bonusPerLevel : 0),
+    };
+  };
+
+  const renderTechTree = () => {
+    const lang = getLang();
+    const tech = getTechTree();
+    if (!tech) return '';
+    let html = '<div class="guild-tech-tree" style="padding:12px;">';
+    html += '<h3 style="margin:0 0 8px;">' + (lang === 'en' ? 'Guild Tech Tree' : '公会科技树') + '</h3>';
+    for (const [id, t] of Object.entries(tech)) {
+      const cost = Math.floor(t.costBase * Math.pow(t.costMult, t.level));
+      const maxed = t.level >= t.maxLevel;
+      const canAfford = st.gears >= cost;
+      const desc = t.desc[lang] || t.desc.zh;
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);">';
+      html += '<div><div style="font-size:13px;">' + desc + '</div>';
+      html += '<div style="font-size:11px;opacity:0.6;">Lv.' + t.level + '/' + t.maxLevel + '</div></div>';
+      html += '<button class="btn"' + (maxed || !canAfford ? ' disabled style="opacity:0.4"' : '') + '>';
+      html += maxed ? (lang === 'en' ? 'MAX' : '满级') : '$' + cost;
+      html += '</button></div>';
+    }
+    html += '</div>';
+    return html;
+  };
+
   return {
     // 初始化
     init,
@@ -563,6 +619,12 @@ const createGuildSystem = ({
     // UI
     renderGuildPanel,
     renderGuildRanking,
+    renderTechTree,
+
+    // Tech Tree
+    getTechTree,
+    upgradeTech,
+    getTechBonuses,
   };
 };
 

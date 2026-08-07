@@ -381,6 +381,14 @@ const createAssetAllocationSystem = ({
         document.querySelectorAll('[data-risk-profile]').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.riskProfile === profile);
         });
+
+        // 刷新统计面板
+        const statsContainer = document.querySelector('.allocation-stats');
+        if (statsContainer) {
+          const temp = document.createElement('div');
+          temp.innerHTML = renderStatsPanel();
+          statsContainer.replaceWith(temp.firstElementChild);
+        }
       }
     });
 

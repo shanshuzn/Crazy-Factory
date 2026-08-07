@@ -25,16 +25,29 @@ const createUpdateDetectionSystem = ({
   let isChecking = false;
   let lastDetectedVersion = null;
   let dismissedVersion = localStorage.getItem('updateDismissedVersion') || '';
-  // timerId 作为 RAF 调度器的取消句柄（替代 setInterval，融入统一 RAF 循环）
+  // 优先使用统一 RAF 调度器（window.__timerManager）；不可用时回退到原生 setInterval
+  const _getTimerManager = () =>
+    (typeof window !== 'undefined' && window.__timerManager) || null;
+  // timerId 作为调度句柄（RAF 调度器使用平凡值 1 作为运行中标记，原生定时器保存 interval id）
   const _scheduleUpdateCheck = () => {
     if (timerId) return;
-    timerId = 1; // RAF 调度器无 ID，平凡值仅作运行中标记
-    window.__timerManager.schedule(checkVersion, checkIntervalMs);
+    const tm = _getTimerManager();
+    if (tm && typeof tm.schedule === 'function') {
+      timerId = 1; // RAF 调度器无 ID，平凡值仅作运行中标记
+      tm.schedule(checkVersion, checkIntervalMs);
+    } else {
+      timerId = setInterval(checkVersion, checkIntervalMs);
+    }
   };
   const _cancelScheduledCheck = () => {
     if (!timerId) return;
+    const tm = _getTimerManager();
+    if (tm && typeof tm.cancel === 'function') {
+      tm.cancel(checkVersion);
+    } else {
+      clearInterval(timerId);
+    }
     timerId = null;
-    window.__timerManager.cancel(checkVersion);
   };
 
   /**

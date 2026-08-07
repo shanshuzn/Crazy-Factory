@@ -20,10 +20,15 @@ const createEconomySystem = ({
   applyUpgradeEffect
 }) => {
   // 预计算 1.15^n 查表（消除每帧 Math.pow 调用，n>TABLE_MAX 时回退）
+  // priceGrowth 可由场景系统动态覆盖（UGC 场景编辑器），切换场景时重建查表
+  let _priceGrowth = PRICE_GROWTH;
   const _powTable = [];
   const _POW_TABLE_MAX = 5000;
-  for (let i = 0; i <= _POW_TABLE_MAX; i++) _powTable[i] = Math.pow(PRICE_GROWTH, i);
-  const _cachedPow = (n) => (n <= _POW_TABLE_MAX ? _powTable[n] : Math.pow(PRICE_GROWTH, n));
+  const _rebuildPowTable = () => {
+    for (let i = 0; i <= _POW_TABLE_MAX; i++) _powTable[i] = Math.pow(_priceGrowth, i);
+  };
+  _rebuildPowTable();
+  const _cachedPow = (n) => (n <= _POW_TABLE_MAX ? _powTable[n] : Math.pow(_priceGrowth, n));
 
   // 每建筑价格缓存：owned 变化时才重算，消除 render 帧内重复 price() 调用
   const _priceCache = new Map(); // b.id → { owned, price0 }
@@ -63,8 +68,13 @@ const createEconomySystem = ({
   // baseGPS 已由 _getBaseGPS() 缓存，移除重复定义
   const resMult = () => 1 + st.researchPoints * 0.1;
   const skillGPS = () => 1 + skillLv('line_optimizer') * 0.25;
+  // 场景参数读取（UGC 场景编辑器）：bullBonus/bearPenalty 可被 st.scenarioParams 覆盖
+  const _scp = (key, fallback) => {
+    const v = st.scenarioParams && st.scenarioParams[key];
+    return v != null && isFinite(Number(v)) && Number(v) > 0 ? Number(v) : fallback;
+  };
   const mktMult = () => {
-    const base = st.marketIsBull ? MARKET_BULL_BONUS : MARKET_BEAR_PENALTY;
+    const base = st.marketIsBull ? _scp('bullBonus', MARKET_BULL_BONUS) : _scp('bearPenalty', MARKET_BEAR_PENALTY);
     return st.marketIsBull ? base * (1 + skillLv('market_sense') * 0.1) : base;
   };
   const skillMasteryMult = () => 1 + (st.skillMasteryTier || 0) * SKILL_MASTERY_BONUS;
@@ -75,6 +85,16 @@ const createEconomySystem = ({
   const _invalidateGPSMult = () => { _gpsMultDirty = true; };
   let _synergyMultFn = null; // () => number，由 synergy-system 注入
   const setSynergyMultiplier = (fn) => { _synergyMultFn = fn; _invalidateGPSMult(); };
+  let _regionMultFn = null; // () => number，由 global-market-system 注入
+  const setRegionMultiplier = (fn) => { _regionMultFn = fn; _invalidateGPSMult(); };
+  let _crisisMultFn = null; // () => number，由 crisis-system 注入
+  const setCrisisMultiplier = (fn) => { _crisisMultFn = fn; _invalidateGPSMult(); };
+  let _guildMultFn = null; // () => number，由 guild-system 注入
+  const setGuildMultiplier = (fn) => { _guildMultFn = fn; _invalidateGPSMult(); };
+  let _boostMultFn = null; // () => number，由 boost-system 注入
+  const setBoostMultiplier = (fn) => { _boostMultFn = fn; _invalidateGPSMult(); };
+  let _subscriptionMultFn = null; // () => number，由 subscription-system 注入
+  const setSubscriptionMultiplier = (fn) => { _subscriptionMultFn = fn; _invalidateGPSMult(); };
   let _riskLambdaFn = null;  // () => number，由 asset-allocation-system 注入
   let _riskVolatilityFn = null; // () => number，由 asset-allocation-system 注入
   const setRiskLambdaFn = (fn) => { _riskLambdaFn = fn; _invalidateROICache(); };
@@ -94,7 +114,12 @@ const createEconomySystem = ({
   const _getGPSMult = () => {
     if (!_gpsMultDirty) return _gpsMultCache;
     const riskVolScale = (_riskVolatilityFn && _riskVolatilityFn()) || 1.0;
-    _gpsMultCache = st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult() * ((_synergyMultFn && _synergyMultFn()) || 1) * riskVolScale;
+    const regionBonus = (_regionMultFn && _regionMultFn()) || 1.0;
+    const crisisPenalty = (_crisisMultFn && _crisisMultFn()) || 1.0;
+    const guildBonus = (_guildMultFn && _guildMultFn()) || 1.0;
+    const boostBonus = (_boostMultFn && _boostMultFn()) || 1.0;
+    const subscriptionBonus = (_subscriptionMultFn && _subscriptionMultFn()) || 1.0;
+    _gpsMultCache = st.gpsMultiplier * resMult() * skillGPS() * mktMult() * skillMasteryMult() * ((_synergyMultFn && _synergyMultFn()) || 1) * regionBonus * crisisPenalty * guildBonus * boostBonus * subscriptionBonus * riskVolScale;
     _gpsMultDirty = false;
     return _gpsMultCache;
   };
@@ -311,8 +336,28 @@ const createEconomySystem = ({
     buyUpgrade,
     tryAutoBuy,
     setSynergyMultiplier,
+    setRegionMultiplier,
+    setCrisisMultiplier,
+    setGuildMultiplier,
+    setBoostMultiplier,
+    setSubscriptionMultiplier,
     setRiskLambdaFn,
     setRiskVolatilityFn,
+    // 场景系统动态覆盖价格增速/市场乘数（UGC 场景编辑器）
+    setScenarioParams: (params = null) => {
+      const p = params && typeof params === 'object' && Object.keys(params).length ? params : null;
+      st.scenarioParams = p;
+      const g = p ? Number(p.priceGrowth) : NaN;
+      const target = isFinite(g) && g > 0 ? g : PRICE_GROWTH;
+      if (Math.abs(target - _priceGrowth) > 1e-9) {
+        _priceGrowth = target;
+        _rebuildPowTable();
+        _priceCache.clear();
+        _invalidateROICache();
+      }
+      _invalidateGPSMult(); // bullBonus/bearPenalty 变化影响 mktMult 链路
+      if (dirty) dirty.buildings = dirty.market = dirty.stats = true;
+    },
     invalidateROICache: _invalidateROICache,
     invalidateBaseGPS: _invalidateBaseGPS,
     invalidateGPSMult: _invalidateGPSMult,

@@ -6,7 +6,7 @@ const I18N = {
   currentLang: 'zh',
 
   // Supported languages
-  supportedLangs: ['zh', 'en'],
+  supportedLangs: ['zh', 'en', 'ja', 'ko', 'fr', 'de', 'es', 'pt', 'ru', 'ar'],
 
   // Translations
   translations: {

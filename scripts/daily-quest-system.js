@@ -169,11 +169,6 @@ const createDailyQuestSystem = ({
   // 获取或初始化任务数据
   const getQuestData = () => _loadQuestData();
 
-  // 保存任务数据
-  const saveQuestData = (data) => {
-    localStorage.setItem(DAILY_QUEST_KEY, JSON.stringify(data));
-  };
-
   // 更新任务进度
   const updateProgress = (typeId, amount = 1) => {
     const data = getQuestData();
@@ -208,7 +203,9 @@ const createDailyQuestSystem = ({
 
     if (!quest || !quest.completed || quest.claimed) return false;
 
-    const reward = quest.getReward(quest.target);
+    // Look up getReward from template since JSON.stringify loses functions
+    const template = QUEST_TYPES[quest.id.toUpperCase()] || Object.values(QUEST_TYPES).find(t => t.id === quest.id);
+    const reward = template ? template.getReward(quest.target) : 0;
     quest.claimed = true;
 
     if (quest.rewardType === 'gears') {
@@ -266,7 +263,9 @@ const createDailyQuestSystem = ({
       if (quest.claimed) {
         statusHtml = `<span style="color: #10b981;">✓ ${lang === 'en' ? 'Claimed' : '已领取'}</span>`;
       } else if (quest.completed) {
-        const reward = quest.getReward(quest.target);
+        // Look up getReward from template since JSON.stringify loses functions
+        const template = QUEST_TYPES[quest.id.toUpperCase()] || Object.values(QUEST_TYPES).find(t => t.id === quest.id);
+        const reward = template ? template.getReward(quest.target) : 0;
         statusHtml = `<button class="daily-claim-btn" data-index="${index}" style="padding: 6px 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">${lang === 'en' ? 'Claim' : '领取'} ${reward} ${quest.rewardType === 'rp' ? 'RP' : '💰'}</button>`;
       } else {
         statusHtml = `

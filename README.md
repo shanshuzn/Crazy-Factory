@@ -10,6 +10,74 @@ python3 -m http.server 4173
 
 浏览器打开：`http://127.0.0.1:4173`
 
+## Agent 模式（ MCP Server ）
+
+本游戏支持 AI Agent 控制，通过 MCP (Model Context Protocol) 接口让 Claude Code 等 Agent 直接操作游戏。
+
+### 启动步骤
+
+1. **启动游戏服务器**
+   ```bash
+   python3 -m http.server 4173
+   ```
+
+2. **打开游戏页面**（浏览器中访问 `http://127.0.0.1:4173`）
+   - 游戏会自动连接 WebSocket (端口 8765)
+   - 右下角显示 `MCP: 已连接`
+
+3. **启动 MCP Server**（新终端）
+   ```bash
+   cd mcp-server
+   npm install  # 仅首次
+   node index.js
+   ```
+
+4. **Claude Code 自动连接**
+   - 项目包含 `.claude/mcp.json` 配置
+   - Claude Code 启动时会自动检测并连接
+
+### 可用工具
+
+| 工具 | 说明 |
+|------|------|
+| `get_game_state` | 获取完整游戏状态（资本、建筑、升级、技能、市场） |
+| `buy_building` | 购买建筑（参数: buildingId, quantity） |
+| `buy_upgrade` | 研发升级（参数: upgradeId） |
+| `buy_skill` | 学习技能（参数: skillId） |
+| `get_recommendations` | 获取策略建议和行动规划 |
+| `set_auto_buy` | 开启/关闭自动投资 |
+
+### 示例对话
+
+```
+用户: 查看当前游戏状态
+Agent: 调用 get_game_state
+
+用户: 购买一个工厂
+Agent: 调用 buy_building { buildingId: "factory_1" }
+
+用户: 给我一些游戏策略建议
+Agent: 调用 get_recommendations { focus: "balance" }
+```
+
+### 手动测试 MCP Server
+
+```bash
+# 终端1: 启动游戏
+python3 -m http.server 4173
+
+# 终端2: 启动 MCP Server
+cd mcp-server && node index.js
+
+# MCP Server 会通过 stdio 接收 JSON-RPC 命令
+```
+
+### 环境变量
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `MCP_BRIDGE_PORT` | `8765` | WebSocket 端口 |
+
 ## 项目定位
 
 当前版本用于快速验证以下核心循环：
@@ -55,8 +123,9 @@ price = floor(basePrice * 1.15 ^ owned)
   - 建筑按累计齿轮解锁
   - 升级含前置条件与 RP 门槛
 - Prestige（软重置）：重置局内进度，换取 RP 永久加成
-- 离线收益：离线结算（8 小时封顶）
+- 离线收益：离线结算（6 小时封顶）
 - 存档：本地自动保存 + 手动重置
+- UGC 场景编辑器（v2.10.0）：自定义经济模型（价格增速/市场周期/牛熊乘数），支持预设模板、创建/导入/导出 JSON 场景，场景参数实时作用于经济与市场系统
 
 ## 项目结构
 

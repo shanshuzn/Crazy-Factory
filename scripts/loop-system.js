@@ -100,4 +100,3 @@ const createLoopSystem = ({
 
   return { startLoop, stopLoop, handleVisibilityChange };
 };
-};

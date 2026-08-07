@@ -97,6 +97,22 @@
     }
     #marketFlash.on { opacity:.1; }
 
+    /* ── UGC 场景编辑器 ── */
+    .scenario-editor {
+      background:var(--panel-2); border:1px solid var(--border); border-radius:14px;
+      font-size:.8rem;
+    }
+    .scenario-editor h3 {
+      font-size:.9rem; color:var(--gold); font-weight:600;
+    }
+    .scenario-editor .btn {
+      background:var(--panel-1); border:1px solid var(--border); border-radius:8px;
+      cursor:pointer; transition:all .15s ease;
+    }
+    .scenario-editor .btn:hover {
+      border-color:var(--gold); color:var(--gold);
+    }
+
     /* ── CONTENT ── */
     .content { padding: 20px 24px; display: grid; gap: 16px; }
 
@@ -272,3 +288,59 @@
       .buy-btn,.upgrade-btn,.skill-btn { width:100%; }
     }
   
+
+
+    /* ═══ Phase 3: Enhanced Responsive Design ═══ */
+
+    @media (max-width: 480px) {
+      .header { padding: 12px 8px; }
+      .header h1 { font-size: 18px; }
+      .subtitle { font-size: 12px; }
+      .stats { grid-template-columns: 1fr; gap: 6px; }
+      .stat-card { padding: 8px; }
+      .stat-card .value { font-size: 16px; }
+      .controls { flex-wrap: wrap; gap: 4px; }
+      .chip { padding: 4px 8px; font-size: 11px; }
+      .building, .upgrade, .skill, .achievement { grid-template-columns: 1fr; padding: 8px; }
+      .buy-btn, .upgrade-btn, .skill-btn { width: 100%; padding: 8px; font-size: 13px; }
+      .market-bar { flex-wrap: wrap; gap: 4px; padding: 6px 8px; font-size: 11px; }
+      .market-wave-track { width: 80px; }
+      .manual { padding: 12px 8px; }
+      .btn { padding: 8px 12px; font-size: 13px; }
+      .section-title { font-size: 14px; margin: 12px 0 6px; }
+      .tutorial-tooltip { max-width: 90vw !important; left: 5vw !important; }
+      .game { padding: 0 4px; }
+      .progress-wrap { padding: 8px; }
+    }
+
+    @media (min-width: 481px) and (max-width: 768px) {
+      .header { padding: 16px 12px; }
+      .stats { grid-template-columns: repeat(3, 1fr); }
+      .building, .upgrade, .skill { grid-template-columns: 1fr 1fr; }
+      .controls { flex-wrap: wrap; }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .building, .upgrade, .skill { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Touch-friendly: larger tap targets on mobile */
+    @media (hover: none) and (pointer: coarse) {
+      .btn, .chip { min-height: 44px; min-width: 44px; }
+      .building .buy-btn, .upgrade .upgrade-btn { padding: 12px; }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --border: #334155;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --gold: #fbbf24;
+        --green: #34d399;
+        --red: #f87171;
+      }
+      body { background: var(--bg); color: var(--text); }
+    }

@@ -1,22 +1,22 @@
     // ════════════════════════════════════════════════
     // ① 经济常量（调这里调手感）
     // ════════════════════════════════════════════════
-    const PRICE_GROWTH         = 1.15;   // 建筑价格增长指数
+    const PRICE_GROWTH         = 1.12;   // 1.15 → 1.12：降低价格指数，缩短瓶颈期
     const SAVE_KEY             = "finance_empire_v2";
     const TICK_RATE            = 60;
     const FIXED_STEP           = 1 / TICK_RATE;
     const MAX_ACCUMULATED_SECS = 0.25;   // 防止补帧过多
-    const OFFLINE_CAP_SECONDS  = 8 * 3600;
+    const OFFLINE_CAP_SECONDS  = 6 * 3600;  // 8h → 6h：平衡离线收益与在线粘性
     const SAVE_INTERVAL        = 5000;    // 自动存档间隔(ms)
     const SMOOTH_SPEED         = 0.15;   // 数字滚动平滑速度
     const RENDER_THROTTLE      = 100;     // 渲染节流间隔(ms)
 
     // 市场参数
     // 优化市场稳定性：增加周期长度，缩小多头/空头差距
-    const MARKET_CYCLE_MIN  = 35;        // 25 → 35：延长最小周期，减少频繁切换
-    const MARKET_CYCLE_MAX  = 75;        // 55 → 75：延长最大周期，提升稳定性
-    const MARKET_BULL_BONUS = 1.25;      // 1.4 → 1.25：降低多头加成，减少极端收益
-    const MARKET_BEAR_PENALTY = 0.8;     // 0.7 → 0.8：提高空头底线，减少极端损失
+    const MARKET_CYCLE_MIN  = 45;        // 25 → 35 → 45：进一步延长，减少频繁切换
+    const MARKET_CYCLE_MAX  = 90;        // 55 → 75 → 90：进一步延长，提升稳定性
+    const MARKET_BULL_BONUS = 1.15;      // 1.4 → 1.25 → 1.15：进一步降低多头加成
+    const MARKET_BEAR_PENALTY = 0.85;    // 0.7 → 0.8 → 0.85：进一步提高空头底线
     const SKILL_MASTERY_STEP = 3;     // 每 3 级技能提升 1 个专精层级
     const SKILL_MASTERY_BONUS = 0.05; // 每层专精提供 +5% 总收益
 
@@ -64,21 +64,27 @@
       { id:"logistics",  name:"物流公司",  basePrice:1200,      dps:47,      owned:0, unlock:2000,       emoji:"🚛",
         synergy:{upstream:["factory"], downstream:["realestate"], bonusPerUpstream:0.10, bonusPerDownstream:0.06,
           desc:"为房地产运输建材，物流越密地产营销越畅"} },
-      { id:"realestate", name:"房地产",    basePrice:13000,     dps:260,     owned:0, unlock:15000,      emoji:"🏢",
+      { id:"realestate", name:"房地产",    basePrice:13000,     dps:260,     owned:0, unlock:12000,      emoji:"🏢",
         synergy:{upstream:["logistics"], downstream:["bank"], bonusPerUpstream:0.12, bonusPerDownstream:0.08,
           desc:"需要物流运输建材，银行存款支撑地价"} },
       { id:"bank",       name:"商业银行",  basePrice:140000,    dps:1400,    owned:0, unlock:100000,     emoji:"🏦",
         synergy:{upstream:["realestate"], downstream:["fund"], bonusPerUpstream:0.15, bonusPerDownstream:0.10,
           desc:"吸收房地产存款，为量化基金提供客户资金"} },
-      { id:"fund",       name:"量化基金",  basePrice:1500000,   dps:7800,    owned:0, unlock:800000,     emoji:"📊",
+      { id:"fund",       name:"量化基金",  basePrice:1500000,   dps:7800,    owned:0, unlock:600000,     emoji:"📊",
         synergy:{upstream:["bank"], downstream:["central"], bonusPerUpstream:0.18, bonusPerDownstream:0.12,
           desc:"管理银行资产，中央银行是其最后贷款人"} },
-      { id:"central",    name:"中央银行",  basePrice:20000000,  dps:44000,   owned:0, unlock:12000000,   emoji:"🏛️",
+      { id:"central",    name:"中央银行",  basePrice:20000000,  dps:44000,   owned:0, unlock:10000000,   emoji:"🏛️",
         synergy:{upstream:["fund"], downstream:["conglom"], bonusPerUpstream:0.20, bonusPerDownstream:0.15,
           desc:"监管量化基金，为金融集团提供流动性支持"} },
       { id:"conglom",    name:"金融集团",  basePrice:300000000, dps:260000,  owned:0, unlock:180000000,  emoji:"🌐",
         synergy:{upstream:["central"], downstream:[], bonusPerUpstream:0.25, bonusPerDownstream:0,
           desc:"产业链顶端，享受全链路最高加成"} },
+      { id:"fintech",    name:"金融科技",  basePrice:4e12,      dps:1600000,  owned:0, unlock:2e12,     emoji:"💳",
+        synergy:{upstream:["conglom"], downstream:["blockchain"], bonusPerUpstream:0.30, bonusPerDownstream:0.15,
+          desc:"移动支付与P2P借贷，数据驱动收益增长"} },
+      { id:"blockchain", name:"区块链",    basePrice:5e13,      dps:10000000, owned:0, unlock:25e12,    emoji:"⛓️",
+        synergy:{upstream:["fintech"], downstream:[], bonusPerUpstream:0.35, bonusPerDownstream:0,
+          desc:"加密货币与DeFi，高波动高收益的终极产业"} },
     ];
 
     // ════════════════════════════════════════════════
@@ -99,10 +105,14 @@
       { id:"sp_realestate",name:"土地溢价",  price:350000,     desc:"房地产产出 ×2",          type:"bldBoost",   value:{id:"realestate", mult:2}, purchased:false, unlockRP:0, requires:null },
       { id:"sp_bank",      name:"存款准备金",price:4000000,    desc:"商业银行产出 ×2",        type:"bldBoost",   value:{id:"bank",       mult:2}, purchased:false, unlockRP:1, requires:null },
       { id:"sp_fund",      name:"高频策略",  price:50000000,   desc:"量化基金产出 ×2",        type:"bldBoost",   value:{id:"fund",       mult:2}, purchased:false, unlockRP:2, requires:null },
+      { id:"sp_central",   name:"货币政策",  price:500000000,  desc:"中央银行产出 ×2",        type:"bldBoost",   value:{id:"central",    mult:2}, purchased:false, unlockRP:3, requires:null },
+      { id:"sp_conglom",   name:"帝国整合",  price:5e9,        desc:"金融集团产出 ×2",        type:"bldBoost",   value:{id:"conglom",    mult:2}, purchased:false, unlockRP:4, requires:null },
+      { id:"sp_fintech",   name:"数字支付",  price:5e11,       desc:"金融科技产出 ×2",        type:"bldBoost",   value:{id:"fintech",    mult:2}, purchased:false, unlockRP:5, requires:null },
+      { id:"sp_blockchain",name:"智能合约",  price:5e13,       desc:"区块链产出 ×2",          type:"bldBoost",   value:{id:"blockchain", mult:2}, purchased:false, unlockRP:6, requires:null },
     ];
 
     // 建筑专属倍率表（运行时维护，存档时持久化）
-    const bldBoost = { workshop:1, factory:1, logistics:1, realestate:1, bank:1, fund:1, central:1, conglom:1 };
+    const bldBoost = { workshop:1, factory:1, logistics:1, realestate:1, bank:1, fund:1, central:1, conglom:1, fintech:1, blockchain:1 };
 
     // ════════════════════════════════════════════════
     // ④ 技能树
@@ -159,6 +169,10 @@
       { id:"bull_market",  name:"牛市猎手",  desc:"多头市场中完成 50 次撮合",         reward:{type:"gear",value:2000},  check:()=>st.bullClicks>=50,                                                     done:false, claimed:false },
       { id:"central_bank", name:"央行行长",  desc:"拥有 1 家中央银行",               reward:{type:"rp",value:3},       check:()=>bld("central").owned>=1,                                               done:false, claimed:false },
       { id:"conglom_owner",name:"金融帝国",  desc:"拥有 1 个金融集团",               reward:{type:"rp",value:5},       check:()=>bld("conglom").owned>=1,                                               done:false, claimed:false },
+      { id:"fintech_owner", name:"数字先锋",  desc:"拥有 1 个金融科技",               reward:{type:"rp",value:8},       check:()=>bld("fintech").owned>=1,                                               done:false, claimed:false },
+      { id:"blockchain_owner", name:"链上之王", desc:"拥有 1 个区块链",               reward:{type:"rp",value:10},      check:()=>bld("blockchain").owned>=1,                                            done:false, claimed:false },
+      { id:"fintech_10",    name:"金融科技帝国", desc:"拥有 10 个金融科技",           reward:{type:"rp",value:15},      check:()=>bld("fintech").owned>=10,                                              done:false, claimed:false },
+      { id:"blockchain_10", name:"区块链大亨",   desc:"拥有 10 个区块链",             reward:{type:"rp",value:20},      check:()=>bld("blockchain").owned>=10,                                           done:false, claimed:false },
       // ── 新成就：产业链 ──
       { id:"synergy_1",   name:"产业链初成",desc:"激活首个产业链加成",               reward:{type:"gear",value:500},    check:()=>{ const s = typeof window.synergySystem !== "undefined" ? window.synergySystem : null; return s && s.calculateGlobalSynergy().globalMultiplier > 1.01; }, done:false, claimed:false },
       { id:"synergy_chain",name:"全链贯通",desc:"产业链全线激活（每层都有建筑）",    reward:{type:"rp",value:3},        check:()=>{ const s = typeof window.synergySystem !== "undefined" ? window.synergySystem : null; if (!s) return false; const gs=s.calculateGlobalSynergy(); return gs.globalMultiplier>=1.5; }, done:false, claimed:false },

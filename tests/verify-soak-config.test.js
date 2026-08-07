@@ -6,7 +6,11 @@ const path = require('node:path');
 
 const OUT_DIR = path.join('artifacts', 'test-soak-config');
 
-test('verify_soak_thresholds honors configurable sample commands', () => {
+// Windows 本机通常无 bash；该测试依赖 bash 脚本，仅在 bash 可用时执行（CI/Linux/macOS）
+const bashCheck = spawnSync('bash', ['--version'], { encoding: 'utf8' });
+const bashAvailable = bashCheck.status === 0;
+
+test('verify_soak_thresholds honors configurable sample commands', { skip: !bashAvailable && 'bash not available' }, () => {
   fs.rmSync(OUT_DIR, { recursive: true, force: true });
 
   const env = {
