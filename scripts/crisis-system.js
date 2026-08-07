@@ -474,7 +474,7 @@ const createCrisisSystem = ({
     initCrisisData();
 
     // 定期更新（统一由 RAF 驱动，移除独立 setInterval）
-    if (window.__timerManager) window.__timerManager.schedule(update, 100);
+    if (typeof window !== 'undefined' && window.__timerManager) window.__timerManager.schedule(update, 100);
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -491,6 +491,7 @@ const createCrisisSystem = ({
     recoverCrisis,
     getActiveCrisis,
     isCrisisActive,
+    checkCrisisTrigger,
 
     // 效果
     getCrisisEffects,
