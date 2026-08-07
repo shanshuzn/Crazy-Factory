@@ -205,5 +205,18 @@ const createMarketSystem = ({
   };
 
   updateRateOutlook();
-  return { doMarketSwitch, tickMarket, renderMarket, setScenarioParams };
+  return {
+    doMarketSwitch,
+    tickMarket,
+    renderMarket,
+    setScenarioParams,
+    // 诊断/测试接口
+    getActiveMacro,
+    getEventById,
+    getOutlookHitRate,
+    updateRateOutlook,
+    settleOutlookResult,
+    maybeRollMacroEvent,
+    decayMacroEvent,
+  };
 };
