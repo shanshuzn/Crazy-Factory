@@ -128,6 +128,7 @@ price = floor(basePrice * 1.15 ^ owned)
 - UGC 场景编辑器（v2.10.0）：自定义经济模型（价格增速/市场周期/牛熊乘数），支持预设模板、创建/导入/导出 JSON 场景，场景参数实时作用于经济与市场系统
 - 场景分享码（v2.13.0）：一键生成 `CFS1:` 短码复制分享，或通过 `?scenario=CFS1:...` URL 参数自动加载他人场景
 - 场景市场（v2.15.0）：8 个精选社区场景（大萧条/黄金年代/供应链危机/数字革命/黑天鹅等），一键应用 + 收藏夹持久化
+- 版本单一来源（v2.15.0）：`scripts/version.js` 集中管理版本号与更新日志，`tests/version-consistency.test.js` 自动校验 6 处引用一致性
 - 性能监控面板（v2.11.0）：URL 加 `?debug=1` 开启，展示 12 项 GPS 乘数分解、FPS/帧耗时/Heap 趋势图、场景/资产配置实时状态
 - Mod 支持接口（v2.12.0）：`window.CFMod` 全局 API，支持注册自定义 Mod（`onLoad`/`onUpdate`/`onEvent` 生命周期钩子）、启用/禁用/卸载、localStorage 持久化、游戏内管理面板
 - PWA 离线支持（v2.14.0）：Service Worker 预缓存全部核心资源，支持离线游玩、安装到桌面（manifest 含 shortcuts）

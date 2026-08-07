@@ -13,6 +13,7 @@ const CORE_ASSETS = [
   './styles/main.css',
   './manifest.json',
   './version.json',
+  './scripts/version.js',
   './scripts/game-data.js',
   './scripts/formula-system.js',
   './scripts/log-system.js',
