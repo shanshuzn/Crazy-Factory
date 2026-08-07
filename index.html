@@ -182,6 +182,21 @@
   <script src="scripts/scenario-editor-system.js" defer></script>
   <script src="scripts/mod-system.js" defer></script>
   <script src="scripts/game.js" defer></script>
+  <script>
+    // PWA：注册 Service Worker（支持离线游玩）
+    // 仅 HTTPS 或 localhost 环境启用
+    if ('serviceWorker' in navigator) {
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      const isSecure = window.isSecureContext;
+      if (isLocal || isSecure) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(function (err) {
+            console.warn('[PWA] SW registration failed:', err);
+          });
+        });
+      }
+    }
+  </script>
 
 </body>
 </html>

@@ -1,11 +1,18 @@
 
 # 🏭 Crazy Factory / 金融帝国 - 项目路线图
-> **当前版本**: v2.13.0  
+> **当前版本**: v2.14.0  
 > **最后更新**: 2026-08-08  
 > **维护者**: 开发团队
 ---
 
 ## 📊 项目现状 (2026-08-08)
+### v2.14.0 更新内容
+- ✅ **PWA 离线支持（阶段三收尾）** — sw.js：核心资源预缓存（35 项）+ Stale-While-Revalidate 运行时缓存 + 离线回退首页
+- ✅ manifest.json 补齐规范字段（scope/display_override/shortcuts/categories/lang），支持安装到桌面
+- ✅ serve.js 适配：sw.js 用 max-age=86400 长缓存，其他资源保持 no-cache（开发安全）
+- ✅ index.html 注册 SW（HTTPS 或 localhost 才启用）
+- ✅ 新增 PWA 测试（7 用例，含缓存清单与 index.html 一致性校验），测试总数 91 → 98
+
 ### v2.13.0 更新内容
 - ✅ **场景分享码（P0 UGC 后续）** — 一键生成 `CFS1:` 短码复制分享，`?scenario=` URL 参数自动加载场景，导入框兼容 JSON 与分享码
 - ✅ 分享码压缩算法：UTF-8 bytes → base64url，兼容浏览器（btoa/atob）与 Node（Buffer）
@@ -62,7 +69,7 @@
 - ✅ 响应式设计增强（480px/768px/1024px 三档适配）
 - ✅ 触摸友好（44px 最小点击区域）
 - ✅ 深色模式支持
-- ✅ PWA 支持（manifest.json + meta tags）
+- ✅ PWA 支持（manifest.json + Service Worker 离线缓存 v2.14.0）
 - ✅ 订阅支付网关脚手架（Stripe/Apple IAP/Google Play）
 - ✅ A/B 测试框架（实验分配+转化追踪+结果分析）
 
@@ -101,6 +108,7 @@
 
 阶段三：平台扩展 (3-4个月) —— 已完成
     ├── 移动端适配 ✅
+    ├── PWA 离线支持 ✅（v2.14.0）
     ├── 商业化系统 ✅
     └── 数据分析与运营 ✅
 
@@ -150,4 +158,4 @@
 ---
 
 **最后更新**: 2026-08-08  
-**下一步**: UGC 场景市场/评分 + ES Modules 迁移
+**下一步**: UGC 场景市场/评分 + ES Modules 迁移 + game.js 拆分

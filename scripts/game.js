@@ -57,8 +57,9 @@
     const speedQuestViewMap = new Map();
 
     // 版本号
-    const APP_VERSION = 'v2.13.0';
+    const APP_VERSION = 'v2.14.0';
     const CHANGELOG = [
+      { version: 'v2.14.0', date: '2026-08-08', notes: ['PWA 离线支持：Service Worker 预缓存全部核心资源，支持安装到桌面/离线游玩', 'manifest 补齐 scope/display_override/shortcuts 等规范字段'] },
       { version: 'v2.13.0', date: '2026-08-08', notes: ['UGC 场景分享码：一键生成/复制 CFS1 短码，支持 URL 参数 ?scenario= 自动导入', '导入框支持粘贴分享码或 JSON，分享按钮直达'] },
       { version: 'v2.12.0', date: '2026-08-08', notes: ['Mod 支持接口：window.CFMod API，支持注册/启用/禁用/持久化，内置示例 Mod', '修复 APP_VERSION 未同步显示版本的问题'] },
       { version: 'v2.11.0', date: '2026-08-08', notes: ['性能监控面板增强：12 项 GPS 乘数分解、FPS/帧耗时/Heap 趋势图、场景/资产配置实时状态', '官网同步 v2.11.0：新增 UGC 场景编辑器介绍与更新日志'] },

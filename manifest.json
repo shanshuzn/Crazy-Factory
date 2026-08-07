@@ -3,15 +3,29 @@
   "short_name": "金融帝国",
   "description": "从街头小贩到金融帝国的放置类模拟游戏",
   "start_url": "/",
+  "scope": "/",
+  "lang": "zh-CN",
+  "dir": "ltr",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#0f172a",
   "theme_color": "#fbbf24",
   "orientation": "any",
+  "categories": ["games", "finance", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "开始游戏",
+      "short_name": "游戏",
+      "url": "/index.html",
+      "description": "直接进入游戏"
+    }
+  ],
   "icons": [
     {
       "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
