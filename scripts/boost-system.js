@@ -295,8 +295,9 @@ const createBoostSystem = ({
 
       // 模拟支付成功（95%成功率）
       if (Math.random() > 0.05) {
-        // 如果是组合包，添加所有组件
+        // 如果是组合包，添加所有组件；同时记录组合包本身（用于 oneTime 防重复购买）
         if (item.effect.type === 'bundle') {
+          st.boost.inventory[itemId] = (st.boost.inventory[itemId] || 0) + 1;
           item.effect.items.forEach(subItemId => {
             st.boost.inventory[subItemId] = (st.boost.inventory[subItemId] || 0) + 1;
           });
@@ -346,8 +347,8 @@ const createBoostSystem = ({
     const result = applyEffect(item.effect);
 
     if (result.success) {
-      // 消耗道具
-      st.boost.inventory[itemId]--;
+      // 消耗道具（防止负数）
+      st.boost.inventory[itemId] = Math.max(0, st.boost.inventory[itemId] - 1);
       st.boost.stats.totalItemsUsed++;
 
       // 触发事件
@@ -698,7 +699,7 @@ const createBoostSystem = ({
     initBoostData();
 
     // 定期更新效果（统一由 RAF 驱动，移除独立 setInterval）
-    if (window.__timerManager) window.__timerManager.schedule(updateEffects, 1000);
+    if (typeof window !== 'undefined' && window.__timerManager) window.__timerManager.schedule(updateEffects, 1000);
   };
 
   // ═══════════════════════════════════════════════════════════════════════════

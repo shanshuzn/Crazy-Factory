@@ -140,7 +140,7 @@
 ### P2 可选
 5. **ES Modules 迁移** — 从 <script defer> 迁移到 Vite 打包
 6. **game.js 拆分** — 当前 68KB/1670 行需重构
-7. **核心系统测试补全** — ✅ market-system（23 用例）+ synergy-system（19 用例）已补；derivatives/guild/global-market 等仍无独立测试
+7. **核心系统测试补全** — ✅ market-system（23）+ synergy-system（19）+ boost-system（28）已补；derivatives/guild/global-market 等仍无独立测试
 
 ---
 
