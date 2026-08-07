@@ -316,8 +316,35 @@ const createEconomySystem = ({
   // 调试用 GPS 分解：debug-system 依赖此接口
   const getGpsBreakdown = () => {
     const base = _getBaseGPS();
+    const riskVolScale = (_riskVolatilityFn && _riskVolatilityFn()) || 1.0;
+    const regionBonus = (_regionMultFn && _regionMultFn()) || 1.0;
+    const crisisPenalty = (_crisisMultFn && _crisisMultFn()) || 1.0;
+    const guildBonus = (_guildMultFn && _guildMultFn()) || 1.0;
+    const boostBonus = (_boostMultFn && _boostMultFn()) || 1.0;
+    const subscriptionBonus = (_subscriptionMultFn && _subscriptionMultFn()) || 1.0;
+    const synergyBonus = (_synergyMultFn && _synergyMultFn()) || 1.0;
+    const factors = {
+      gpsMultiplier: st.gpsMultiplier,
+      research: resMult(),
+      skillGPS: skillGPS(),
+      market: mktMult(),
+      skillMastery: skillMasteryMult(),
+      synergy: synergyBonus,
+      region: regionBonus,
+      crisis: crisisPenalty,
+      guild: guildBonus,
+      boost: boostBonus,
+      subscription: subscriptionBonus,
+      riskVolatility: riskVolScale,
+    };
     const mult = _getGPSMult();
-    return { baseGPS: base, finalMult: mult, totalGPS: base * mult };
+    return {
+      baseGPS: base,
+      finalMult: mult,
+      totalGPS: base * mult,
+      factors,
+      productCheck: Object.values(factors).reduce((a, v) => a * v, 1),
+    };
   };
 
   return {

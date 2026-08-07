@@ -59,6 +59,7 @@
     // 版本号
     const APP_VERSION = 'v2.10.0';
     const CHANGELOG = [
+      { version: 'v2.11.0', date: '2026-08-08', notes: ['性能监控面板增强：12 项 GPS 乘数分解、FPS/帧耗时/Heap 趋势图、场景/资产配置实时状态', '官网同步 v2.11.0：新增 UGC 场景编辑器介绍与更新日志'] },
       { version: 'v2.10.0', date: '2026-08-07', notes: ['UGC 场景编辑器正式接入游戏（创建/导入/导出/模板切换）', '修复滚动更新检测在无 RAF 调度器环境下的崩溃', '存档新增场景状态持久化'] },
       { version: 'v2.9.0', date: '2026-06-08', notes: ['市场稳定性优化', '新增公会科技树', 'i18n 扩展至 10 种语言'] },
     ];
@@ -442,12 +443,15 @@
     });
     const { render } = renderSystem;
 
+    // 资产配置系统在下方创建，这里用惰性 getter 在 debug 面板刷新时再解析
     const debugSystem = createDebugSystem({
       st,
       buildings,
       getGpsBreakdown,
       SAVE_KEY,
       fmt,
+      getBudgetSplit: () => (allocationSystem ? allocationSystem.getBudgetSplit(st.gears) : null),
+      getRiskProfile: () => (st.assetAllocation ? st.assetAllocation.riskProfile : 'balanced'),
     });
 
     // ════════════════════════════════════════════════

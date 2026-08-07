@@ -4,23 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>金融帝国 - 产业链放置游戏 | Crazy Factory</title>
-  <meta name="description" content="从街头小贩到金融帝国的放置类模拟游戏。经营产业链，把握市场波动，建立你的金融帝国。" />
+  <meta name="description" content="从街头小贩到金融帝国的放置类模拟游戏。经营产业链，把握市场波动，用 UGC 场景编辑器打造你的专属经济模型。" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.6; }
     .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); }
     .hero h1 { font-size: 3rem; margin-bottom: 1rem; background: linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero .badge { display: inline-block; background: rgba(52,211,153,.12); color: #34d399; border: 1px solid rgba(52,211,153,.4); border-radius: 999px; padding: 4px 14px; font-size: .85rem; margin-bottom: 1rem; }
     .hero p { font-size: 1.2rem; color: #94a3b8; max-width: 600px; margin-bottom: 2rem; }
     .btn-primary { display: inline-block; padding: 14px 32px; background: #fbbf24; color: #0f172a; font-size: 1.1rem; font-weight: 600; border-radius: 8px; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(251,191,36,0.3); }
     .features { padding: 4rem 2rem; max-width: 1000px; margin: 0 auto; }
     .features h2 { text-align: center; font-size: 2rem; margin-bottom: 2rem; color: #fbbf24; }
     .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-    .feature-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.5rem; }
+    .feature-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.5rem; transition: border-color .2s, transform .2s; }
+    .feature-card:hover { border-color: #fbbf24; transform: translateY(-3px); }
     .feature-card h3 { font-size: 1.2rem; margin-bottom: 0.5rem; color: #fbbf24; }
     .feature-card p { color: #94a3b8; font-size: 0.95rem; }
+    .feature-card .tag { display: inline-block; margin-top: .6rem; font-size: .75rem; color: #34d399; background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3); padding: 2px 10px; border-radius: 999px; }
     .stats { background: #1e293b; padding: 3rem 2rem; text-align: center; }
-    .stats-grid { display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; max-width: 800px; margin: 0 auto; }
+    .stats-grid { display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; max-width: 900px; margin: 0 auto; }
     .stat-item .number { font-size: 2.5rem; font-weight: 700; color: #fbbf24; }
     .stat-item .label { color: #94a3b8; font-size: 0.9rem; }
     .roadmap { padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
@@ -29,12 +32,21 @@
     .roadmap-item .phase { min-width: 80px; font-weight: 600; color: #fbbf24; }
     .roadmap-item .desc { color: #cbd5e1; }
     .roadmap-item .status { font-size: 0.85rem; color: #34d399; }
+    .changelog { padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
+    .changelog h2 { text-align: center; font-size: 2rem; margin-bottom: 2rem; color: #fbbf24; }
+    .log-item { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; }
+    .log-item .ver { display: flex; align-items: center; gap: .8rem; margin-bottom: .6rem; }
+    .log-item .ver strong { font-size: 1.1rem; color: #fbbf24; }
+    .log-item .ver span { font-size: .8rem; color: #64748b; }
+    .log-item ul { padding-left: 1.2rem; color: #cbd5e1; font-size: .92rem; }
+    .log-item li { margin-bottom: .3rem; }
     footer { padding: 2rem; text-align: center; color: #64748b; font-size: 0.85rem; border-top: 1px solid #1e293b; }
     @media (max-width: 600px) { .hero h1 { font-size: 2rem; } .stats-grid { gap: 1.5rem; } }
   </style>
 </head>
 <body>
   <section class="hero">
+    <div class="badge">v2.11.0 · 新增 UGC 场景编辑器与性能监控</div>
     <h1>🏭 金融帝国</h1>
     <p>从街头小贩到金融帝国 —— 深度放置类金融模拟游戏。经营产业链，把握市场波动，建立跨实体与金融的产业帝国。</p>
     <a href="../index.html" class="btn-primary">🎮 立即开始游戏</a>
@@ -46,26 +58,42 @@
       <div class="feature-card">
         <h3>📊 10层产业链</h3>
         <p>从手工作坊到区块链，10个产业层级，完整的上下游联动系统。均衡发展产业链获得额外加成。</p>
+        <span class="tag">实体产业</span>
       </div>
       <div class="feature-card">
         <h3>📈 动态市场</h3>
         <p>牛熊市周期切换、利率前瞻预测、宏观事件冲击。把握市场时机是成功的关键。</p>
+        <span class="tag">实时模拟</span>
       </div>
       <div class="feature-card">
         <h3>💹 金融衍生品</h3>
         <p>期货合约、期权对冲、全球市场套利。高风险高回报的进阶金融玩法。</p>
+        <span class="tag">金融进阶</span>
       </div>
       <div class="feature-card">
-        <h3>🤖 AI Agent 集成</h3>
-        <p>通过 MCP 协议让 AI 代理直接操控游戏。智能策略建议，自动化投资决策。</p>
+        <h3>🎛️ UGC 场景编辑器</h3>
+        <p>自定义价格增速、市场周期与牛熊乘数，打造专属经济模型。支持预设模板、JSON 导入导出与存档持久化。</p>
+        <span class="tag">v2.10 新功能</span>
+      </div>
+      <div class="feature-card">
+        <h3>🛡️ 资产配置</h3>
+        <p>保守/均衡/进取三档风险偏好，自动预算分配、危机减免与衍生品杠杆调节。</p>
+        <span class="tag">风险管理</span>
       </div>
       <div class="feature-card">
         <h3>🏰 公会竞争</h3>
         <p>加入虚拟公会，贡献资源升级公会科技树，参与公会排名竞争。</p>
+        <span class="tag">多人协作</span>
+      </div>
+      <div class="feature-card">
+        <h3>🤖 AI Agent 集成</h3>
+        <p>通过 MCP 协议让 AI 代理直接操控游戏。智能策略建议，自动化投资决策。</p>
+        <span class="tag">AI 工具链</span>
       </div>
       <div class="feature-card">
         <h3>🌍 10种语言</h3>
-        <p>支持中文、英语、日语、韩语、法语、德语、西班牙语等10种语言。</p>
+        <p>支持中文、英语、日语、韩语、法语、德语、西班牙语等10种语言，无缝切换。</p>
+        <span class="tag">国际化</span>
       </div>
     </div>
   </section>
@@ -73,8 +101,8 @@
   <section class="stats">
     <div class="stats-grid">
       <div class="stat-item"><div class="number">10</div><div class="label">产业链层级</div></div>
-      <div class="stat-item"><div class="number">30+</div><div class="label">系统模块</div></div>
-      <div class="stat-item"><div class="number">6</div><div class="label">AI 工具</div></div>
+      <div class="stat-item"><div class="number">33+</div><div class="label">系统模块</div></div>
+      <div class="stat-item"><div class="number">66</div><div class="label">自动化测试</div></div>
       <div class="stat-item"><div class="number">10</div><div class="label">支持语言</div></div>
     </div>
   </section>
@@ -84,11 +112,36 @@
     <div class="roadmap-item"><div class="phase">阶段一</div><div><div class="desc">优化与完善 — 数值平衡、用户体验、性能优化</div><div class="status">✅ 已完成</div></div></div>
     <div class="roadmap-item"><div class="phase">阶段二</div><div><div class="desc">内容扩展 — FinTech/区块链产业链、公会科技树、赛季系统</div><div class="status">✅ 已完成</div></div></div>
     <div class="roadmap-item"><div class="phase">阶段三</div><div><div class="desc">平台扩展 — 响应式设计、PWA、订阅支付、A/B测试</div><div class="status">✅ 已完成</div></div></div>
-    <div class="roadmap-item"><div class="phase">阶段四</div><div><div class="desc">生态建设 — UGC场景编辑器、多语言、品牌建设</div><div class="status">🔄 进行中</div></div></div>
+    <div class="roadmap-item"><div class="phase">阶段四</div><div><div class="desc">生态建设 — UGC场景编辑器（✅）、多语言（✅）、Mod 接口与场景市场</div><div class="status">🔄 进行中</div></div></div>
+  </section>
+
+  <section class="changelog">
+    <h2>更新日志</h2>
+    <div class="log-item">
+      <div class="ver"><strong>v2.11.0</strong><span>2026-08-08</span></div>
+      <ul>
+        <li>性能监控面板增强：12 项 GPS 乘数分解、FPS/帧耗时/Heap 趋势图、场景与资产配置实时状态</li>
+        <li>调试面板支持折叠，样式与游戏主题统一</li>
+      </ul>
+    </div>
+    <div class="log-item">
+      <div class="ver"><strong>v2.10.0</strong><span>2026-08-07</span></div>
+      <ul>
+        <li>UGC 场景编辑器正式接入游戏：预设模板（恶性通胀/科技泡沫/自由市场等）+ 自定义创建/导入/导出</li>
+        <li>场景参数实时作用于经济与市场系统，存档持久化</li>
+        <li>修复滚动更新检测在无 RAF 调度器环境下的崩溃</li>
+      </ul>
+    </div>
+    <div class="log-item">
+      <div class="ver"><strong>v2.9.0</strong><span>2026-06-08</span></div>
+      <ul>
+        <li>市场稳定性优化、新增公会科技树、i18n 扩展至 10 种语言</li>
+      </ul>
+    </div>
   </section>
 
   <footer>
-    <p>Crazy Factory / 金融帝国 v2.9.0 | MIT License | 2026</p>
+    <p>Crazy Factory / 金融帝国 v2.11.0 | MIT License | 2026</p>
   </footer>
 </body>
 </html>
