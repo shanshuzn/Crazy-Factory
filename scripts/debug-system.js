@@ -107,7 +107,7 @@ const createDebugSystem = ({ st, buildings, getGpsBreakdown, SAVE_KEY, fmt, getB
 
     const hasTrend = Math.min(...fpsBuf) > 0;
     const lines = [
-      `v2.11.0-debug  ${st.gears !== undefined ? 'gears:' + fmtV(st.gears) : ''}`,
+      `v2.15.0-debug  ${st.gears !== undefined ? 'gears:' + fmtV(st.gears) : ''}`,
       heading('CORE'),
       `baseGPS        ${fmtV(gp.baseGPS)}`,
       `finalMult      ${fmtV(gp.finalMult)}x`,

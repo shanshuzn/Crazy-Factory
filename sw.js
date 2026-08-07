@@ -2,7 +2,7 @@
 // PWA 离线支持（ROADMAP 阶段三）
 // 策略：核心资源预缓存（install）+ Stale-While-Revalidate（运行时缓存）+ 离线回退
 // 版本号：与 version.json 同步，缓存名变更即触发全量更新
-const CACHE_VERSION = 'cf-v2.14.0';
+const CACHE_VERSION = 'cf-v2.15.0';
 const CORE_CACHE = CACHE_VERSION + '-core';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 

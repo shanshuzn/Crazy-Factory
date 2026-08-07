@@ -62,6 +62,98 @@ const createScenarioEditorSystem = ({
   };
 
   // ════════════════════════════════════════════════
+  // 场景市场：精选社区场景库
+  // 这些场景可由玩家"应用"（立即生效）或"收藏"（加入收藏夹）
+  // ════════════════════════════════════════════════
+  const MARKETPLACE = {
+    great_depression: {
+      id: 'great_depression',
+      name: { zh: '大萧条', en: 'Great Depression' },
+      description: { zh: '需求崩塌，产能过剩，熊市主导', en: 'Demand collapse, overcapacity, bear market' },
+      params: { priceGrowth: 1.05, marketCycleMin: 60, marketCycleMax: 180, bullBonus: 1.0, bearPenalty: 0.55 },
+      difficulty: 2,
+      tags: ['survival', 'bear'],
+    },
+    golden_age: {
+      id: 'golden_age',
+      name: { zh: '黄金年代', en: 'Golden Age' },
+      description: { zh: '持续繁荣，牛市频繁，适合新手', en: 'Sustained boom, frequent bull runs, newbie friendly' },
+      params: { priceGrowth: 1.1, marketCycleMin: 30, marketCycleMax: 70, bullBonus: 1.6, bearPenalty: 0.7 },
+      difficulty: 1,
+      tags: ['casual', 'bull'],
+    },
+    supply_crisis: {
+      id: 'supply_crisis',
+      name: { zh: '供应链危机', en: 'Supply Chain Crisis' },
+      description: { zh: '上游涨价传导全产业链，成本压力大', en: 'Upstream price hikes cascade, cost pressure' },
+      params: { priceGrowth: 1.22, marketCycleMin: 35, marketCycleMax: 80, bullBonus: 1.3, bearPenalty: 0.6 },
+      difficulty: 3,
+      tags: ['inflation', 'hard'],
+    },
+    digital_revolution: {
+      id: 'digital_revolution',
+      name: { zh: '数字革命', en: 'Digital Revolution' },
+      description: { zh: '科技主导，泡沫与机遇并存', en: 'Tech-driven, bubbles and opportunities' },
+      params: { priceGrowth: 1.2, marketCycleMin: 18, marketCycleMax: 40, bullBonus: 2.2, bearPenalty: 0.45 },
+      difficulty: 3,
+      tags: ['tech', 'volatile'],
+    },
+    slow_burn: {
+      id: 'slow_burn',
+      name: { zh: '慢性通胀', en: 'Slow Burn' },
+      description: { zh: '温和但持续的物价上涨', en: 'Mild but persistent inflation' },
+      params: { priceGrowth: 1.16, marketCycleMin: 40, marketCycleMax: 100, bullBonus: 1.4, bearPenalty: 0.65 },
+      difficulty: 2,
+      tags: ['inflation', 'steady'],
+    },
+    black_swan: {
+      id: 'black_swan',
+      name: { zh: '黑天鹅', en: 'Black Swan' },
+      description: { zh: '极端事件频发，市场剧烈震荡', en: 'Frequent extreme events, violent swings' },
+      params: { priceGrowth: 1.14, marketCycleMin: 8, marketCycleMax: 20, bullBonus: 1.8, bearPenalty: 0.35 },
+      difficulty: 4,
+      tags: ['extreme', 'hard'],
+    },
+    easy_money: {
+      id: 'easy_money',
+      name: { zh: '货币宽松', en: 'Easy Money' },
+      description: { zh: '放水时代，资产价格普涨', en: 'QE era, assets broadly inflate' },
+      params: { priceGrowth: 1.19, marketCycleMin: 25, marketCycleMax: 60, bullBonus: 2.0, bearPenalty: 0.5 },
+      difficulty: 2,
+      tags: ['bull', 'inflation'],
+    },
+    frozen_market: {
+      id: 'frozen_market',
+      name: { zh: '冰封市场', en: 'Frozen Market' },
+      description: { zh: '交易停滞，价格几乎不变', en: 'Stagnant trading, prices barely move' },
+      params: { priceGrowth: 1.02, marketCycleMin: 90, marketCycleMax: 240, bullBonus: 1.05, bearPenalty: 0.9 },
+      difficulty: 1,
+      tags: ['casual', 'slow'],
+    },
+  };
+
+  // 收藏夹：持久化到 st.scenarios.favorites（存于存档）
+  const _getFavorites = () => {
+    if (!st.scenarios.favorites) st.scenarios.favorites = [];
+    return st.scenarios.favorites;
+  };
+
+  const toggleFavorite = (scenarioId) => {
+    const lang = getLang();
+    const favs = _getFavorites();
+    const idx = favs.indexOf(scenarioId);
+    if (idx >= 0) favs.splice(idx, 1);
+    else favs.push(scenarioId);
+    if (eventBus) eventBus.emit('scenario:favoritesChanged', { favorites: [...favs] });
+    return { success: true, favorited: idx < 0 };
+  };
+
+  const isFavorite = (scenarioId) => _getFavorites().includes(scenarioId);
+
+  const getMarketplace = () => Object.values(MARKETPLACE);
+  const getMarketplaceScenario = (id) => MARKETPLACE[id] || null;
+
+  // ════════════════════════════════════════════════
   // 初始化
   // ════════════════════════════════════════════════
   const init = () => {
@@ -70,9 +162,11 @@ const createScenarioEditorSystem = ({
         customScenarios: [],
         activeScenario: null,
         history: [],
+        favorites: [],
         stats: { created: 0, played: 0 },
       };
     }
+    if (!st.scenarios.favorites) st.scenarios.favorites = [];
   };
 
   // ════════════════════════════════════════════════
@@ -117,7 +211,7 @@ const createScenarioEditorSystem = ({
 
   const applyScenario = (scenarioId) => {
     const lang = getLang();
-    let scenario = TEMPLATES[scenarioId];
+    let scenario = TEMPLATES[scenarioId] || MARKETPLACE[scenarioId];
     if (!scenario) {
       scenario = st.scenarios.customScenarios.find(s => s.id === scenarioId);
     }
@@ -133,6 +227,7 @@ const createScenarioEditorSystem = ({
   const getActiveScenario = () => {
     if (!st.scenarios || !st.scenarios.activeScenario) return null;
     return TEMPLATES[st.scenarios.activeScenario] ||
+           MARKETPLACE[st.scenarios.activeScenario] ||
            st.scenarios.customScenarios.find(s => s.id === st.scenarios.activeScenario) || null;
   };
 
@@ -260,6 +355,51 @@ const createScenarioEditorSystem = ({
     html += '<input data-scenario-field="import" type="text" placeholder="' + L('粘贴 JSON 或分享码', 'Paste scenario JSON or share code') + '" style="width:100%;margin-bottom:4px;padding:4px 8px;font-size:12px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:4px;color:inherit;">';
     html += '<button class="btn" data-scenario-action="import" style="width:100%;padding:6px;font-size:12px;">' + L('导入', 'Import') + '</button>';
     html += '</div>';
+
+    // 场景市场（精选社区场景）
+    html += '<div style="margin-bottom:12px;">';
+    html += '<div style="font-size:13px;font-weight:600;margin-bottom:6px;">' + L('🛒 场景市场', 'Scenario Market') + ' (' + Object.keys(MARKETPLACE).length + ')</div>';
+    for (const [id, t] of Object.entries(MARKETPLACE)) {
+      const name = t.name[lang] || t.name.zh;
+      const desc = t.description[lang] || t.description.zh;
+      const active = st.scenarios && st.scenarios.activeScenario === id;
+      const fav = isFavorite(id);
+      const diff = t.difficulty || 1;
+      const diffStr = Array(diff).fill('★').join('') + Array(Math.max(0, 5 - diff)).fill('☆').join('');
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border:1px solid rgba(255,255,255,0.1);border-radius:6px;margin-bottom:4px;' + (active ? 'background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3);' : '') + '">';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="font-size:13px;">' + name + ' <span style="font-size:10px;opacity:0.6;">' + diffStr + '</span></div>';
+      html += '<div style="font-size:11px;opacity:0.6;">' + desc + '</div>';
+      html += '</div>';
+      html += '<div style="display:flex;gap:4px;flex-shrink:0;">';
+      html += '<button class="btn" data-scenario-action="favorite" data-scenario-id="' + id + '" style="padding:4px 8px;font-size:11px;">' + (fav ? '★' : '☆') + '</button>';
+      html += '<button class="btn" data-scenario-action="apply" data-scenario-id="' + id + '" style="padding:4px 8px;font-size:11px;">' + (active ? L('启用中', 'Active') : L('应用', 'Apply')) + '</button>';
+      html += '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    // 收藏夹（快捷入口）
+    const favs = _getFavorites().filter((id) => MARKETPLACE[id] || st.scenarios.customScenarios.find((s) => s.id === id));
+    if (favs.length > 0) {
+      html += '<div style="margin-bottom:12px;">';
+      html += '<div style="font-size:13px;font-weight:600;margin-bottom:6px;">' + L('⭐ 收藏夹', 'Favorites') + ' (' + favs.length + ')</div>';
+      for (const fid of favs) {
+        const ms = MARKETPLACE[fid];
+        const cs = !ms && st.scenarios.customScenarios.find((s) => s.id === fid);
+        const scen = ms || cs;
+        if (!scen) continue;
+        const name = (scen.name[lang] || scen.name.zh);
+        const active = st.scenarios.activeScenario === fid;
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border:1px solid rgba(255,255,255,0.08);border-radius:6px;margin-bottom:3px;' + (active ? 'background:rgba(251,191,36,0.1);' : '') + '">';
+        html += '<div style="font-size:12px;">' + name + '</div>';
+        html += '<div style="display:flex;gap:4px;">';
+        html += '<button class="btn" data-scenario-action="apply" data-scenario-id="' + fid + '" style="padding:2px 8px;font-size:11px;">' + (active ? L('启用中', 'Active') : L('应用', 'Apply')) + '</button>';
+        html += '<button class="btn" data-scenario-action="unfavorite" data-scenario-id="' + fid + '" style="padding:2px 8px;font-size:11px;">☆</button>';
+        html += '</div></div>';
+      }
+      html += '</div>';
+    }
 
     // Templates
     html += '<div style="margin-bottom:12px;">';
@@ -400,6 +540,9 @@ const createScenarioEditorSystem = ({
           } else if (r.success && pushLog) {
             pushLog(r.data.slice(0, 200) + '...');
           }
+        } else if (action === 'favorite' || action === 'unfavorite') {
+          const r = toggleFavorite(id);
+          if (pushLog) pushLog(r.favorited ? L('已收藏: ', 'Favorited: ') + id : L('已取消收藏: ', 'Unfavorited: ') + id);
         } else if (action === 'delete') {
           deleteScenario(id);
         }
@@ -426,6 +569,10 @@ const createScenarioEditorSystem = ({
     renderScenarioPanel,
     bindEvents,
     getTemplates: () => TEMPLATES,
+    getMarketplace,
+    getMarketplaceScenario,
+    toggleFavorite,
+    isFavorite,
   };
 };
 
