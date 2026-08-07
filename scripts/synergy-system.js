@@ -223,7 +223,7 @@ const createSynergySystem = ({
     checkSynergyChanges();
 
     // 定期检查和更新（统一由 RAF 驱动，移除独立 setInterval）
-    if (window.__timerManager) window.__timerManager.schedule(checkSynergyChanges, 10000);
+    if (typeof window !== 'undefined' && window.__timerManager) window.__timerManager.schedule(checkSynergyChanges, 10000);
   };
 
   return {
