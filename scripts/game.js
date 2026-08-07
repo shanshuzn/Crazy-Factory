@@ -57,8 +57,9 @@
     const speedQuestViewMap = new Map();
 
     // 版本号
-    const APP_VERSION = 'v2.12.0';
+    const APP_VERSION = 'v2.13.0';
     const CHANGELOG = [
+      { version: 'v2.13.0', date: '2026-08-08', notes: ['UGC 场景分享码：一键生成/复制 CFS1 短码，支持 URL 参数 ?scenario= 自动导入', '导入框支持粘贴分享码或 JSON，分享按钮直达'] },
       { version: 'v2.12.0', date: '2026-08-08', notes: ['Mod 支持接口：window.CFMod API，支持注册/启用/禁用/持久化，内置示例 Mod', '修复 APP_VERSION 未同步显示版本的问题'] },
       { version: 'v2.11.0', date: '2026-08-08', notes: ['性能监控面板增强：12 项 GPS 乘数分解、FPS/帧耗时/Heap 趋势图、场景/资产配置实时状态', '官网同步 v2.11.0：新增 UGC 场景编辑器介绍与更新日志'] },
       { version: 'v2.10.0', date: '2026-08-07', notes: ['UGC 场景编辑器正式接入游戏（创建/导入/导出/模板切换）', '修复滚动更新检测在无 RAF 调度器环境下的崩溃', '存档新增场景状态持久化'] },
@@ -339,6 +340,23 @@
       buildings,
     });
     scenarioSystem.init();
+
+    // URL 分享码自动导入：?scenario=CFS1:...
+    (() => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const shareCode = params.get('scenario');
+        if (shareCode) {
+          const r = scenarioSystem.applyScenarioCode(shareCode);
+          if (r.success) {
+            scenarioSystem.applyScenario(r.scenario.id);
+            if (pushLog) pushLog((I18N.getCurrentLang() === 'en' ? 'Shared scenario loaded: ' : '分享场景已加载: ') + (r.scenario.name.zh || r.scenario.name.en));
+          } else if (pushLog) {
+            pushLog((I18N.getCurrentLang() === 'en' ? 'Share code invalid: ' : '分享码无效: ') + (r.error || ''));
+          }
+        }
+      } catch (e) { /* URL 解析失败时静默 */ }
+    })();
 
     // 监听场景切换：将参数同步到经济系统与市场系统
     eventBus.on('scenario:applied', ({ params }) => {

@@ -164,6 +164,75 @@ const createScenarioEditorSystem = ({
   };
 
   // ════════════════════════════════════════════════
+  // 分享码系统：短码压缩（base64url）
+  // 格式：紧凑 JSON -> UTF-8 bytes -> base64url
+  // 兼容浏览器 (btoa/atob) 与 Node (Buffer)
+  // ════════════════════════════════════════════════
+  const CODE_PREFIX = 'CFS1:'; // Crazy Factory Scenario v1
+
+  const _utf8ToBytes = (str) => encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+  const _bytesToUtf8 = (bin) => decodeURIComponent(bin.split('').map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join(''));
+  const _toBase64Url = (bin) => {
+    const b64 = (typeof btoa === 'function')
+      ? btoa(bin)
+      : (typeof Buffer !== 'undefined' ? Buffer.from(bin, 'binary').toString('base64') : '');
+    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  };
+  const _fromBase64Url = (code) => {
+    let b64 = code.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    return (typeof atob === 'function')
+      ? atob(b64)
+      : (typeof Buffer !== 'undefined' ? Buffer.from(b64, 'base64').toString('binary') : '');
+  };
+
+  const buildSharePayload = (scenario) => ({
+    v: 1,
+    n: scenario.name,          // {zh,en}
+    d: scenario.description || '',
+    p: scenario.params,
+  });
+
+  // 场景 -> 分享码
+  const encodeScenarioCode = (scenario) => {
+    if (!scenario) return { success: false, error: 'no scenario' };
+    try {
+      const json = JSON.stringify(buildSharePayload(scenario));
+      const bytes = _utf8ToBytes(json);
+      return { success: true, code: CODE_PREFIX + _toBase64Url(bytes) };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  // 分享码 -> 场景数据（不落库，供导入）
+  const decodeScenarioCode = (code) => {
+    const lang = getLang();
+    try {
+      if (!code) return { success: false, error: lang === 'en' ? 'Empty code' : '空分享码' };
+      const body = code.startsWith(CODE_PREFIX) ? code.slice(CODE_PREFIX.length) : code;
+      const bin = _fromBase64Url(body);
+      const json = _bytesToUtf8(bin);
+      const data = JSON.parse(json);
+      if (!data || !data.p) return { success: false, error: lang === 'en' ? 'Invalid code' : '无效的分享码' };
+      const name = data.n && typeof data.n === 'object'
+        ? { zh: data.n.zh || '分享场景', en: data.n.en || data.n.zh || 'Shared Scenario' }
+        : { zh: data.n || '分享场景', en: data.n || 'Shared Scenario' };
+      return { success: true, scenario: { name, description: data.d || '', params: data.p } };
+    } catch (e) {
+      return { success: false, error: lang === 'en' ? 'Decode error: ' + e.message : '解码错误: ' + e.message };
+    }
+  };
+
+  // 分享码 -> 创建并返回新场景
+  const applyScenarioCode = (code) => {
+    const lang = getLang();
+    const dec = decodeScenarioCode(code);
+    if (!dec.success) return dec;
+    return createScenario(dec.scenario.name, dec.scenario.description, dec.scenario.params);
+  };
+
+  // ════════════════════════════════════════════════
   // UI 渲染
   // ════════════════════════════════════════════════
   const renderScenarioPanel = () => {
@@ -185,10 +254,10 @@ const createScenarioEditorSystem = ({
     html += '<button class="btn" data-scenario-action="create" style="width:100%;padding:6px;font-size:12px;">' + L('创建并应用', 'Create & Apply') + '</button>';
     html += '</div>';
 
-    // 导入
+    // 导入（JSON 或分享码）
     html += '<div style="margin-bottom:12px;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px;">';
     html += '<div style="font-size:13px;font-weight:600;margin-bottom:6px;">' + L('导入场景', 'Import Scenario') + '</div>';
-    html += '<input data-scenario-field="import" type="text" placeholder="' + L('粘贴 JSON 场景数据', 'Paste scenario JSON') + '" style="width:100%;margin-bottom:4px;padding:4px 8px;font-size:12px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:4px;color:inherit;">';
+    html += '<input data-scenario-field="import" type="text" placeholder="' + L('粘贴 JSON 或分享码', 'Paste scenario JSON or share code') + '" style="width:100%;margin-bottom:4px;padding:4px 8px;font-size:12px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:4px;color:inherit;">';
     html += '<button class="btn" data-scenario-action="import" style="width:100%;padding:6px;font-size:12px;">' + L('导入', 'Import') + '</button>';
     html += '</div>';
 
@@ -221,6 +290,7 @@ const createScenarioEditorSystem = ({
       html += '<div style="font-size:13px;">' + name + '</div>';
       html += '<div style="display:flex;gap:4px;">';
       html += '<button class="btn" data-scenario-action="apply" data-scenario-id="' + s.id + '" style="padding:4px 8px;font-size:11px;">' + L('应用', 'Apply') + '</button>';
+      html += '<button class="btn" data-scenario-action="share" data-scenario-id="' + s.id + '" style="padding:4px 8px;font-size:11px;">' + L('分享', 'Share') + '</button>';
       html += '<button class="btn" data-scenario-action="export" data-scenario-id="' + s.id + '" style="padding:4px 8px;font-size:11px;">' + L('导出', 'Export') + '</button>';
       html += '<button class="btn" data-scenario-action="delete" data-scenario-id="' + s.id + '" style="padding:4px 8px;font-size:11px;color:#f87171;">' + L('删除', 'Delete') + '</button>';
       html += '</div></div>';
@@ -271,13 +341,14 @@ const createScenarioEditorSystem = ({
       });
     });
 
-    // 导入场景
+    // 导入场景（自动识别 JSON 或分享码）
     container.querySelectorAll('[data-scenario-action="import"]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const importEl = container.querySelector('[data-scenario-field="import"]');
-        const json = importEl && importEl.value.trim();
-        if (!json) return;
-        const r = importScenario(json);
+        const raw = importEl && importEl.value.trim();
+        if (!raw) return;
+        const isCode = raw.startsWith(CODE_PREFIX);
+        const r = isCode ? applyScenarioCode(raw) : importScenario(raw);
         if (r.success) {
           if (pushLog) pushLog(L('场景导入成功: ', 'Scenario imported: ') + (r.scenario.name[lang()] || r.scenario.name.zh));
           applyScenario(r.scenario.id);
@@ -298,6 +369,26 @@ const createScenarioEditorSystem = ({
         if (action === 'apply') {
           const r = applyScenario(id);
           if (!r.success && pushLog) pushLog((r.error || ''));
+        } else if (action === 'share') {
+          const scen = st.scenarios.customScenarios.find((s) => s.id === id);
+          const r = encodeScenarioCode(scen);
+          if (r.success) {
+            const copyText = r.code;
+            const copyFn = () => {
+              if (navigator && navigator.clipboard) {
+                navigator.clipboard.writeText(copyText).then(() => {
+                  if (pushLog) pushLog(L('分享码已复制: ', 'Share code copied: ') + copyText.slice(0, 24) + '...');
+                }).catch(() => {
+                  if (pushLog) pushLog(copyText.slice(0, 100) + '...');
+                });
+              } else if (pushLog) {
+                pushLog(copyText.slice(0, 100) + '...');
+              }
+            };
+            copyFn();
+          } else if (pushLog) {
+            pushLog((r.error || ''));
+          }
         } else if (action === 'export') {
           const r = exportScenario(id);
           if (r.success && navigator && navigator.clipboard) {
@@ -329,6 +420,9 @@ const createScenarioEditorSystem = ({
     getActiveScenario,
     exportScenario,
     importScenario,
+    encodeScenarioCode,
+    decodeScenarioCode,
+    applyScenarioCode,
     renderScenarioPanel,
     bindEvents,
     getTemplates: () => TEMPLATES,
