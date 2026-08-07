@@ -112,6 +112,8 @@ const createFeedbackSystem = ({ st, JUICE, fmt, manualBtn, manualZone, marketFla
     },
     emit(event, payload) {
       (listeners.get(event) ?? _emptyArr).forEach((fn) => fn(payload));
+      // 通配符订阅（Mod 系统等外部扩展）
+      (listeners.get('*') ?? _emptyArr).forEach((fn) => fn(event, payload));
     }
   };
 

@@ -57,8 +57,9 @@
     const speedQuestViewMap = new Map();
 
     // 版本号
-    const APP_VERSION = 'v2.10.0';
+    const APP_VERSION = 'v2.12.0';
     const CHANGELOG = [
+      { version: 'v2.12.0', date: '2026-08-08', notes: ['Mod 支持接口：window.CFMod API，支持注册/启用/禁用/持久化，内置示例 Mod', '修复 APP_VERSION 未同步显示版本的问题'] },
       { version: 'v2.11.0', date: '2026-08-08', notes: ['性能监控面板增强：12 项 GPS 乘数分解、FPS/帧耗时/Heap 趋势图、场景/资产配置实时状态', '官网同步 v2.11.0：新增 UGC 场景编辑器介绍与更新日志'] },
       { version: 'v2.10.0', date: '2026-08-07', notes: ['UGC 场景编辑器正式接入游戏（创建/导入/导出/模板切换）', '修复滚动更新检测在无 RAF 调度器环境下的崩溃', '存档新增场景状态持久化'] },
       { version: 'v2.9.0', date: '2026-06-08', notes: ['市场稳定性优化', '新增公会科技树', 'i18n 扩展至 10 种语言'] },
@@ -871,6 +872,46 @@
       originalOnAfterFrame(dtSec);
       dailyQuestSystem.trackEarnedGears();
     };
+
+    // ════════════════════════════════════════════════
+    // Mod 支持系统 (P1)
+    // 提供 window.CFMod 全局 API，Mod 可在控制台注册扩展游戏
+    // ════════════════════════════════════════════════
+    const modSystem = createModSystem({
+      st,
+      eventBus,
+      pushLog,
+    });
+
+    // 挂载到全局 API
+    window.CFMod = {
+      register: modSystem.register,
+      setEnabled: modSystem.setEnabled,
+      remove: modSystem.remove,
+      getMods: modSystem.getMods,
+      isEnabled: modSystem.isEnabled,
+      count: () => modSystem.getCount(),
+      version: APP_VERSION,
+    };
+
+    // Mod 每帧更新（装饰器链追加）
+    const originalModFrame = debugSystem.update;
+    debugSystem.update = (dtSec) => {
+      originalModFrame(dtSec);
+      modSystem.update(dtSec);
+    };
+
+    // 注入 Mod 管理面板（延迟确保 DOM 就绪，放在场景编辑器之后）
+    setTimeout(() => {
+      const content = document.querySelector('.content');
+      if (!content) return;
+      const modContainer = document.createElement('div');
+      modContainer.id = 'modContainer';
+      modContainer.className = 'scenario-editor'; // 复用面板样式
+      modContainer.innerHTML = modSystem.renderPanel();
+      content.insertBefore(modContainer, content.firstChild);
+      modSystem.bindEvents(modContainer);
+    }, 2000);
 
     // 添加每日任务面板到UI（延迟确保DOM就绪）
     setTimeout(() => {

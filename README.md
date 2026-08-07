@@ -127,6 +127,7 @@ price = floor(basePrice * 1.15 ^ owned)
 - 存档：本地自动保存 + 手动重置
 - UGC 场景编辑器（v2.10.0）：自定义经济模型（价格增速/市场周期/牛熊乘数），支持预设模板、创建/导入/导出 JSON 场景，场景参数实时作用于经济与市场系统
 - 性能监控面板（v2.11.0）：URL 加 `?debug=1` 开启，展示 12 项 GPS 乘数分解、FPS/帧耗时/Heap 趋势图、场景/资产配置实时状态
+- Mod 支持接口（v2.12.0）：`window.CFMod` 全局 API，支持注册自定义 Mod（`onLoad`/`onUpdate`/`onEvent` 生命周期钩子）、启用/禁用/卸载、localStorage 持久化、游戏内管理面板
 
 ## 项目结构
 
